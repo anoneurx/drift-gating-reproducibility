@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-pagerank_s101,0,LRU,0.89926,0,0,33.2
+real-pagerank_s101,0,ARC,0.89691,0,0,57.8
+real-pagerank_s101,0,S3-FIFO,0.91919,0,0,55.7
+real-pagerank_s101,0,SIEVE,0.88018,0,0,23.1
+real-pagerank_s101,0,W-TinyLFU,0.88438,0,0,160.5
+real-pagerank_s101,0,DA,0.90010,1,1,38.5
+real-pagerank_s101,0,ContShadow,0.90006,5,16,102.2

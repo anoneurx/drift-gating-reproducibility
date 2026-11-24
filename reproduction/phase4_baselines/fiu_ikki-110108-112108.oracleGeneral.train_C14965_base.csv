@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,LRU,0.75494,0,0,32.1
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,ARC,0.74721,0,0,46.0
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,S3-FIFO,0.75138,0,0,39.9
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,SIEVE,0.75991,0,0,17.7
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,W-TinyLFU,0.77269,0,0,154.4
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,DA,0.75494,0,7,87.5
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,ContShadow,0.75494,0,25,179.1

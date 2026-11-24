@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Phase 6: means over 18 PDL family$\times$capacity points (1M-reference prefixes)}
+\label{tab:pdl_all}
+\centering\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Method & Mean miss & Switches/trace & Shadow evals/trace & ns/ref \\
+\midrule
+ARC & 0.4796 & 0.00 & 0.00 & 56.4 \\
+CLOCK & 0.4973 & 0.00 & 0.00 & 9.5 \\
+ContShadow & 0.4739 & 1.06 & 13.11 & 147.5 \\
+DA & 0.4742 & 0.83 & 2.67 & 94.4 \\
+LHD & 0.7278 & 0.00 & 0.00 & 125.3 \\
+LRU & 0.4987 & 0.00 & 0.00 & 41.0 \\
+S3-FIFO & 0.4683 & 0.00 & 0.00 & 43.4 \\
+SIEVE & 0.4879 & 0.00 & 0.00 & 21.1 \\
+W-TinyLFU & 0.4857 & 0.00 & 0.00 & 157.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,34 @@
+btree      train-DA=0.3391 cfg ncand=5 K=0  held-out DA=0.2088 LRU=0.3310 S3=0.1934 DIP=0.2800 MGLRU=0.3332
+hashjoin   train-DA=0.3537 cfg ncand=5 K=0  held-out DA=0.0044 LRU=0.0044 S3=0.0000 DIP=0.0039 MGLRU=0.0064
+bfs        train-DA=0.3539 cfg ncand=5 K=0  held-out DA=0.0013 LRU=0.0013 S3=0.0006 DIP=0.0013 MGLRU=0.0017
+sort       train-DA=0.3537 cfg ncand=5 K=0  held-out DA=0.0041 LRU=0.0041 S3=0.0040 DIP=0.0041 MGLRU=0.0040
+stencil    train-DA=0.3539 cfg ncand=5 K=0  held-out DA=0.0007 LRU=0.0007 S3=0.0007 DIP=0.0007 MGLRU=0.0007
+sparse     train-DA=0.3024 cfg ncand=5 K=0  held-out DA=0.7215 LRU=0.7446 S3=0.7182 DIP=0.7440 MGLRU=0.7445
+heap       train-DA=0.3444 cfg ncand=5 K=0  held-out DA=0.1343 LRU=0.2459 S3=0.1337 DIP=0.2473 MGLRU=0.2469
+radix      train-DA=0.3531 cfg ncand=5 K=0  held-out DA=0.0120 LRU=0.0120 S3=0.0120 DIP=0.0120 MGLRU=0.0120
+pagerank   train-DA=0.2945 cfg ncand=5 K=0  held-out DA=0.8323 LRU=0.8324 S3=0.8471 DIP=0.8340 MGLRU=0.8289
+hashmap    train-DA=0.3032 cfg ncand=5 K=0  held-out DA=0.7113 LRU=0.7377 S3=0.7136 DIP=0.7380 MGLRU=0.7370
+matvec     train-DA=0.3175 cfg ncand=5 K=0  held-out DA=0.5114 LRU=0.5012 S3=0.5000 DIP=0.4794 MGLRU=0.5012
+linkedlist train-DA=0.2868 cfg ncand=5 K=0  held-out DA=0.9401 LRU=0.9398 S3=0.9406 DIP=0.9397 MGLRU=0.9398
+stringmatch train-DA=0.3540 cfg ncand=5 K=0  held-out DA=0.0004 LRU=0.0004 S3=0.0004 DIP=0.0004 MGLRU=0.0004
+unionfind  train-DA=0.3016 cfg ncand=5 K=0  held-out DA=0.7337 LRU=0.7567 S3=0.7345 DIP=0.7566 MGLRU=0.7568
+binarysearch train-DA=0.3440 cfg ncand=5 K=0  held-out DA=0.1395 LRU=0.1976 S3=0.1381 DIP=0.2053 MGLRU=0.2081
+
+=== mean over ten whole-program folds ===
+  OPT            0.2007  per-program: 0.188 0.001 0.001 0.004 0.001 0.383 0.114 0.012 0.485 0.385 0.258 0.677 0.000 0.393 0.109
+  S3-FIFO        0.3291  per-program: 0.193 0.000 0.001 0.004 0.001 0.718 0.134 0.012 0.847 0.714 0.500 0.941 0.000 0.734 0.138
+  DA             0.3304  per-program: 0.209 0.004 0.001 0.004 0.001 0.721 0.134 0.012 0.832 0.711 0.511 0.940 0.000 0.734 0.139
+  ContShadow     0.3305  per-program: 0.209 0.004 0.001 0.004 0.001 0.719 0.134 0.012 0.836 0.711 0.511 0.941 0.000 0.734 0.139
+  DIP-set-duel   0.3498  per-program: 0.280 0.004 0.001 0.004 0.001 0.744 0.247 0.012 0.834 0.738 0.479 0.940 0.000 0.757 0.205
+  MGLRU-style    0.3548  per-program: 0.333 0.006 0.002 0.004 0.001 0.745 0.247 0.012 0.829 0.737 0.501 0.940 0.000 0.757 0.208
+  2Q             0.3469  per-program: 0.274 0.005 0.002 0.004 0.001 0.744 0.217 0.012 0.844 0.738 0.501 0.941 0.000 0.756 0.165
+  CAR            0.3431  per-program: 0.275 0.005 0.001 0.004 0.001 0.745 0.218 0.012 0.783 0.737 0.500 0.940 0.000 0.756 0.169
+  LIRS           0.3609  per-program: 0.378 0.008 0.002 0.004 0.001 0.744 0.271 0.012 0.832 0.738 0.501 0.940 0.000 0.756 0.226
+  CLOCK-Pro      0.3476  per-program: 0.274 0.005 0.001 0.004 0.001 0.744 0.251 0.012 0.785 0.737 0.500 0.941 0.000 0.756 0.203
+  CACHEUS        0.3540  per-program: 0.331 0.004 0.001 0.004 0.001 0.745 0.246 0.012 0.832 0.738 0.501 0.940 0.000 0.757 0.198
+  3L-style       0.3497  per-program: 0.276 0.005 0.001 0.004 0.001 0.745 0.248 0.012 0.829 0.737 0.500 0.941 0.000 0.756 0.190
+  ARC            0.3491  per-program: 0.276 0.004 0.001 0.004 0.001 0.744 0.246 0.012 0.828 0.737 0.500 0.940 0.000 0.756 0.186
+  LPR-style      0.3539  per-program: 0.331 0.004 0.001 0.004 0.001 0.744 0.246 0.012 0.834 0.736 0.501 0.940 0.000 0.757 0.198
+  LRU            0.3540  per-program: 0.331 0.004 0.001 0.004 0.001 0.745 0.246 0.012 0.832 0.738 0.501 0.940 0.000 0.757 0.198
+
+Saved /home/kashie/Sem 5/research/reproduction/whole_program_holdout_results.csv

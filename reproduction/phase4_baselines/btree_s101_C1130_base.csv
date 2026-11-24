@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-btree_s101,0,LRU,0.31026,0,0,32.7
+real-btree_s101,0,ARC,0.26124,0,0,34.9
+real-btree_s101,0,S3-FIFO,0.17816,0,0,14.3
+real-btree_s101,0,SIEVE,0.24094,0,0,8.4
+real-btree_s101,0,W-TinyLFU,0.25314,0,0,102.4
+real-btree_s101,0,DA,0.19248,1,4,43.8
+real-btree_s101,0,ContShadow,0.19248,1,16,78.1

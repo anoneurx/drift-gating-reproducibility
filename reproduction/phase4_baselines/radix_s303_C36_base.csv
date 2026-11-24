@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-radix_s303,0,LRU,0.01204,0,0,26.1
+real-radix_s303,0,ARC,0.01204,0,0,25.4
+real-radix_s303,0,S3-FIFO,0.01204,0,0,3.8
+real-radix_s303,0,SIEVE,0.01204,0,0,3.2
+real-radix_s303,0,W-TinyLFU,0.01204,0,0,80.3
+real-radix_s303,0,DA,0.01204,0,1,29.5
+real-radix_s303,0,ContShadow,0.01204,0,16,40.3

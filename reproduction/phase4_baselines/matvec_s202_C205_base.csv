@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-matvec_s202,0,LRU,0.50122,0,0,30.4
+real-matvec_s202,0,ARC,0.50000,0,0,47.1
+real-matvec_s202,0,S3-FIFO,0.50000,0,0,30.0
+real-matvec_s202,0,SIEVE,0.50000,0,0,15.6
+real-matvec_s202,0,W-TinyLFU,0.50122,0,0,136.5
+real-matvec_s202,0,DA,0.50000,1,2,171.4
+real-matvec_s202,0,ContShadow,0.50000,1,16,213.3

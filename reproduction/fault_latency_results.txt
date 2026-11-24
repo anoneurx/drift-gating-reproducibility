@@ -1,0 +1,9 @@
+pages=32768 page_size=4096 bytes=134217728 reps=7 (median)
+resident_access_ns=15.85
+first_touch_ns_per_page=1995.89
+refault_after_madv_dontneed_ns_per_page=2072.82
+first_touch_minor_fault_ns=1980.04
+refault_minor_fault_ns=2056.97
+first_touch_minor_fault_us=1.980
+refault_minor_fault_us=2.057
+# Compare with cost_model.py break-even ~2.20 us per miss.

@@ -1,0 +1,7 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_homes-110108-112108.oracleGeneral.test,0,DA,0.62410,2,8,179.8
+real-fiu_ikki-110108-112108.oracleGeneral.test,1,DA,0.75744,1,8,295.2
+real-fiu_madmax-110108-112108.oracleGeneral.test,2,DA,0.78014,2,6,174.8
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,3,DA,0.78096,1,7,282.2
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.test,4,DA,0.57761,1,9,192.0
+real-fiu_webresearch-030409-033109.oracleGeneral.test,5,DA,0.63836,1,8,287.2

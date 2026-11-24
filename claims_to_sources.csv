@@ -1,0 +1,149 @@
+claim,number,source_file,command_or_note
+Non-stable mean miss ratio (DA),0.4529,reproduction/main_study_results.csv,"python3 check_paper_numbers.py (main-study mean miss, DA)"
+Non-stable mean miss ratio (LRU),0.5700,reproduction/main_study_results.csv,python3 check_paper_numbers.py
+Non-stable mean miss ratio (S3-FIFO),0.4683,reproduction/main_study_results.csv,python3 check_paper_numbers.py
+Non-stable mean miss ratio (ContShadow),0.4228,reproduction/main_study_results.csv,python3 check_paper_numbers.py
+DA vs LRU reduction,20.5%,reproduction/main_study_results.csv,100*(1-DA/LRU) from main_study_results.csv
+DA vs S3-FIFO mean difference,-0.0154,reproduction/main_study_results.csv; reproduction/analyze_main_study.py,"paired mean diff, Table VII"
+DA vs ContShadow mean difference,+0.0301,reproduction/main_study_results.csv; reproduction/analyze_main_study.py,"paired mean diff, Table VII"
+DA vs S3-FIFO Holm p,0.090,reproduction/main_study_results.csv; reproduction/analyze_main_study.py,"Wilcoxon + Holm, Table VII"
+Shadow-eval reduction vs ContShadow,76.4%,reproduction/main_study_results.csv,100*(1-6.47/27.39)
+Detection abrupt,97/100,reproduction/main_study_detection.csv,sum detected/n_bounds for abrupt
+Detection gradual,24/100,reproduction/main_study_detection.csv,sum detected/n_bounds for gradual
+Detection recurring,96/100,reproduction/main_study_detection.csv,sum detected/n_bounds for recurring
+Detection composite,61/80,reproduction/main_study_detection.csv,sum detected/n_bounds for composite
+Detection totals non-stable,"278/380, 169 spurious",reproduction/main_study_detection.csv,check_paper_numbers.py detection checks
+Stable false confirmations after 100k,1,reproduction/main_study_detection.csv,check_paper_numbers.py
+Stable spurious confirmations total,23,reproduction/main_study_detection.csv,check_paper_numbers.py
+Offset 333 non-stable detected/spurious,274/171,reproduction/detection_offset333.csv,python3 generate_offset_table.py; check_paper_numbers.py
+Offset 1501 non-stable detected/spurious,276/171,reproduction/detection_offset1501.csv,python3 generate_offset_table.py; check_paper_numbers.py
+Detection window,"30,000 references absolute",reproduction/sim_full.cpp,code: c >= b && c <= b + 30000
+KS active alarms / rejected,643 / 173,reproduction/diag_component_totals.csv,check_paper_numbers.py diagnostic component activations
+DA-noS2 mean miss ratio,0.456,reproduction/main_study_results.csv,"ablation mean miss, DA-noS2"
+DA mean miss ratio (ablation),0.453,reproduction/main_study_results.csv,"ablation mean miss, DA"
+Public frozen/reselected DA miss,0.668337,reproduction/public_test_frozen.csv; reproduction/public_test_reselected.csv,mean DA miss on 6 held-out suffixes
+Public frozen/reselected switches,0,reproduction/public_test_frozen.csv; reproduction/public_test_reselected.csv,sum DA switches on held-out suffixes
+Public repaired reselected DA miss,0.668337,reproduction/public_test_reselected_repaired.csv,same command as NOT_DONE.md with --cs-cap-f 1.0
+Public repaired reselected switches,0,reproduction/public_test_reselected_repaired.csv,same command as NOT_DONE.md
+Synthetic repaired DA mean miss,0.452888,reproduction/main_study_repaired_results.csv,./sim_full --seed 5001 --ncand 5 --kfrac 0 --z 1.28 --edelay 10 --cs-cap-f 1.0 --ablations --out main_study_repaired_results.csv --det main_study_repaired_detection.csv
+Synthetic repaired DA switches/evals,2.3625 / 6.475,reproduction/main_study_repaired_results.csv,same as above
+Holdout original DA mean,0.330381,reproduction/whole_program_holdout_results.csv,python3 whole_program_holdout.py (original protocol)
+Holdout repaired DA mean,0.330381,reproduction/whole_program_holdout_repaired_results.csv,python3 whole_program_holdout.py --cs-cap-f 1.0 --out whole_program_holdout_repaired_results.csv
+Holdout repaired S3-FIFO mean,0.329126,reproduction/whole_program_holdout_repaired_results.csv,same as above
+Holdout DA-S3 diff, +0.0013,reproduction/appendix_intervals.csv; appendix_intervals.py,python3 appendix_intervals.py
+Holdout DA-S3 95% CI / W/L/T / Holm p,"+0.0013 [-0.0019,+0.0044], 4/8/3, 0.544",reproduction/appendix_intervals.csv,python3 appendix_intervals.py
+DA/ContShadow total-time crossover,~2.2 us/miss (95% CI 1.44-4.06 us),reproduction/cost_model_bootstrap.csv; reproduction/cost_model.py,python3 cost_model.py; bootstrap_cost_model.py
+Measured minor-fault latency,1.98 us first touch; 2.057 us refault,reproduction/fault_latency_results.txt,prototype_fault_latency.cpp as recorded
+DA ns/ref (main study),67.4,reproduction/main_study_results.csv,check_paper_numbers.py
+ContShadow ns/ref (main study),133.4,reproduction/main_study_results.csv,check_paper_numbers.py
+S3-FIFO ns/ref (main study),28.5,reproduction/main_study_results.csv,check_paper_numbers.py
+Post hoc trigger oracle synthetic mean miss (non-stable),0.4335,reproduction/trigger_real/oracle.csv,./sim_full --seed 5001 --ncand 5 --kfrac 0 --z 1.28 --edelay 10 --da-only --trigger oracle --out trigger_real/oracle.csv --det trigger_real/oracle_det.csv
+Post hoc trigger periodic p40 synthetic mean miss (non-stable),0.4687,reproduction/trigger_real/periodic_p40.csv,./sim_full ... --trigger periodic --trigger-period 40 --out trigger_real/periodic_p40.csv --det trigger_real/periodic_p40_det.csv
+Post hoc trigger random r04 synthetic mean miss (non-stable),0.4906,reproduction/trigger_real/random_r04.csv,./sim_full ... --trigger random --trigger-rand 0.04 --trigger-seed 99 --out trigger_real/random_r04.csv --det trigger_real/random_r04_det.csv
+Post hoc trigger paired DA-oracle diff/CI/WLT/Holm,"+0.0194 [+0.0061,+0.0347], 8/22/50, Holm 0.0177",reproduction/main_study_results.csv; reproduction/trigger_real/oracle.csv,bootstrap 10000 seed 0; Wilcoxon/Holm (check_paper_numbers.py)
+Post hoc trigger paired DA-periodic-p40 diff/CI/WLT/Holm,"-0.0158 [-0.0297,-0.0008], 36/26/18, Holm 0.0177",reproduction/main_study_results.csv; reproduction/trigger_real/periodic_p40.csv,bootstrap 10000 seed 0; Wilcoxon/Holm (check_paper_numbers.py)
+Post hoc trigger paired DA-random-r04 diff/CI/WLT/Holm,"-0.0377 [-0.0585,-0.0163], 47/19/14, Holm 0.0004",reproduction/main_study_results.csv; reproduction/trigger_real/random_r04.csv,bootstrap 10000 seed 0; Wilcoxon/Holm (check_paper_numbers.py)
+Post hoc FIU trigger oracle confirms,0,reproduction/trigger_real/fiu_oracle_det.csv,"same FIU base args, default seed 5001, C=1000 default; oracle has no FIU bounds"
+Post hoc FIU trigger oracle miss/sw/ev,0.712698 / 6 / 6,reproduction/trigger_real/fiu_oracle.csv,./sim_full (FIU base args) --trigger oracle --out trigger_real/fiu_oracle.csv --det trigger_real/fiu_oracle_det.csv
+Post hoc FIU trigger periodic p40 miss/sw/ev/confirms,0.713068 / 11 / 40 / 35,reproduction/trigger_real/fiu_periodic_p40.csv,./sim_full (FIU base args) --trigger periodic --trigger-period 40 ...
+Post hoc FIU trigger random r04 miss/sw/ev/confirms,0.709742 / 10 / 36 / 35,reproduction/trigger_real/fiu_random_r04.csv,./sim_full (FIU base args) --trigger random --trigger-rand 0.04 --trigger-seed 99 ...
+Post hoc param sweep summary,see param_sweep/summary.csv,reproduction/param_sweep/summary.csv,"python3 run_param_sweep.py (seed 5001, da-only, one-at-a-time delta/h/W/p)"
+Post hoc FIU rankability sweep,see rankability_real/fiu_sweep.csv,reproduction/rankability_real/fiu_sweep.csv,"python3 run_rankability_fiu.py (default seed 5001, C in {500..20000}, p in {0.05..0.4})"
+Post hoc synthetic rankability sweep,see rankability_real/synth_sweep.csv,reproduction/rankability_real/synth_sweep.csv,"python3 run_rankability_synth.py (seed 5001, C in {500,1000,2000,4000}, p in {0.05..0.4})"
+Phase1 rankable boundary Cs/Dw>=1,0/1514, reproduction/phase1_rankability/diag/*_eval.csv,"python3 aggregation over 64280 eval rows; 0 rankable across bins >=1.0"
+Phase1 rankable 0.1-0.9 range,0.997-1.000, reproduction/phase1_rankability/diag/*_eval.csv,python3 binning by Cs/Dw
+Phase1 synth C1000 selected test miss,0.439719, reproduction/phase1_rankability/all_summary.csv,train-only selection f=0.5 p=0.2 then held-out test
+Phase1 synth C1000 f0 test miss,0.452888, reproduction/phase1_rankability/all_summary.csv,train-only selected f=0 p=0.2 held-out test
+Phase1 FIU C20000 selected test miss,0.662083, reproduction/phase1_rankability/all_summary.csv,train-only selection f=0 p=0.05 held-out test
+Phase2 CUSUM default evals,6.47, reproduction/main_study_results.csv,mean shadow_evals non-stable
+Phase2 Oracle miss,0.4335, reproduction/trigger_real/oracle.csv,mean miss non-stable
+Phase2 Oracle evals,5.74, reproduction/trigger_real/oracle.csv,mean shadow_evals non-stable
+Phase2 ContShadow miss,0.4228, reproduction/main_study_results.csv,mean miss non-stable
+Phase2 ContShadow evals,27.39, reproduction/main_study_results.csv,mean shadow_evals non-stable
+Phase3 PH selected train tag,ph_d0.001_l2, reproduction/phase3_detectors/train_summary.csv,min train miss tie lower evals
+Phase3 ADWIN selected train tag,adwin_d0.05, reproduction/phase3_detectors/train_summary.csv,min train miss tie lower evals
+Phase3 PH test miss,0.4552, reproduction/phase3_detectors/ph_selected_seed5001.csv,mean non-stable miss seed 5001
+Phase3 PH test evals,3.52, reproduction/phase3_detectors/ph_selected_seed5001.csv,mean shadow_evals non-stable
+Phase3 PH recall,0.505, reproduction/phase3_detectors/ph_selected_seed5001_det.csv,sum detected/n_bounds with 30k window
+Phase3 ADWIN test miss,0.4991, reproduction/phase3_detectors/adwin_selected_seed5001.csv,mean non-stable miss seed 5001
+Phase3 ADWIN recall,0.197, reproduction/phase3_detectors/adwin_selected_seed5001_det.csv,sum detected/n_bounds with 30k window
+Phase4 synth SIEVE miss,0.5557, reproduction/phase4_baselines/synth_sieve_wtiny.csv,mean non-stable miss seed 5001
+Phase4 synth W-TinyLFU miss,0.4913, reproduction/phase4_baselines/synth_sieve_wtiny.csv,mean non-stable miss seed 5001
+Phase4 real S3-FIFO mean,0.5162, reproduction/phase4_baselines/real_summary.csv,mean over 216 trace-capacity points
+Phase4 real W-TinyLFU mean,0.5317, reproduction/phase4_baselines/real_summary.csv,mean over 216 trace-capacity points
+Phase4 real LRU mean,0.5496, reproduction/phase4_baselines/real_summary.csv,mean over 216 trace-capacity points
+Phase4 real DA mean,0.5477, reproduction/phase4_baselines/real_summary.csv,mean over 216 trace-capacity points
+Phase4 FIU DA mean,0.7087, reproduction/phase4_baselines/real_summary.csv,mean over FIU trace-capacity points
+Phase4 FIU LRU mean,0.7011, reproduction/phase4_baselines/real_summary.csv,mean over FIU trace-capacity points
+Phase5 break-even R,783.28, reproduction/cost_model.csv,cost_model.py
+Phase5 break-even direct us,2.1962, reproduction/cost_model.csv,cost_model.py
+Phase5 t3 DA miss,0.4586, reproduction/phase5/t3_seed5001.csv,mean non-stable miss with --lcb-dist t3
+Phase5 t3 delta vs default,+0.0057, reproduction/phase5/t3_seed5001.csv; reproduction/main_study_results.csv,0.4586-0.4529
+[39] URLs live and external traces present,verified 2026-11-23,webfetch pdl.cmu.edu/CacheEviction/index.shtml and ftp listing,README citation terms; PDL copyright non-commercial scholarly use
+LHD synth mean miss,0.6736, reproduction/phase4_lhd/synth_lhd.csv,mean non-stable miss seed 5001
+LHD real mean miss,0.6979, reproduction/phase4_lhd/*_lhd.csv,mean over real trace-capacity points
+External PDL S3-FIFO mean,0.6188, reproduction/phase4_external/external_summary.csv,mean over 9 trace-capacity points (3 FIU originals)
+External PDL DA mean,0.6280, reproduction/phase4_external/external_summary.csv,mean over 9 trace-capacity points
+External PDL LHD mean,0.9358, reproduction/phase4_external/external_summary.csv,mean over 9 trace-capacity points
+Lower-envelope regime CLOCK,c_m < 0.215539 us,reproduction/phase5/envelope_summary.csv; reproduction/phase5/total_time_envelope.py,python3 total_time_envelope.py
+Lower-envelope regime S3-FIFO,0.215539-2.304942 us,reproduction/phase5/envelope_summary.csv; reproduction/phase5/total_time_envelope.py,python3 total_time_envelope.py
+Lower-envelope regime ContShadow,c_m > 2.304942 us,reproduction/phase5/envelope_summary.csv; reproduction/phase5/total_time_envelope.py,python3 total_time_envelope.py
+DA never on lower envelope,false,reproduction/phase5/envelope_summary.csv,python3 total_time_envelope.py; point-estimate claim only
+DA minimum excess over best policy,3.268673 ns/ref at 2.304942 us,reproduction/phase5/envelope_summary.csv,python3 total_time_envelope.py
+DA minimum excess bootstrap 95% CI,[-28.597766,40.231357] ns,reproduction/phase5/total_time_bootstrap.csv,python3 bootstrap_total_time.py seed 20261124 B=10000; CI includes zero
+CLOCK/S3-FIFO crossing + 95% CI,0.215539 us [0.170596,0.274219],reproduction/phase5/total_time_bootstrap.csv,python3 bootstrap_total_time.py
+S3-FIFO/ContShadow crossing + 95% CI,2.304942 us [1.659945,3.678437],reproduction/phase5/total_time_bootstrap.csv,python3 bootstrap_total_time.py
+DA/ContShadow crossing + 95% CI,2.196187 us [1.449376,4.105260],reproduction/phase5/total_time_bootstrap.csv,python3 bootstrap_total_time.py
+DA/S3-FIFO crossing + 95% CI,2.516878 us [1.085631,22.051195],reproduction/phase5/total_time_bootstrap.csv,9394/10000 positive replicates; unstable
+Minor-fault total time CLOCK,1239.600 ns/ref at c_m=2.2 us,reproduction/phase5/total_time_table.csv,python3 total_time_envelope.py
+Minor-fault total time S3-FIFO,1058.821 ns/ref at c_m=2.2 us,reproduction/phase5/total_time_table.csv,python3 total_time_envelope.py
+Minor-fault total time ContShadow,1063.593 ns/ref at c_m=2.2 us,reproduction/phase5/total_time_table.csv,python3 total_time_envelope.py
+Minor-fault total time DA,1063.708 ns/ref at c_m=2.2 us,reproduction/phase5/total_time_table.csv,python3 total_time_envelope.py
+Minor-fault cheapest policy,S3-FIFO (DA 4.887 ns above),reproduction/phase5/total_time_table.csv,python3 total_time_envelope.py
+Envelope mean ns/ref CLOCK,8.90,reproduction/main_study_results.csv,mean non-stable ns_per_ref via check_paper_numbers.py
+Envelope mean miss CLOCK,0.55941,reproduction/main_study_results.csv,mean non-stable miss_ratio via check_paper_numbers.py
+Envelope mean ns/ref S3-FIFO,28.54,reproduction/main_study_results.csv,mean non-stable ns_per_ref via check_paper_numbers.py
+Envelope mean miss S3-FIFO,0.46831,reproduction/main_study_results.csv,mean non-stable miss_ratio via check_paper_numbers.py
+Envelope mean ns/ref ContShadow,133.36,reproduction/main_study_results.csv,mean non-stable ns_per_ref via check_paper_numbers.py
+Envelope mean miss ContShadow,0.42283,reproduction/main_study_results.csv,mean non-stable miss_ratio via check_paper_numbers.py
+Envelope mean ns/ref DA,67.36,reproduction/main_study_results.csv,mean non-stable ns_per_ref via check_paper_numbers.py
+Envelope mean miss DA,0.45289,reproduction/main_study_results.csv,mean non-stable miss_ratio via check_paper_numbers.py
+Table XIII / Fig. 6 regenerated from frozen data,no new experiment,reproduction/phase5/total_time_envelope.py; reproduction/phase5/bootstrap_total_time.py,re-analysis only; seed-5001 main study unchanged
+Phase 6 PDL DA mean miss (18 points),0.4742,reproduction/phase6_pdl/summary.csv,python3 phase6_pdl/run_pdl.py && python3 phase6_pdl/analyze_pdl.py
+Phase 6 PDL S3-FIFO mean miss (18 points),0.4683,reproduction/phase6_pdl/summary.csv,python3 phase6_pdl/run_pdl.py && python3 phase6_pdl/analyze_pdl.py
+Phase 6 PDL ContShadow mean miss (18 points),0.4739,reproduction/phase6_pdl/summary.csv,python3 phase6_pdl/run_pdl.py && python3 phase6_pdl/analyze_pdl.py
+Phase 6 PDL CLOCK mean miss (18 points),0.4973,reproduction/phase6_pdl/summary.csv,python3 phase6_pdl/run_pdl.py && python3 phase6_pdl/analyze_pdl.py
+Phase 6 PDL LRU mean miss (18 points),0.4987,reproduction/phase6_pdl/summary.csv,python3 phase6_pdl/run_pdl.py && python3 phase6_pdl/analyze_pdl.py
+Phase 6 DA minus S3-FIFO paired miss difference,+0.0059,reproduction/phase6_pdl/paired_da_minus_baseline.csv,paired trace-capacity bootstrap seed 20261125 B=10000
+Phase 6 DA minus S3-FIFO Holm p,0.0192,reproduction/phase6_pdl/paired_da_minus_baseline.csv,Wilcoxon + Holm across seven baselines
+Phase 7 async repetition 1 mean miss,0.5611,reproduction/phase7_async/summary.csv,./sim_async --seed 5001 --da-only --async-shadow (rep 1)
+Phase 7 async repetition 2 mean miss,0.5676,reproduction/phase7_async/summary.csv,./sim_async --seed 5001 --da-only --async-shadow (rep 2)
+Phase 7 async repetition 3 mean miss,0.5599,reproduction/phase7_async/summary.csv,./sim_async --seed 5001 --da-only --async-shadow (rep 3)
+Phase 7 async rep 1 paired async-minus-sync,+0.1082,reproduction/phase7_async/paired.csv,bootstrap over 80 non-stable traces seed 20261126 B=10000
+Phase 7 async rep 2 paired async-minus-sync,+0.1147,reproduction/phase7_async/paired.csv,bootstrap over 80 non-stable traces seed 20261126 B=10000
+Phase 7 async rep 3 paired async-minus-sync,+0.1070,reproduction/phase7_async/paired.csv,bootstrap over 80 non-stable traces seed 20261126 B=10000
+Phase 7 async timing rows,240,reproduction/phase7_async/timing_summary.csv,three repetitions x 80 non-stable traces
+Phase 7 async stale decisions,15066,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
+Phase 7 async applied results,1192,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
+Phase 7 async dropped requests,0,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
+Phase 7 async PDL repetitions count,3,reproduction/phase7_async/summary.csv,three real --async-shadow repetitions
+Phase 6 PDL family count,6,reproduction/phase6_pdl/manifest.csv,one 1M-reference prefix per family
+Phase 8 real guest runs,9,reproduction/phase8_kernel/kernel_summary.csv,three fresh QEMU boots per condition (fixed_lru/fixed_mglru/coupled)
+Phase 8 minor faults per run,131138,reproduction/phase8_kernel/kernel_summary.csv,minflt from guest getrusage in every one of nine runs
+Phase 8 major faults per run,0,reproduction/phase8_kernel/kernel_summary.csv,majflt from guest getrusage in every one of nine runs
+Phase 8 workingset_refault_anon delta,0,reproduction/phase8_kernel/kernel_summary.csv,vmstat before/after deltas in all nine runs
+Phase 8 pgscan_anon/pgsteal_anon deltas,0,reproduction/phase8_kernel/kernel_summary.csv,vmstat before/after deltas in all nine runs
+Phase 8 controller toggles,0,reproduction/phase8_kernel/results/coupled/*/ctl_toggles.csv,three coupled boots; no positive controller signal
+Phase 8 parsed ftrace duration samples,191370,reproduction/phase8_kernel/ftrace_durations.csv,python3 parse_ftrace.py over nine raw function_graph traces
+Phase 8 ftrace function groups,18,reproduction/phase8_kernel/ftrace_summary.csv,nine runs x two sampled functions
+Phase 8 sampled functions,handle_mm_fault and do_wp_page,reproduction/phase8_kernel/ftrace_summary.csv,no reclaim function produced a sample
+Phase 8 handle_mm_fault median/p95 range,641/1532 ns to 761/1593 ns,reproduction/phase8_kernel/ftrace_summary.csv,per-run medians and p95 printed in phase8_kernel_main_table.tex
+Phase 8 kernel/toolchain,Linux 6.6.1 gcc-15 -std=gnu11 bison 3.8.2 elfutils-0.191,reproduction/phase8_kernel/manifest.csv,build recorded before guest runs
+Phase 8 cgroup memory.max/memory.peak,empty,reproduction/phase8_kernel/results/*/*/cgroup_memory_*.txt,memory pressure not demonstrated; no reclaim-latency claim
+Phase 8 frozen seed-5001 artifacts unchanged,PASS,reproduction/main_study_results.csv; reproduction/main_study_detection.csv,SHA256 verified by reproduction/final_hygiene.py
+Phase 10 independent pilot trace WSS,72539,reproduction/phase10_capacity_pilot/manifest.csv,1000000-record webusers prefix; sha256 f09a2450a1b9dc7eb521191dfbeea1213d1a7fd63cbec5cb601dffec46c85403
+Phase 10 pilot C=10000 LRU/S3-FIFO miss,0.74182/0.73317,reproduction/phase10_capacity_pilot/C10000.csv,seed 0; gap 0.00865 fails the 0.10 separation rule
+Phase 10 pilot C=20000 LRU/S3-FIFO miss,0.73590/0.52726,reproduction/phase10_capacity_pilot/C20000.csv,seed 0; gap 0.20864 qualifies; smallest qualifying capacity selected
+Phase 10 pilot C=50000 LRU/S3-FIFO miss,0.18981/0.03674,reproduction/phase10_capacity_pilot/C50000.csv,seed 0; both non-saturated but larger than the selected capacity
+Phase 10 selected capacity,20000,reproduction/phase10_capacity_pilot/selection.csv,pre-registered rule in PROTOCOL.md Phase 10; applied once by select_capacity.py
+Phase 10 provenance effect,no performance-number change,reproduction/public_trace_results.csv; latex/supplement.tex; drift_gating_latex_source/supplement.tex,independent pilot re-selects the already frozen C=20000; only provenance text updated

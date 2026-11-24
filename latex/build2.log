@@ -1,0 +1,180 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-08-10>
+(./IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd))
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/makecell/makecell.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/preprint/balance.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/l3kernel/l3backend-pdftex.def)
+(./main.aux)
+-- Lines per column: 58 (exact).
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(./main.out) (./main.out) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}]
+Underfull \hbox (badness 4954) in paragraph at lines 126--138
+[]\T1/ptm/m/n/10 Four con-straints make drift-aware re-place-ment hard.
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd) [2] [3]
+Underfull \hbox (badness 2452) in paragraph at lines 339--339
+[]|\T1/ptm/m/n/9 CLOCK man-age-ment com-bined with 2Q-
+
+Underfull \hbox (badness 4441) in paragraph at lines 341--341
+[]|\T1/ptm/m/n/9 Prediction-uncertainty in-dex with adap-tive
+
+Underfull \hbox (badness 4699) in paragraph at lines 349--349
+[]|\T1/ptm/m/n/9 Tier-aware LLM prefix-cache re-place-ment
+
+Underfull \hbox (badness 4913) in paragraph at lines 351--351
+[]|\T1/ptm/m/n/9 Statistical cache-
+
+Underfull \hbox (badness 6978) in paragraph at lines 385--385
+[]|\T1/ptm/m/n/8 Drift de-tec-
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+[]|\T1/ptm/m/n/8 Policy
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+[]|\T1/ptm/m/n/8 LPR switches LRU/MRU
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+\T1/ptm/m/n/8 heuris-ti-cally [16];
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+\T1/ptm/m/n/8 LeCaR/CACHEUS reweight
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--386
+\T1/ptm/m/n/8 ex-perts [11], [12]; Acme
+
+Underfull \hbox (badness 2753) in paragraph at lines 386--386
+\T1/ptm/m/n/8 switches cache mode by a
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--387
+[]|\T1/ptm/m/n/8 Switches among {LRU,
+
+Underfull \hbox (badness 3291) in paragraph at lines 386--387
+\T1/ptm/m/n/8 LFU-A, 2Q, MRU} only
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--387
+\T1/ptm/m/n/8 and S3-FIFO are not
+
+Underfull \hbox (badness 2326) in paragraph at lines 387--387
+[]|\T1/ptm/m/n/8 Acme keeps cache con-tents
+
+Underfull \hbox (badness 1424) in paragraph at lines 387--388
+\T1/ptm/m/n/8 re-mov-ing this costs 0.022
+
+Underfull \hbox (badness 10000) in paragraph at lines 388--388
+[]|\T1/ptm/m/n/8 Transition
+
+Underfull \hbox (badness 10000) in paragraph at lines 389--389
+[]|\T1/ptm/m/n/8 Statistical
+
+Underfull \hbox (badness 6173) in paragraph at lines 389--389
+[]|\T1/ptm/m/n/8 Acme: one-tailed $\OML/cmm/m/it/8 t$\T1/ptm/m/n/8 -test on
+
+Overfull \hbox (0.87677pt too wide) in paragraph at lines 381--392
+[][] 
+[4 <./figs/fig2_workflow.png>]
+Underfull \vbox (badness 10000) has occurred while \output is active
+Underfull \vbox (badness 10000) has occurred while \output is active [5]
+[6 <./figs/fig1_arch.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 605--605
+[]|\T1/ptm/m/n/8 Shadow ca-pac-ity; warm-up;
+
+Overfull \hbox (9.11894pt too wide) in paragraph at lines 645--665
+[][] 
+[7] [8 <./figs/fig3_overall.png> <./figs/fig4_scenario.png> <./figs/fig5_paired
+.png>] [9 <./figs/fig6_ablation.png> <./figs/fig7_cost.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 950--950
+[]|\T1/ptm/m/n/8 Not sup-ported vs.
+[10 <./figs/fig8_sensitivity.png> <./figs/fig9_capacity.png>]
+Underfull \hbox (badness 3514) in paragraph at lines 1088--1090
+[]\T1/ptm/m/it/10 Acknowledgment. \T1/ptm/m/n/10 The au-thors thank their su-pe
+r-vi-sor,
+
+Package balance Warning: You have called \balance in second column
+(balance)                Columns might not be balanced.
+
+[11]
+Underfull \hbox (badness 3343) in paragraph at lines 1185--1190
+\T1/ptm/m/n/8 ing hi-er-ar-chi-cal tem-po-ral mem-ory and sta-tis-ti-cal tests,
+'' \T1/ptm/m/it/8 Int. J.
+
+Overfull \vbox (0.94395pt too high) has occurred while \output is active
+[12] (./main.aux) )
+(see the transcript file for additional information)</usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/u
+tmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (12 pages, 2010727 bytes).
+Transcript written on main.log.

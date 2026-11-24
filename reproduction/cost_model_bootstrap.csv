@@ -1,0 +1,4 @@
+quantity,point,ci95_low,ci95_high,unit,n_traces,bootstrap_reps,seed
+direct_break_even_miss_cost,2196.187,1440.744,4058.722,ns,80,10000,20261123
+direct_break_even_miss_cost_us,2.1962,1.4407,4.0587,us,80,10000,20261123
+break_even_ratio_R,783.275,426.332,1186.660,c_e/c_m,80,10000,20261123

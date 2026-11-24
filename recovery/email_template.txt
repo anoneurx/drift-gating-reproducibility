@@ -1,0 +1,35 @@
+Subject: Request for simulator source and raw results — Drift-Aware Adaptive Page Replacement
+
+Dear [Name],
+
+I am preparing a revised version of "Drift-Aware Adaptive Page Replacement:
+Literature Review and Trace-Driven Evaluation of a Statistically Gated Policy
+Controller" and need to verify and extend the experimental results in Tables
+IV–XI. The manuscript reports that the simulator source, trace generators with
+seeds, configuration files and result tables are available as supplementary
+material, but these files are not in my copy.
+
+Could you please send:
+
+1. The simulator source at the round-2 state (after amendment A1, i.e. with
+   recency-filtered state migration and the shadow window starting at the
+   confirmation epoch).
+2. The trace generators and the exact seed lists for the 26 training traces,
+   the 110 test traces (seeds 1001 and up), and the 110 fresh traces (seeds
+   5001 and up).
+3. Raw per-trace results for every method (miss ratio, switches, shadow
+   evaluations, timings) and the per-trace detection logs.
+4. The exact implementations of S3-FIFO, LPR-style, ContShadow and LeCaR used
+   in the experiments, plus the analysis scripts for the bootstrap intervals,
+   Wilcoxon tests, Holm correction and KS tests.
+5. The Table V configuration file.
+
+I need these to reproduce the published numbers before making any changes. I
+will not modify results until the reproduction matches Tables VI–XI exactly.
+
+If any of this material no longer exists, please let me know explicitly: I will
+then correct the data-availability statement in the paper rather than leave a
+claim that cannot be satisfied.
+
+Thank you,
+[Your name]

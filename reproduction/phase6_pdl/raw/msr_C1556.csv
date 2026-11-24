@@ -1,0 +1,10 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-msr,0,LRU,0.37986,0,0,43.5
+real-msr,0,CLOCK,0.37547,0,0,9.8
+real-msr,0,ARC,0.34566,0,0,38.4
+real-msr,0,S3-FIFO,0.34873,0,0,25.2
+real-msr,0,SIEVE,0.35468,0,0,13.6
+real-msr,0,W-TinyLFU,0.35989,0,0,119.2
+real-msr,0,LHD,0.84467,0,0,76.5
+real-msr,0,DA,0.34818,2,5,68.2
+real-msr,0,ContShadow,0.34147,4,33,146.5

@@ -1,0 +1,5 @@
+do_swap_page
+do_wp_page
+handle_mm_fault
+reclaim_pages
+shrink_folio_list

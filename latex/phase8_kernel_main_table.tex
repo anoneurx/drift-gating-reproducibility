@@ -1,0 +1,21 @@
+\begin{table}[t]
+\caption{Phase 8: real guest-kernel observations; ftrace row is handle\_mm\_fault}
+\label{tab:kernel_main}
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Condition & Minor faults & Refaults & Toggles & Median/p95 fault ns \\
+\midrule
+fixed\_lru & 131,138 & 0 & 0 & $761.0/1593.0$ \\
+fixed\_lru & 131,138 & 0 & 0 & $671.0/1522.0$ \\
+fixed\_lru & 131,138 & 0 & 0 & $752.0/1643.9$ \\
+fixed\_mglru & 131,138 & 0 & 0 & $641.0/1532.0$ \\
+fixed\_mglru & 131,138 & 0 & 0 & $711.5/1573.0$ \\
+fixed\_mglru & 131,138 & 0 & 0 & $741.0/1643.0$ \\
+coupled & 131,138 & 0 & 0 & $731.0/1673.0$ \\
+coupled & 131,138 & 0 & 0 & $741.0/1693.0$ \\
+coupled & 131,138 & 0 & 0 & $701.0/1583.0$ \\
+\bottomrule
+\end{tabular}
+\end{table}

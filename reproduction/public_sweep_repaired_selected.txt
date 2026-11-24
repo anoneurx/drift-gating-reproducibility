@@ -1,0 +1,7 @@
+ncand=4
+kfrac=0
+edelay=2
+z=1.28
+C=20000
+csCapF=1.0
+train_miss=0.68027

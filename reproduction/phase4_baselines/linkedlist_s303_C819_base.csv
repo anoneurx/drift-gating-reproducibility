@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-linkedlist_s303,0,LRU,0.95083,0,0,25.6
+real-linkedlist_s303,0,ARC,0.95096,0,0,49.3
+real-linkedlist_s303,0,S3-FIFO,0.95154,0,0,49.0
+real-linkedlist_s303,0,SIEVE,0.95066,0,0,19.8
+real-linkedlist_s303,0,W-TinyLFU,0.95137,0,0,157.1
+real-linkedlist_s303,0,DA,0.94999,1,1,35.3
+real-linkedlist_s303,0,ContShadow,0.95098,6,16,167.8

@@ -1,0 +1,30 @@
+\begin{table}[t]
+\caption{Phase 8: per-function ftrace durations from the guest kernel (all conditions)}
+\label{tab:kernel_ftrace}
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Condition & Rep. & Function & Samples & Median ns & p95 ns \\
+\midrule
+coupled & 1 & do\_wp\_page & 47 & 1423.0 & 4024.8 \\
+coupled & 1 & handle\_mm\_fault & 21289 & 731.0 & 1673.0 \\
+coupled & 2 & do\_wp\_page & 48 & 2119.0 & 4988.9 \\
+coupled & 2 & handle\_mm\_fault & 21467 & 741.0 & 1693.0 \\
+coupled & 3 & do\_wp\_page & 32 & 1663.0 & 7649.4 \\
+coupled & 3 & handle\_mm\_fault & 21198 & 701.0 & 1583.0 \\
+fixed\_lru & 1 & do\_wp\_page & 11 & 1493.0 & 2133.5 \\
+fixed\_lru & 1 & handle\_mm\_fault & 21206 & 761.0 & 1593.0 \\
+fixed\_lru & 2 & do\_wp\_page & 11 & 2304.0 & 3546.0 \\
+fixed\_lru & 2 & handle\_mm\_fault & 21201 & 671.0 & 1522.0 \\
+fixed\_lru & 3 & do\_wp\_page & 11 & 1462.0 & 4303.5 \\
+fixed\_lru & 3 & handle\_mm\_fault & 21203 & 752.0 & 1643.9 \\
+fixed\_mglru & 1 & do\_wp\_page & 11 & 1994.0 & 4574.0 \\
+fixed\_mglru & 1 & handle\_mm\_fault & 21207 & 641.0 & 1532.0 \\
+fixed\_mglru & 2 & do\_wp\_page & 11 & 1253.0 & 1778.5 \\
+fixed\_mglru & 2 & handle\_mm\_fault & 21204 & 711.5 & 1573.0 \\
+fixed\_mglru & 3 & do\_wp\_page & 10 & 1583.0 & 2049.5 \\
+fixed\_mglru & 3 & handle\_mm\_fault & 21203 & 741.0 & 1643.0 \\
+\bottomrule
+\end{tabular}
+\end{table}

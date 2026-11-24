@@ -1,0 +1,4 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_webresearch-030409-033109.oracleGeneral,0,LRU,0.67179,0,0,24.9
+real-fiu_webresearch-030409-033109.oracleGeneral,0,S3-FIFO,0.65361,0,0,28.1
+real-fiu_webresearch-030409-033109.oracleGeneral,0,DA,0.65442,2,15,96.8

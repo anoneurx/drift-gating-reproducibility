@@ -1,0 +1,3 @@
+quantity,value,unit,n_traces
+mean_ns_per_eval,2456186.5,ns,110
+median_ns_per_eval,2333017.3,ns,110

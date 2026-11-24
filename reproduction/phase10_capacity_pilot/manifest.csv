@@ -1,0 +1,2 @@
+trace,url,http_status,utc_start,compressed_bytes_consumed,records,wss,max_id,sha256_bin,output
+webusers,https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/fiu/fiu_webusers-030409-033109.oracleGeneral.zst,200,2026-11-24T16:10:29.610385+00:00,3801175,1000000,72539,72538,f09a2450a1b9dc7eb521191dfbeea1213d1a7fd63cbec5cb601dffec46c85403,/home/kashie/Sem 5/research/reproduction/phase10_capacity_pilot/webusers.bin

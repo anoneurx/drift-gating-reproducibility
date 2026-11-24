@@ -1,0 +1,2 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-hashjoin_s101,0,DA-adwin,0.88246,1,1,73.9

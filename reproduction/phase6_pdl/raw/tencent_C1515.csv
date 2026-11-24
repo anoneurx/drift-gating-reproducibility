@@ -1,0 +1,10 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-tencent,0,LRU,0.39732,0,0,47.4
+real-tencent,0,CLOCK,0.39716,0,0,12.4
+real-tencent,0,ARC,0.39495,0,0,71.7
+real-tencent,0,S3-FIFO,0.39387,0,0,60.2
+real-tencent,0,SIEVE,0.39704,0,0,28.8
+real-tencent,0,W-TinyLFU,0.40590,0,0,169.4
+real-tencent,0,LHD,0.80286,0,0,105.8
+real-tencent,0,DA,0.39387,1,7,83.9
+real-tencent,0,ContShadow,0.39387,1,34,176.0

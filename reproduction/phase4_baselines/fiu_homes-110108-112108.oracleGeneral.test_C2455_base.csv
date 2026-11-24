@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_homes-110108-112108.oracleGeneral.test,0,LRU,0.66173,0,0,21.9
+real-fiu_homes-110108-112108.oracleGeneral.test,0,ARC,0.62996,0,0,37.4
+real-fiu_homes-110108-112108.oracleGeneral.test,0,S3-FIFO,0.62724,0,0,36.1
+real-fiu_homes-110108-112108.oracleGeneral.test,0,SIEVE,0.69521,0,0,18.0
+real-fiu_homes-110108-112108.oracleGeneral.test,0,W-TinyLFU,0.64714,0,0,128.9
+real-fiu_homes-110108-112108.oracleGeneral.test,0,DA,0.76956,3,7,190.2
+real-fiu_homes-110108-112108.oracleGeneral.test,0,ContShadow,0.69226,7,25,200.8

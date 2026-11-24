@@ -1,0 +1,805 @@
+    Drift-Aware Adaptive Page Replacement: Literature Review and Trace-
+          Driven Evaluation of a Statistically Gated Policy Controller
+           Hunain Tahir, Muhammad Qasim, and Hussain Ahmad
+                               Student IDs: F2024332128, F2024332122, F2024332173
+      School of Systems and Technology (SST), University of Management and Technology (UMT), Lahore, Pakistan
+                                              Supervisor: Mohsin Ghouri
+      Abstract—Page-replacement policies decide which memory page is evicted under memory pressure.
+      Classical policies perform well on stable access patterns but can degrade when the workload changes
+      phase. This paper reviews 15 studies from 2025–2026 on adaptive replacement, statistical drift detection
+      and emerging memory systems, and finds that the three areas remain weakly connected: adaptive
+      policies rarely use an explicit statistical change decision, while drift detectors are rarely evaluated under
+      memory-management cost constraints. We therefore design and evaluate a drift-aware controller that
+      separates a cheap per-reference path from a periodic control path. It monitors the epoch miss ratio with
+      a CUSUM statistic, confirms a candidate change with a two-sample Kolmogorov–Smirnov test on
+      sampled reuse times, evaluates candidate policies by sampled shadow simulation, and switches only
+      when the estimated gain exceeds a transition-cost margin. In a trace-driven simulator we compare it
+      with eleven fixed and adaptive baselines (ten in the paired statistical comparison; MRU is reported
+      descriptively) and an offline optimum on 110 held-out traces (synthetic phase traces and kernel-model
+      composites), after freezing parameters on separate training traces and re-testing on a fresh trace set. On
+      80 non-stable traces the controller’s mean miss ratio was 0.410, 14.2% below LRU and significantly
+      below LRU, FIFO, CLOCK, LFU-A and ARC (Holm-adjusted), but not better than S3-FIFO (0.402) or
+      a simple regret-driven LRU/MRU switcher (0.381). It detected 96% of 280 phase boundaries within
+      about one epoch with no false confirmations on the 30 stable traces (11 spurious confirmations outside
+      boundary windows occurred on the 60 non-stable detection traces), and matched continuous shadow-
+      based switching (0.410 vs 0.407) with 81% fewer shadow evaluations. Ablations show that state
+      migration and shadow evaluation are essential, whereas the second-stage confirmation gave no
+      measurable benefit; the controller also costs about 6.4 times the per-reference time of LRU in the
+      simulator. The results delimit when drift-gated policy selection is useful and which design elements
+      matter, but do not establish superiority over the strongest existing methods.
+      Index Terms—Adaptive caching, change detection, concept drift, page replacement, shadow simulation,
+      trace-driven evaluation, virtual memory.
+                      I. INTRODUCTION                               The stakes of this choice have grown. Containerized and
+Physical memory is finite. When a process references a              multi-tenant servers interleave unrelated workloads on
+page that is not resident and no free frame is available, the       shared memory, GPU and accelerator memory is
+memory manager must evict a resident page. The rule that            oversubscribed by multitasking and large-model serving,
+makes this choice, the page-replacement policy, affects             and tiered memory systems make a wrong eviction more
+page-fault frequency, storage traffic, tail latency and,            expensive because the next level is slow or recomputation
+ultimately, application throughput. Recency-based policies          is costly [26]–[28]. Recent studies show that adaptive and
+such as least recently used (LRU) and its CLOCK                     learned policies can reduce misses substantially [15], [18],
+approximation remain the practical default in operating             [19], but also that simple policies such as LRU remain
+systems, while the research literature offers frequency-            surprisingly competitive in some settings [28] and that no
+aware, scan-resistant and self-tuning alternatives, including       policy dominates across workload patterns [29]. A
+the adaptive replacement cache (ARC) [1], CLOCK with                principled account of when adaptation pays for itself is
+adaptive replacement (CAR) [2], the low inter-reference             therefore needed, not only another adaptive algorithm.
+recency set policy (LIRS) [3], 2Q [4] and S3-FIFO [5].              We use workload drift to mean a statistically meaningful
+No single policy is best for every access pattern. A                change over time in the distribution or temporal structure
+sequential scan can flush a cache tuned for repeated reuse,         of page references. Two research lines address related
+a loop slightly larger than memory can make LRU miss on             problems. Adaptive replacement algorithms infer from
+every reference, and a policy that protects a previously hot        feedback which behaviour to favour: ARC shifts capacity
+working set can retain pages that are useless after a phase         between recency and frequency lists, LeCaR and
+change. Real workloads move between such regimes: a                 CACHEUS reweight expert policies by regret, and recent
+database alternates between index lookups and table scans,          learned or learning-augmented designs reduce the cost of
+a scientific code between computation kernels, and a                learning on the eviction path [11], [12], [15], [19].
+multitasking system between applications. The question              Concept-drift research, in contrast, provides formal change
+this paper studies is therefore not which policy is best, but       detectors with controllable error rates, such as adaptive
+whether a system can recognize that the reference                   windowing and sequential tests [6], [7], [20]–[25]. The two
+behaviour has changed and respond at an acceptable cost.            lines have overlapping goals but different constraints. A
+                                                                    drift detector built for a machine-learning pipeline may be
+
+                                                                1
+too expensive, or rest on assumptions (labels, prediction          We adopt a deliberately cautious evaluation stance. The
+errors) that do not exist in a page-reference stream. A            protocol fixes the design and parameters on training traces
+replacement algorithm that adapts continuously may,                before test traces are touched, evaluates all methods on
+conversely, switch behaviour without any control over the          identical traces, uses paired non-parametric statistics with
+rate of unnecessary switches.                                      multiple-comparison correction, includes an offline
+A closely related precedent exists outside operating-system        optimum so that the remaining gap is visible, and reports
+paging. Adaptive cache-mode selection for queries over             negative and null findings together with every design
+raw data [34] keeps a shadow cache of the alternative              amendment. We also compare against an Acme-style
+mode and switches when a significance test favours it.             variant that applies the same shadow evaluation without a
+That work shows that statistically guided cache adaptation         drift gate [34], because that comparison isolates what drift
+is not new; what remains open is whether drift-gated               detection itself contributes. This stance is intended to make
+selection among page-replacement policies is effective             the conclusions trustworthy even where they are
+once the costs of monitoring, shadow evaluation and                unfavourable to the proposed controller.
+policy-state migration are counted, and how it compares            The answer to RQ4 is mixed, and we state it here so that
+with strong existing replacement algorithms.                       the scope of the paper is clear. On 80 held-out non-stable
+Four constraints make drift-aware replacement hard. (a)            traces, the controller reduced the mean miss ratio by 14.2%
+Rate. References arrive at memory speed, so any per-               relative to LRU and was significantly better than LRU,
+reference statistical work is prohibitive, and monitoring          FIFO, CLOCK, LFU-A and ARC after multiple-
+must be sampled or summarized by epoch. (b) Missing                comparison correction. It was not significantly different
+labels and policy-dependent signals. There is no ground            from 2Q, LeCaR, S3-FIFO or a continuous-shadow
+truth for “the workload changed”, and the most obvious             variant, and it was worse on average than a simple LPR-
+signal, the miss ratio, depends on the active policy and           style heuristic that switches between LRU and MRU on re-
+capacity, so a switch can itself create an apparent change.        access feedback. Compared with continuous shadow
+(c) State. Policies keep different metadata, and a switch          evaluation, drift gating cut shadow evaluations by 81% at
+must rebuild it from the resident pages; the quality of that       equal miss ratio. The controller’s simulated per-reference
+migration, and which pages it retains, can decide whether a        cost, however, was 6.4 times that of LRU. We therefore do
+switch helps or harms. (d) Error control. False alarms             not claim superiority over the best existing methods; we
+waste work and cause oscillation, while missed changes             claim a measured characterization of drift-gated policy
+leave a mismatched policy in place. A design that ignores          selection, with design lessons that apply to any adaptive
+any of the four can look good on paper and fail in                 replacement system (Section V-I).
+operation.                                                         The evidence has limits that readers should keep in mind.
+This paper makes four contributions. First, we review 15           The experiments use generated reference traces, namely
+studies from 2025–2026 together with the foundational              synthetic phase traces with known change points and
+work needed to place them, and identify where adaptive             composite traces from five kernel-level access models, not
+replacement, drift detection and emerging memory systems           traces collected from running operating systems, because
+fail to connect (Sections III and IV). Second, we specify a        no external trace repositories were accessible in the
+drift-aware controller with a deliberately small set of            evaluation environment. The simulator measures
+components: a sequential monitor on the epoch miss ratio,          algorithmic behaviour and relative cost, not kernel
+a distributional confirmation test on sampled reuse times,         performance. Section VI and Section VII discuss these
+sampled shadow simulation of a four-policy candidate set,          limitations in detail. The paper’s value lies in an honest,
+and a cost-aware switching rule with a recency-filtered            reproducible comparison and in the specific mechanisms it
+state migration (Section V-C). Third, we evaluate it in a          isolates, such as the effect of stale pages on policy
+trace-driven simulator against eleven fixed and adaptive           switching, which we expect to hold on real traces but have
+baselines (ten in the paired tests) and an offline optimum,        not verified there.
+using a protocol that separates training from held-out data,       The remainder of the paper is organized as follows.
+freezes parameters before testing, and reports every design        Section II gives conceptual background. Section III states
+amendment, including one made after a first test round             the review scope and synthesizes the reviewed studies, and
+(Section V). Fourth, we report where the approach helps,           Section IV identifies the research gaps. Section V presents
+where it does not, and which components matter, through            the experimental methodology and results. Section VI
+ablations, sensitivity analyses, a sampling-validity study         discusses threats to validity, Section VII the limitations
+and a cost analysis.                                               and scope of the claims, and Section VIII concludes.
+Our research questions are: RQ1 How do recent adaptive                          II. CONCEPTUAL BACKGROUND
+replacement policies detect and respond to changing access
+behaviour? RQ2 Which drift detectors are candidates for            A. Page Replacement and Workload Phases
+low-overhead use in memory management? RQ3 What do                 A reference trace is an ordered sequence of page
+emerging GPU, multi-tier and benchmark studies imply for           identifiers. For a capacity of C frames, a replacement
+replacement under changing workloads? RQ4 Can a drift-             policy chooses the victim whenever a reference misses and
+confirmed, cost-aware controller select among replacement          all frames are occupied. LRU evicts the least recently used
+policies more effectively than fixed and heuristic-adaptive        page; LFU the least frequently used; FIFO the oldest;
+baselines under controlled phase changes? RQ1–RQ3 are              CLOCK approximates LRU with a reference bit and a
+answered by the review; RQ4 is answered empirically.               circular scan; MRU evicts the most recently used page,
+
+                                                               2
+which is favourable for cyclic scans larger than memory.              and was published at AAAI 2025. No preregistered search
+Hybrid designs use several queues to separate one-time                protocol, duplicate screening or quality scoring was
+from repeated references [1]–[5]. The miss ratio is the               applied, so the review does not claim systematic
+fraction of references that miss; it is a necessary but               completeness, and several included works are preprints.
+incomplete quality measure, since metadata cost, decision             Results reported in the studies are not pooled or
+cost and adaptation speed also matter. Results on storage-            normalized because workloads, hardware and metrics
+block traces are cache-replacement results and are not                differ.
+direct evidence about virtual-memory paging.
+                                                                      A. Adaptive and Learning-Based Replacement
+Workload phases differ in working-set size, reuse-distance
+distribution, sequentiality and frequency skew. Drift may             3L-Cache [15] reduces the cost of learned eviction by
+be abrupt, gradual or recurring [6]. Phase changes also               moving learning and inference off the critical path,
+interact with policy state: a policy that retains pages of the        evaluated on 4,855 CDN, key-value and block traces, but
+previous phase (for example MRU, which pins the oldest                its overhead remains above LRU. LPR [16] uses re-access
+resident pages) can perform far worse than its steady-state           feedback to switch among policies at runtime, for example
+behaviour suggests until that state is flushed. This                  from LRU to MRU, with a heuristic rather than statistical
+interaction is central to the design and results of this paper.       switching signal. EACLOCK [17] adapts a CLOCK-style
+                                                                      policy from hit-rate feedback for skewed and shifting
+B. Workload Drift and Statistical Detection                           workloads. Clock2Q+ [18] targets correlated metadata
+Concept-drift research distinguishes changes in the input             references in VMware vSAN and reports up to 28.5%
+distribution, in the input–output relationship, or both [6]. A        lower miss ratio than S3-FIFO on metadata traces. S4-
+page-reference stream has no labels, so a controller must             FIFO [19] learns configuration parameters for a FIFO-
+monitor observable summaries such as the miss ratio or                family heuristic rather than every eviction, and, like 3L-
+reuse-time distribution. Adaptive windowing (ADWIN)                   Cache, separates a fast data path from slower control logic.
+tests whether sub-windows have different means [7];                   B. Drift Detection
+Page–Hinkley and CUSUM procedures accumulate
+deviations from a reference level and signal when the sum             PUDD [20] detects drift from prediction uncertainty but
+exceeds a threshold [30]; two-sample tests such as the                needs a predictive model. A label-free statistical-process-
+Kolmogorov–Smirnov (KS) test compare distributions.                   control detector [21] stresses power and false-positive
+Each has assumptions about sample size, independence                  control but is evaluated by simulation of model-monitoring
+and repeated testing that must be addressed in an                     scenarios. Dynamic threshold determination [22] adapts
+implementation. Because memory operations occur at very               alarm thresholds after each alarm, at the cost of
+high rates, a detector for this setting must avoid per-               maintaining parallel candidate models temporarily. A
+reference heavy computation and must balance detection                transformer–autoencoder hybrid [23] and an HTM-plus-
+delay, false alarms, memory use and runtime cost.                     SPRT framework [24] offer richer temporal modelling but
+                                                                      impose training or univariate-data assumptions. ADWIN-
+C. Earlier Adaptive Replacement and Cache Modelling                   U [25] adapts adaptive windowing to unsupervised
+SEQ [8] detects long fault sequences and handles them                 settings. None is evaluated on page-reference streams or at
+separately, and EELRU [9] adjusts its eviction point from             memory-management rates.
+recency-distribution evidence. ARC [1] balances recency               C. GPU, Multi-Tier and Benchmark Studies
+and frequency using ghost-list hits, CAR [2] transfers the
+idea to CLOCK, LIRS [3] uses inter-reference recency,                 MSched [26] predicts the next task’s working set from
+and 2Q [4] separates newly admitted from re-referenced                kernel launch arguments to migrate GPU memory
+pages. S3-FIFO [5] shows that FIFO queues with a small                proactively, which relies on predictability that CPU page
+admission queue can match or beat more complex designs.               streams lack. gpu_ext [27] makes GPU-driver policies
+ACME [10], LeCaR [11] and CACHEUS [12] mix expert                     replaceable eBPF programs, an architectural mechanism
+policies using regret or learned feedback. Miniature                  for safe policy updates. The LLM prefix-cache study [28]
+simulation [13] and spatially hashed sampling [14]                    finds LRU surprisingly competitive, cautioning against
+approximate larger cache configurations cheaply, which                assuming that sophisticated policies always win. A stale-
+makes on-demand evaluation of alternative policies                    tolerant cache benchmark [29] finds that no policy
+feasible, although sampling can distort temporal structure            dominates across four synthetic workload patterns. Finally,
+and policy rankings. These works establish that workload-             Acme [34] is the closest precedent for statistical policy
+sensitive replacement is long-standing; the proposed                  switching: it simulates the alternative caching mode
+controller does not claim that adaptation itself is new.              through shadow entries and switches when a one-tailed t-
+                                                                      test at the 0.05 level favours it, reporting execution time
+            III. REVIEW SCOPE AND APPROACH                            within 16% of the optimal mode in the worst case and 4%
+This is a focused narrative review, not a systematic review           on average on TPC-H workloads.
+or meta-analysis. The study set was selected by the authors                        IV. PREVIOUS RESEARCH GAPS
+to cover adaptive replacement, drift detection and
+emerging memory or cache settings, and comprises 15                   Table I summarizes the 15 reviewed studies and the closest
+peer-reviewed publications and preprints from 2025–2026               prior art by research area, contribution and limitation
+plus foundational work needed to explain the lineage. One             relative to the goal of low-overhead, drift-aware page
+study [20] first appeared as a preprint in December 2024              replacement. The limitations are framed against that goal;
+                                                                      they are not claims that the original studies fail at their
+
+                                                                  3
+own objectives, and some are inferred from each study’s                                  experiment. Gap 3: transition costs. The costs of detector
+scope. Reported results are not recomputed or compared                                   execution, shadow simulation, policy-state preparation and
+across studies.                                                                          post-switch warm-up are not consistently reported together
+                        TABLE I                                                          with miss ratio and detection delay. Gap 4:
+                                                                                         comparability. Studies use different workloads, metrics
+COMPARATIVE SUMMARY OF THE REVIEWED STUDIES AND
+                                                                                         and system contexts, so their results cannot be compared
+CLOSEST PRIOR ART
+                                                                                         as though from a shared benchmark.
+Ref                                                   Limitation for drift-aware
+.    Research area      Main contribution             page replacement                   Table II compares the reviewed approaches with the
+[15] Adaptive           Learning-based eviction       Overhead remains above             controller as actually implemented in this study.
+     replacement        with reduced inference work LRU; evaluation is trace-
+                        on the critical path.         based, not a live kernel                                     TABLE II
+                                                      deployment.
+[16] Adaptive           Re-access feedback used to Switching signal is                   COMPARISON OF EXISTING METHODS AND THE
+     replacement        switch policy at runtime      heuristic; no formal               EVALUATED CONTROLLER
+                        (e.g., LRU to MRU).           statistical drift control.
+[17] Adaptive           CLOCK-style adaptation        No explicit drift test or          Dimension       Existing methods (reviewed)       Evaluated controller
+     replacement        driven by runtime hit-rate    quantified recovery after          Drift detection ARC, LeCaR, CACHEUS and CUSUM on the epoch miss
+                        and workload feedback.        phase changes is described.                        LPR adapt from ghost-list,        ratio, then a two-sample KS test
+[18] Adaptive           CLOCK management              Specialized for metadata                           regret or re-access feedback [1], on sampled reuse times; no
+     replacement        combined with 2Q-inspired caches; not a general policy-                          [11], [12], [16]; generic         persistence rule; weak on
+                        queues for metadata           selection controller.                              detectors such as ADWIN and gradual drift
+                        caching.                                                                         PUDD are not evaluated on
+[19] Adaptive           Learned parameters for a      Learned configuration is not                       page streams [7], [20]–[25]
+     replacement        FIFO-family heuristic with continuous, statistically             Policy          LPR switches LRU/MRU              Switches among {LRU, LFU-
+                        a separated control path.     triggered policy switching.        switching       heuristically [16];               A, 2Q, MRU} only after
+[20] Drift detection    Prediction-uncertainty index Depends on a predictive                             LeCaR/CACHEUS reweight            confirmed drift; ARC and S3-
+                        with adaptive bucketing for model; not designed for                              experts [11], [12]; Acme          FIFO are not candidates
+                        early detection.              memory-reference streams.                          switches cache mode by a t-test
+[21] Drift detection    Label-free detector based on Evaluated by simulation of                          [34]
+                        statistical process control.  model-monitoring scenarios,        State migration Acme keeps cache contents         Rebuilds metadata from
+                                                      not on reference traces.                           [34]; policy-state handling is    resident pages by last access
+[22] Drift detection    Dynamic threshold             Maintains parallel candidate                       not reported in the reviewed      and discards pages
+                        determination using a post- models; cost for page                                studies                           unreferenced for 20,000
+                        alarm comparison phase.       replacement untested.                                                                references; removing this costs
+[23] Drift detection    Transformer–autoencoder       Training and inference                                                               0.022 miss ratio
+                        hybrid with a composite       demands may be excessive           Transition cost Monitoring, shadow-evaluation Margin K = 0.1C, hysteresis
+                        trust score.                  for a memory path; one                             and warm-up costs are not         and dwell time; 6.4 times LRU
+                                                      synthetic dataset.                                 consistently reported together    time per reference in the
+[24] Drift detection    HTM online sequence           Described for univariate                           (Gap 3)                           simulator, 54% below
+                        learning combined with        streams; cost at page-                                                               ContShadow; memory not
+                        sequential probability ratio reference rates unquantified.                                                         measured
+                        testing.                                                         Statistical     Acme: one-tailed t-test on        KS test at alpha = 10^-3; no
+[25] Drift detection    Adaptive windowing for        Feature statistics may miss        confirmation    shadow results [34]; heuristics measurable benefit in the
+                        unsupervised drift detection. temporal structure of                              elsewhere                         ablation; LCB (z = 1.28) over
+                                                      reference streams.                                                                   four blocks in the switching
+[26] GPU / tiered       Predicts task working sets; Relies on GPU kernel-                                                                  rule
+                        proactive GPU–host page       argument predictability            These gaps are empirical. The question is whether
+                        movement.                     absent from CPU page
+                                                      streams.                           statistically confirmed changes in compact page-reference
+[27] GPU / tiered       eBPF-based replaceable        Extensible mechanism; not          summaries, combined with on-demand candidate
+                        GPU-driver policies.          itself a statistical drift
+                                                      detector.
+                                                                                         evaluation and explicit switching-cost safeguards, give a
+[28] GPU / tiered       Tier-aware LLM prefix-        Specific to prefix reuse;          favourable trade-off against fixed policies and existing
+                        cache replacement with        may not transfer to OS page        adaptive methods. Each component of the proposed
+                        non-uniform recomputation replacement.
+                        costs.                                                           controller has precedent (ADWIN [7], miniature
+[29] Benchmark          Adds staleness metrics to     Synthetic application-cache        simulation [13], SHARDS [14], statistical cache-mode
+                        cache-policy comparison       workloads, not virtual-
+                        under TTL workloads.          memory traces.                     selection [34]); the claim examined here concerns their
+[34] Statistical cache- Shadow-cache simulation       Chooses lazy versus eager          integration for page-replacement policy selection and the
+     mode selection     with a one-tailed t-test to   query caching, not a page-
+                        switch caching mode.          replacement policy; switch
+                                                                                         measured consequences. The review cannot establish that
+                                                      retains cache contents.            no related implementation exists outside the selected
+The reviewed work establishes that adaptive replacement                                  literature, and the proposal is not presented as the first
+is well studied [1]–[5], [8]–[12]; that learning-based                                   statistical cache-adaptation system.
+policies can respond online to access patterns [15]–[19];
+that statistical drift detection offers explicit change                                      V. EXPERIMENTAL METHODOLOGY AND RESULTS
+evidence [6], [7], [20]–[25]; and that cache-mode selection                              A. Hypotheses and Protocol Integrity
+has used shadow evaluation and significance testing [34].
+                                                                                         We test four hypotheses derived from RQ4. H1
+Four gaps follow.
+                                                                                         (replacement quality): on workloads with phase changes
+Gap 1: detectors on reference streams. Generic drift                                     the controller achieves a lower mean miss ratio than the
+detectors are rarely evaluated on page-reference feature                                 strongest fixed baseline, while not being worse on stable
+streams at memory-management sampling rates and                                          workloads. H2 (switch quality): relative to heuristic-
+overhead budgets. Gap 2: statistical gating versus                                       adaptive baselines, drift-gated switching avoids
+heuristic adaptation. Adaptive page-replacement studies                                  unnecessary switches without unacceptable detection
+such as LPR [16] already respond to changing patterns, but                               delay. H3 (overhead): the controller’s total added cost
+no reviewed study compares explicit statistical change                                   stays within a modest budget relative to LRU or CLOCK.
+confirmation against such heuristics in a controlled                                     H4 (sampling validity): candidate rankings from sampled
+
+                                                                                     4
+shadow simulation agree with full-capacity simulation                         still contained pre-change pages, which made policies that
+often enough to support switching. No numerical budget                        pin old pages, such as MRU and LFU, look and perform
+for H3 or agreement threshold for H4 was fixed before the                     poorly. (iii) Round 2. We introduced a single amendment
+experiments. We therefore classify the analyses as follows.                   (A1) with two parts: pages not referenced since the
+H1 and H2 are confirmatory only in direction: the margin                      confirmation point are discarded when switching (recency-
+for “not worse” on stable traces and a switch-count                           filtered state migration), and the shadow window begins at
+criterion were not fixed in advance, and the strongest                        the confirmation epoch. A1 was validated on the training
+baseline was identified only after the results were known.                    traces only, and then evaluated on 110 fresh traces (seeds
+H3 and H4 are exploratory, and the reference points used                      5001 and up) that had not been inspected before the run.
+later (for example 6 times LRU) are descriptive, not                          All results below come from round 2 unless stated. The
+preregistered acceptance criteria. The paired comparisons                     parameter values were not re-tuned after round 1.
+of Table VII, with Holm correction over ten tests, are the
+primary inferential analysis; ablation, sensitivity and                       B. Simulator, Workloads and Baselines
+sampling-validity results are exploratory. Fig. 2                             We implemented a single-threaded trace-driven simulator
+summarizes the protocol; no recorded real-world traces are                    in C++ with a capacity of C = 1,000 frames, excluding the
+part of the current experiments.                                              first 20,000 references (cold fill) from reported miss ratios.
+                                                                              All policies see identical traces. Policies were sanity-
+                                                                              checked against known behaviour: LRU misses on every
+                                                                              reference of a loop larger than memory, MRU matches the
+                                                                              offline optimum on that loop, and the offline optimum is
+                                                                              never exceeded. Workloads (Table III) are generated, not
+                                                                              collected: five access primitives with disjoint page ranges,
+                                                                              combined into stable, abrupt, gradual and recurring
+                                                                              scenarios with known change points, plus composite traces
+                                                                              from five kernel-level access models (column-wise matrix
+                                                                              traversal, hash join, B-tree lookup, external-sort merge and
+                                                                              skewed key-value lookup with scan bursts). Traces are 110
+                                                                              per round: 30 stable, 20 abrupt, 20 gradual, 20 recurring
+                                                                              and 20 composite.
+                                                                                                        TABLE III
+                                                                              WORKLOAD DEFINITIONS
+                                                                              Component   Definition
+                                                                              LOOP        Cyclic scan over 1,200 pages (larger than C).
+                                                                              ZIPF        Zipf(0.9) over 8,000 pages, randomly permuted page ids.
+                                                                              HOTSCAN     70% uniform over 600 hot pages, 30% sequential scan over 20,000
+                                                                                          pages.
+                                                                              WINDOW      Uniform over a 700-page window sliding one page per 40
+                                                                                          references.
+                                                                              UNIFORM     Uniform random over 4,000 pages.
+                                                                              Stable      One primitive, 300,000 refs (6 traces each).
+                                                                              Abrupt      Six phases of 100,000 refs; no immediate repetition of a type.
+                                                                              Gradual     As abrupt, with linear mixture ramps of 40,000 refs at boundaries.
+                                                                              Recurring   Two primitives alternating, 6 × 80,000 refs.
+                                                                              Composite   Five kernel models in random order, 5 × 100,000 refs.
+                                                                              Table IV lists the methods compared: eight fixed policies
+                                                                              (LRU, FIFO, CLOCK, LFU-A, MRU, 2Q, ARC, S3-
+Experimental workflow. Blue boxes are training stages, orange boxes are       FIFO) and three adaptive methods (LeCaR, LPR-style,
+                        held-out test rounds.                                 ContShadow), eleven baselines in total. MRU is reported
+The protocol has three stages. (i) Training. 26 traces (seeds                 in Table VI but is not one of the ten paired comparisons of
+9001 and up) were used to make design decisions and to                        Table VII. Verification note on LFU-A: Table IV gives
+select the detector parameters by a fixed rule applied                        count halving every 4C = 4,000 references for the stand-
+before any test evaluation: the lowest mean training miss                     alone baseline, whereas Table V gives halving every 50
+ratio among 27 settings (CUSUM threshold h ∈ {5, 8, 12},                      epochs (100,000 references) for the controller’s LFU-A
+KS level ∈ {10⁻², 10⁻³, 10⁻⁴}, sampling rate p ∈ {0.05,                       candidate; the source code must confirm whether this
+0.1, 0.2}) with zero false confirmations on stable training                   difference is intended. Re-implementations of published
+traces, ties broken toward the more conservative setting.                     algorithms follow the cited descriptions but are not the
+Two design choices were also fixed on training traces: an                     authors’ code; the LPR-style baseline re-implements the
+initial policy selection after the first baseline period, and a               principle of [16] (re-access “regret” feedback with
+10-epoch delay between drift confirmation and shadow                          probationary LRU/MRU switching), not its code, and may
+evaluation. (ii) Round 1. The frozen design (A0) was run                      differ from the original in important ways. CAR, LIRS,
+on 110 test traces (seeds 1001 and up). Its mean miss ratio                   CLOCK-Pro [36], CACHEUS, 3L-Cache, S4-FIFO,
+on non-stable traces (0.392) was better than LRU (0.441)                      EACLOCK and Clock2Q+ were not implemented. The
+but worse than S3-FIFO (0.379) and the LPR-style                              ContShadow variant is our Acme-style control: it runs the
+heuristic (0.365). Inspection showed that after a phase                       same shadow evaluation and switching rule every ten
+change the shadow window and the retained resident pages                      epochs without a drift gate.
+
+                                                                          5
+                              TABLE IV                                           implemented; the monitored features were the miss ratio
+METHODS COMPARED                                                                 (Stage 1) and sampled reuse times (Stage 2) only.
+Group       Methods
+Fixed       LRU, FIFO, CLOCK, LFU-A (counts halved every 4C references),
+            MRU, 2Q (Kin = C/4, Kout = C/2), ARC [1], S3-FIFO [5] (10%
+            small queue, ghost = main size).
+Adaptive    LeCaR [11] (re-implementation); LPR-style (principle of [16]);
+            ContShadow (shadow evaluation every 10 epochs, no drift gate).
+Proposed    DA: drift-gated controller (Section V-C).
+Ablations   DA-noPurge (A0 migration), DA-noS2 (no KS confirmation), DA-
+            noShadow (random pick), DA-noCost (no cost margin), DA-
+            noDwell.
+Reference   OPT: offline Belady optimum [32].
+
+C. Controller Under Test
+The controller (Fig. 1) keeps a fast path that serves every
+reference with the active policy and updates two counters
+per page (last access and an aged count); a sampled subset
+of references, selected by a 64-bit hash of the page id with
+probability p, feeds reuse-time and window buffers. All
+other work runs once per epoch of W references. The
+candidate set is {LRU, LFU-A, 2Q, MRU}; the initial
+policy is LRU, and after the first baseline period one
+shadow evaluation selects a start policy.
+Stage 1. The epoch miss ratio mt is standardized as zt = (mt
+− μ₀)/σ₀, with μ₀ and σ₀ estimated over a baseline of B = 8
+epochs (σ₀ floored at 0.02). A two-sided CUSUM
+accumulates
+S+t = max(0, S+t−1 + zt − δ) (1)
+S−t = max(0, S−t−1 − zt − δ) (2)
+and raises an alarm when either statistic exceeds h. Stage
+2. On an alarm, the sampled reuse times of the last three
+epochs (measured in sampled references, with first-time
+references given a large sentinel value) are compared with
+the baseline reuse times by a two-sample KS test; drift is                        Architecture of the evaluated controller: per-reference fast path (blue),
+confirmed if p < α with at least 100 samples per side,                            per-epoch control path (orange), statistical decision points, and policy-
+otherwise the alarm is rejected. Because reuse time                                                        switching feedback.
+depends on the workload and not on the active policy, this                                                          TABLE V
+stage is intended to separate workload change from policy-
+                                                                                 FROZEN CONTROLLER PARAMETERS
+induced miss-ratio change.
+                                                                                 Parameter                            Value
+Shadow evaluation. Ten epochs after confirmation (to                             Capacity C; epoch W                  1,000 frames; 2,000 references
+accumulate post-change data), each candidate is simulated                        Sampling rate p                      0.2 (hash-based, spatial)
+                                                                                 CUSUM δ, h; baseline B               0.5, 5; 8 epochs (σ₀ ≥ 0.02)
+at capacity Cs = round(pC) on the sampled window starting                        KS level α; window                   10⁻³; last 3 epochs, ≥ 100 samples
+at the confirmation epoch. The first 40% of the window                           Evaluation delay; cooldown           10 epochs; 4 epochs
+                                                                                 Shadow capacity; warm-up; blocks     round(pC) = 200; 40%; 4
+warms the shadow caches, and the remainder is split into                         LCB z; horizon H; margin K           1.28; 50,000 refs; 0.1C = 100
+four blocks. For candidate π, Δπ is the per-block miss                           Dwell D; hysteresis window           10 epochs; 30 epochs
+reduction relative to the active policy’s shadow, Braw the                       Migration purge age                  20,000 references
+                                                                                 Count aging                          halved every 50 epochs
+raw references per block, H a fixed horizon and K = 0.1C a
+transition-cost margin in miss-equivalents. The controller                       D. Metrics and Statistical Analysis
+switches to the candidate with the largest margin if
+                                                                                 The primary metric is the miss ratio after warm-up,
+(LCB(Δπ) / Braw) H − K > 0 (3)                                                   reported with the percentage reduction relative to LRU.
+where LCB is a one-sided lower confidence bound (z =                             Detection is evaluated on abrupt, recurring and composite
+1.28) across the four blocks. A reverse switch to the                            traces: a boundary is detected if a confirmed alarm occurs
+previous policy within 30 epochs must additionally exceed                        within 30,000 references after it, and the delay is the
+K (hysteresis), and a dwell time of 10 epochs applies after                      distance to that alarm. False confirmations are counted on
+any switch. Switching rebuilds the target policy’s metadata                      stable traces after reference 100,000, which excludes an
+from the resident pages ordered by last access, after                            initial transient. A reversal is a switch A→B→A within
+discarding pages not referenced in the last 20,000                               60,000 references. Cost is the simulated wall-clock time
+references (A1); LFU-A and 2Q use the aged counts to                             per reference (minimum of five repetitions on eight traces
+place pages. After a confirmed change the controller re-                         on a shared single-core virtual machine; indicative, not a
+baselines for 4 + 10 epochs plus B epochs. Table V lists all                     kernel measurement). Sampling validity (H4) compares the
+parameters. The persistence safeguard of the design                              sampled shadow ranking of the four candidates with a full-
+(several consecutive confirmed epochs) was not
+
+                                                                             6
+capacity simulation of the same raw window. Recovery
+time and memory overhead were not measured.
+The unit of analysis is the trace (80 non-stable, 30 stable).
+Paired differences use the Wilcoxon signed-rank test [33],
+with Holm correction [35] across the ten baseline
+comparisons. Confidence intervals are percentile bootstrap
+intervals over traces (10,000 resamples for means, 5,000
+for paired differences). Effect sizes are mean and median
+paired differences with win/loss counts. Traces in one
+scenario share a generator, so they are not fully
+independent draws from a population of real workloads.
+Only five access primitives and five kernel models
+underlie all traces, so the effective number of independent                     Mean miss ratio by scenario (round 2, C = 1,000; n = 30 stable, 20 per
+units is smaller than 80; a scenario-stratified or cluster                                                other scenario).
+bootstrap would widen the intervals and is a required
+                                                                               E. Replacement Quality
+follow-up analysis.
+                                                                               Table VI and Figs. 3 and 4 give the main result. On the 80
+                          TABLE VI
+                                                                               non-stable traces the controller’s mean miss ratio was
+MEAN MISS RATIO BY SCENARIO (ROUND 2, FRESH HELD-                              0.410 (95% CI 0.387–0.433), 14.2% below LRU (0.477).
+OUT TRACES; LOWER IS BETTER)                                                   The offline optimum reached 0.223, so every online
+              Abru      Grad    Recurr Compo Non-stable [95%    vs LRU         method leaves a large gap. The ranking of the other
+Method Stable pt        ual     ing    site  CI]                (%)
+LRU    0.518 0.516      0.547   0.540 0.306 0.477 [0.445,       0.0
+                                                                               methods was: LPR-style 0.381, S3-FIFO 0.402,
+                                             0.510]                            ContShadow 0.407, DA 0.410, LeCaR 0.421, 2Q 0.431,
+FIFO    0.550   0.551   0.464   0.568 0.323 0.476 [0.445,       0.2            ARC 0.449 and LRU 0.477. MRU is dominated except on
+                                             0.509]
+CLOCK 0.508     0.504   0.535   0.531 0.306 0.469 [0.438,       1.7            loops. On stable traces the controller (0.332) was close to
+                                             0.501]                            the best fixed policies (S3-FIFO 0.342, 2Q 0.344), mostly
+LFU-A   0.493   0.492   0.463   0.523 0.311 0.447 [0.418,       6.2
+                                             0.478]
+                                                                               because of its start-up policy selection.
+MRU     0.732   0.926   0.948   0.836 0.877 0.897 [0.873,       -87.9          By scenario, the controller was competitive on abrupt
+                                             0.918]
+2Q      0.344   0.475   0.465   0.493 0.291 0.431 [0.404,       9.6            traces (0.412, level with ContShadow at 0.411 and below
+                                             0.459]                            S3-FIFO at 0.458) but clearly weaker on gradual drift
+ARC     0.486   0.483   0.505   0.514 0.293 0.449 [0.418,       5.9
+                                             0.481]                            (0.474 versus 0.407 for S3-FIFO and 0.405 for LPR-style).
+S3-FIFO 0.342   0.458   0.407   0.464 0.278 0.402 [0.374,       15.9           In the gradual scenario the reuse-time distribution moves
+                                             0.429]                            slowly, so the KS confirmation was often not triggered
+LeCaR   0.485   0.481   0.402   0.507 0.293 0.421 [0.391,       11.9
+                                             0.451]                            while the policy mixture was changing; a variant without
+LPR-    0.352   0.380   0.405   0.433 0.306 0.381 [0.359,       20.2           that stage reached 0.459 on gradual traces against 0.474 (a
+style                                        0.404]
+ContSha 0.327   0.411   0.413   0.503 0.302 0.407 [0.383,       14.6           per-scenario value not tabulated in Table VIII). On
+dow                                          0.433]                            composite kernel traces all methods except MRU were
+DA      0.332   0.412   0.474   0.457 0.296 0.410 [0.387,       14.2
+                                             0.433]
+                                                                               within about 0.05 of each other.
+OPT     0.221   0.236   0.228   0.255 0.171 0.223 [0.211,       53.4                                    TABLE VII
+                                             0.235]
+                                                                               PAIRED DIFFERENCES, DA MINUS BASELINE (NON-
+                                                                               STABLE, N = 80)
+                                                                               Baseline   Mean diff. [95% CI]                    W/L/T       Holm p
+                                                                               LRU        −0.0676 [−0.087, −0.050]               68/8/4      <0.001
+                                                                               FIFO       −0.0669 [−0.090, −0.044]               68/12/0     <0.001
+                                                                               CLOCK      −0.0595 [−0.078, −0.043]               69/9/2      <0.001
+                                                                               LFU-A      −0.0379 [−0.060, −0.015]               62/18/0     <0.001
+                                                                               2Q         −0.0217 [−0.038, −0.006]               37/43/0     0.288
+                                                                               ARC        −0.0393 [−0.057, −0.022]               41/39/0     0.035
+                                                                               S3-FIFO    +0.0080 [−0.010, +0.026]               27/53/0     0.281
+                                                                               LeCaR      −0.0110 [−0.033, +0.011]               31/48/1     1.000
+                                                                               LPR-style  +0.0287 [+0.012, +0.048]               37/39/4     0.332
+                                                                               ContShadow +0.0020 [−0.015, +0.021]               43/36/1     1.000
+                                                                               Table VII reports paired comparisons; negative differences
+                                                                               favour the controller. It was significantly better than LRU,
+                                                                               FIFO, CLOCK, LFU-A and ARC after Holm correction
+Mean miss ratio on the 80 non-stable traces with 95% bootstrap intervals       (adjusted p ≤ 0.035). Fig. 5 shows the paired differences.
+                     (generated traces, C = 1,000).                            Intervals and tests answer different questions: the bootstrap
+                                                                               interval describes uncertainty in the mean difference,
+                                                                               whereas the Wilcoxon test depends on the ranks of the per-
+                                                                               trace differences. For 2Q the interval for the mean
+                                                                               excludes zero (−0.038 to −0.006) while the adjusted p-
+                                                                               value is 0.288, and for LPR-style the interval excludes zero
+                                                                               in the unfavourable direction while the adjusted p-value is
+                                                                               0.332. Such patterns can arise when differences are
+
+                                                                           7
+skewed, and the intervals are not corrected for multiplicity                                       TABLE VIII
+or for clustering of traces by scenario.                                        ABLATION (ALL TRACES; SWITCHES                   AND   SHADOW
+                                                                                EVALUATIONS PER TRACE)
+                                                                                Variant        Non-stable   Stable    Switches     Shadow evals
+                                                                                DA             0.410        0.332     1.70         4.5
+                                                                                DA-noPurge     0.432        0.332     1.67         4.5
+                                                                                DA-noS2        0.406        0.331     1.73         4.6
+                                                                                DA-noShadow    0.497        0.518     4.56         0.0
+                                                                                DA-noCost      0.405        0.330     3.05         4.5
+                                                                                DA-noDwell     0.410        0.332     1.70         4.5
+                                                                                ContShadow     0.407        0.327     2.36         23.9
+
+                                                                                G. Detection, Switching and Cost
+                                                                                The monitor and confirmation stages detected 269 of 280
+                                                                                phase boundaries (96.1%) in abrupt, recurring and
+                                                                                composite traces. The median delay was 1,999 references,
+                                                                                one epoch, with essentially no spread; this should be read
+Against 2Q (-0.0217, adjusted p = 0.288), LeCaR, S3-                            with care, because all boundaries in these traces coincide
+FIFO (+0.0080, adjusted p = 0.281) and ContShadow the                           with epoch boundaries, which favours detection speed.
+differences were not significant. The LPR-style baseline                        Two different false-alarm measures are reported and
+had a lower mean miss ratio (mean difference +0.0287,                           should not be conflated. (i) On the 30 stable traces, a false
+bootstrap interval excluding zero) although the Wilcoxon                        confirmation is any confirmed alarm after reference
+test on the median difference of 0.000 was not significant                      100,000, because no true change exists; none occurred. (ii)
+(adjusted p = 0.332); the distribution is skewed, because                       On the 60 abrupt, recurring and composite traces, a
+LPR-style wins by a wide margin on loop-containing                              spurious confirmation is a confirmed alarm outside every
+phases and ties elsewhere. In round 1 (design A0) the                           30,000-reference boundary window; 11 occurred. Measure
+controller was significantly worse than S3-FIFO (+0.0135,                       (ii) is counted per trace set, can include within-phase
+p < 0.001), so the amendment narrowed but did not                               structure such as sliding windows and mixtures, and is not
+remove the gap.                                                                 a per-reference rate. For (i) the manuscript reports 8.4
+                                                                                million stable references with a rule-of-three upper bound
+F. Ablation
+                                                                                of 0.36 per million. Verification note: 30 traces of
+Table VIII removes one component at a time. Removing                            300,000 references counted after reference 100,000 give
+recency-filtered migration raised the non-stable miss ratio                     6.0 million references (bound 0.50 per million), so the
+from 0.410 to 0.432 (paired Wilcoxon p < 0.001), and                            counting window must be confirmed against the source.
+replacing shadow evaluation by a random choice raised it                        The controller made 2.12 switches per non-stable trace
+to 0.497 (p < 0.001), worse than LRU (0.477). Both                              (LPR-style 1.84, ContShadow 2.98, DA-noCost 3.94) and
+mechanisms are therefore essential. Removing the cost                           no A→B→A reversals in 187 switches.
+margin did not change the miss ratio (0.405, p = 0.65) but
+                                                                                Cost is the main drawback. Simulated time per reference
+increased switches from 1.70 to 3.05 per trace, so the
+                                                                                was 10.1 ns for LRU, 9.0 for CLOCK, 13.3 for 2Q, 13.3
+margin halves switching at no measurable penalty. The
+                                                                                for S3-FIFO, 16.5 for LPR-style, 65.1 for DA, 141.4 for
+dwell time was never binding because the evaluation delay
+                                                                                ContShadow and 165.7 for LeCaR (Fig. 7). The controller
+already exceeds it. Removing the KS confirmation lowered
+                                                                                thus costs 6.4 times LRU, but 54% less than continuous
+the miss ratio slightly (0.406 versus 0.410, p = 0.12),
+                                                                                shadow evaluation. Shadow simulation accounted for 31%
+which means that, in this data, the second stage did not
+                                                                                of its time, confirmation tests 3% and switching 3%; the
+improve replacement quality; since false alarms were zero
+                                                                                remaining 63% is the always-on fast-path work (hash
+with or without it on stable traces, we cannot show a
+                                                                                sampling, per-page counters and periodic count aging),
+benefit of that stage. ContShadow reached a miss ratio of
+                                                                                which the prototype does not optimize. Fig. 7 plots miss
+0.407, statistically indistinguishable from DA (p = 0.70),
+                                                                                ratio against simulated cost; DA lies between the cheap
+but needed 23.9 shadow evaluations per trace against 4.5
+                                                                                heuristics and the continuous-shadow methods in cost but
+for DA, an 81% reduction attributable to drift gating.
+                                                                                not in miss ratio. These timings come from an unoptimized
+                                                                                simulator on a shared machine and only indicate relative
+                                                                                magnitude. Under any budget below about 6 times LRU,
+                                                                                H3 would not be satisfied by this implementation.
+
+
+
+
+Ablation: non-stable miss ratio and shadow evaluations per trace for each
+                variant (switch counts are in Table VIII).
+
+
+
+
+                                                                            8
+                                                                                                     TABLE IX
+                                                                                  SENSITIVITY OF DA TO SAMPLING RATE AND EPOCH
+                                                                                  LENGTH
+                                                                                  Setting                    Non-stable      Stable        Switches       Shadow ms
+                                                                                  p = 0.05                   0.431           0.332         0.96           1.6
+                                                                                  p = 0.1                    0.413           0.328         1.29           5.4
+                                                                                  p = 0.2 (primary)          0.410           0.332         1.70           8.5
+                                                                                  p = 0.4                    0.406           0.332         1.75           9.6
+                                                                                  W = 1,000                  0.417           0.327         1.73           6.9
+                                                                                  W = 5,000                  0.484           0.357         1.30           6.5
+                                                                                                                     TABLE X
+                                                                                  MEAN MISS RATIO                    ON NON-STABLE TRACES                             BY
+                                                                                  CAPACITY
+                                                                                  Method               C = 500               C = 1,000             C = 2,000
+                                                                                  LRU                  0.598                 0.477                 0.230
+                                                                                  2Q                   0.563                 0.431                 0.229
+                                                                                  ARC                  0.542                 0.449                 0.227
+                                                                                  S3-FIFO              0.549                 0.402                 0.228
+Miss ratio against simulated time per reference (indicative, shared single-       LeCaR                0.536                 0.421                 0.223
+                                core VM).                                         LPR-style            0.594                 0.381                 0.244
+                                                                                  ContShadow           0.542                 0.407                 0.246
+H. Sensitivity and Sampling Validity                                              DA                   0.547                 0.410                 0.234
+                                                                                  OPT                  0.352                 0.223                 0.136
+Table IX and Fig. 8 vary the sampling rate and epoch                              Sampling validity (H4) is only partly supported (Table XI).
+length. The miss ratio improved monotonically with p                              At p = 0.2 the sampled ranking chose the same best policy
+(0.431 at 0.05, 0.410 at 0.2, 0.406 at 0.4), while shadow-                        as full simulation in 78% of 467 evaluations, with a mean
+simulation time grew from 1.6 to 9.6 ms per trace, so the                         rank correlation of 0.72; when it was wrong, the policy it
+sampling rate trades accuracy for cost. A long epoch                              chose incurred on average 17% more misses than the true
+(5,000) was clearly harmful (0.484), because the 10-epoch                         best of that window, and the 95th percentile ratio was 3.5.
+evaluation delay then exceeds most of a phase; a shorter                          Agreement was lower at smaller sampling rates (62% at
+epoch (1,000) was slightly worse (0.417). Table X shows                           0.05).
+capacity sensitivity on non-stable traces. At C = 500 the
+controller (0.547) was close to ARC (0.542) and LeCaR                                                      TABLE XI
+(0.536) and ahead of LRU (0.598); at C = 2,000, where                             AGREEMENT OF SAMPLED AND FULL SHADOW RANKINGS
+most working sets fit in memory, differences between                              p           n              Top-1        Rank corr.     Mean ratio       P95 ratio
+methods nearly vanish and the controller (0.235) was                              0.05        162            0.62         0.76           1.47             3.6
+                                                                                  0.1         465            0.71         0.72           1.17             3.5
+slightly worse than LRU (0.230), reflecting switching and                         0.2         467            0.78         0.72           1.17             3.5
+warm-up cost without much to gain.
+                                                                                  I. Hypothesis Outcomes and Design Lessons
+                                                                                                         TABLE XII
+                                                                                  HYPOTHESIS OUTCOMES
+                                                                                          Outcome                         Evidence
+                                                                                  H1      Not supported vs. strongest     DA 0.410 vs. S3-FIFO 0.402 (+0.008, CI
+                                                                                          baseline                        −0.010 to +0.026); better than LRU, FIFO,
+                                                                                                                          CLOCK, LFU-A, ARC (Holm).
+                                                                                  H2      Not supported                   LPR-style had lower miss ratio with fewer
+                                                                                                                          switches; KS stage gave no measurable
+                                                                                                                          benefit; detection itself was fast and clean.
+                                                                                  H3      Not met                         6.4× LRU per reference; 54% below
+                                                                                                                          ContShadow.
+                                                                                  H4      Partly supported                78% top-1 agreement, mean 17% excess
+ Sensitivity of DA to sampling rate p (left) and epoch length W (right).                                                  misses at p = 0.2.
+                                                                                  Four lessons emerge. First, the state of the replacement
+                                                                                  policy is as important as the choice of policy: switching to
+                                                                                  a policy that pins old pages, without first discarding stale
+                                                                                  pages, can be catastrophic, and a shadow window that
+                                                                                  includes pre-change references misjudges such policies
+                                                                                  (the two mechanisms behind amendment A1; the migration
+                                                                                  filter alone is worth 0.022 in miss ratio). Second,
+                                                                                  evaluating candidates before switching is indispensable
+                                                                                  (random choice is no better than LRU), but it need not be
+                                                                                  continuous: gating it on confirmed drift removed 81% of
+                                                                                  the evaluations at equal miss ratio. Third, a cost margin on
+                                                                                  switching reduces switching by about half without a
+                                                                                  measurable loss. Fourth, a simple regret-driven LRU/MRU
+                                                                                  heuristic beat the full controller on average, mostly
+                                                                                  because loops larger than memory are common in the test
+                                                                                  workloads and MRU solves them after a short LRU flush;
+      Mean miss ratio by capacity on non-stable traces (Table X).                 any real-trace evaluation should check how common such
+                                                                              9
+patterns are. Together these results support the integration                 VII. LIMITATIONS AND SCOPE OF CLAIMS
+hypothesis only in a limited form: drift gating is a cost-           This paper evaluates one controller design in a simulator.
+saving mechanism for statistical policy selection, not yet           It does not establish that the controller outperforms the
+an accuracy advantage over the best existing replacement             best existing replacement algorithms: S3-FIFO and a
+algorithms.                                                          simple LPR-style heuristic had lower mean miss ratios,
+                                                                     and the difference to LPR-style is not removed by the
+                 VI. THREATS TO VALIDITY
+                                                                     amendment. The comparison omits several strong
+Construct validity. The traces are generated: five synthetic         published methods (CAR, LIRS, CACHEUS, 3L-Cache,
+access primitives and five kernel-level access models, not           S4-FIFO,       EACLOCK         and     Clock2Q+)      because
+traces recorded from running systems. Generated phases               implementations were unavailable, so the ranking among
+have clean boundaries aligned with the controller’s epochs,          methods applies only to the compared set. The candidate
+which favours detection delay, and workload types such as            set of the controller is small and excludes ARC and S3-
+loops larger than memory are overrepresented relative to             FIFO; including them could change the results. The
+their frequency in practice, which favours policies such as          implemented design omits the persistence safeguard and
+MRU and regret-driven LRU/MRU switching. Miss ratio                  uses only two monitored features. Recovery time and
+is also partly determined by the active policy, so the Stage-        memory overhead were not measured, and the controller
+1 monitor can mistake a policy-induced change for                    performs poorly on gradual drift in this configuration.
+workload change; the reuse-time confirmation stage was
+                                                                     The literature review is narrative, not systematic, and its
+designed to address this, but our data did not show a
+                                                                     limitations in Table I are partly inferred. The study makes
+measurable benefit from it.
+                                                                     no claim about production kernels, real application traces,
+Internal validity. The design was amended once after the             or latency. We claim only (i) a characterization of drift-
+first test round, using information from that round. We              gated policy selection in a controlled setting, (ii) evidence
+mitigated this by validating the amendment on training               that state migration and shadow evaluation are essential
+traces only and evaluating on a fresh trace set, by keeping          components, (iii) evidence that drift gating can reduce
+all parameters fixed, and by reporting both rounds; a                shadow-evaluation work by 81% at equal miss ratio, and
+reader should nevertheless treat the amended design as               (iv) a reproducible protocol, including its amendment
+having had one additional degree of freedom. Re-                     history, for testing such controllers.
+implementations of ARC, S3-FIFO, 2Q, LeCaR and the
+LPR-style heuristic may differ from the original                                          VIII. CONCLUSION
+implementations, and baselines were not tuned per                    This paper reviewed 15 studies from 2025–2026 on
+workload, which can favour or penalize them. The                     adaptive replacement, statistical drift detection and
+simulator was sanity-checked against known behaviour but             emerging memory systems, and found that the three areas
+not against reference implementations. Seeds were fixed              are weakly connected. To test whether closing the gap
+and the shadow simulator’s sampling is deterministic.                pays off, we implemented a drift-gated controller with
+External validity. A single-threaded trace-driven simulator          CUSUM monitoring, KS confirmation, sampled shadow
+omits concurrency, memory pressure from multiple                     simulation and a cost-aware switching rule, and evaluated
+processes, reclaim interactions, writeback, I/O queueing             it against eleven baselines (ten in the paired tests) and an
+and NUMA effects. Cost figures come from an                          offline optimum on 110 held-out generated traces after
+unoptimized simulator on a shared virtual machine and                freezing parameters on training data and re-testing on fresh
+should be read as relative magnitudes. Results at one                traces.
+nominal capacity (with sensitivity at two others) and one            The controller reduced the mean miss ratio on non-stable
+trace length may not transfer to other scales. Findings are          traces by 14.2% relative to LRU and was significantly
+limited to the evaluated workload families.                          better than LRU, FIFO, CLOCK, LFU-A and ARC. It was
+Statistical conclusion validity. The switching rule applies a        not better than S3-FIFO or an LPR-style LRU/MRU
+normal quantile (z = 1.28) to only four autocorrelated               heuristic, and it cost about 6.4 times LRU per reference in
+shadow blocks; a t-quantile with three degrees of freedom            the simulator. Detection was fast and clean on abrupt
+is about 1.64, so the nominal 90% bound is optimistic. KS            phase changes, and drift gating reduced shadow-evaluation
+p-values on dependent, tied reuse times are not calibrated           work by 81% relative to continuous evaluation at the same
+error rates, so the confirmation stage provides a heuristic          miss ratio. The ablations identify recency-filtered state
+gate rather than formal error control. Traces within a               migration and shadow evaluation as essential, and show
+scenario share a generator, so the effective number of               that the second-stage confirmation did not help here.
+independent workloads is smaller than 80, and the stated p-          Statistically gated policy selection is therefore a viable but
+values and intervals describe variability over generated             not yet superior alternative to existing adaptive
+traces, not over real workloads. Wilcoxon tests with ten             replacement.
+corrected comparisons have limited power for differences             Future work should (i) repeat the evaluation on recorded
+of about 0.01 in mean miss ratio. The H3 budget and H4               traces from real systems (for example the MSR Cambridge
+threshold were not pre-registered. Several secondary                 block traces [31], noting that storage-block traces are
+results (for example the KS stage having no measurable               cache-replacement       evidence,     not     virtual-memory
+effect) are non-significant differences and should not be            evidence), (ii) include the missing baselines and a wider
+read as evidence of no effect.                                       candidate set that contains ARC and S3-FIFO, (iii)
+                                                                     combine drift gating with regret feedback to handle
+                                                                     gradual change, (iv) reduce always-on overhead and
+                                                                10
+measure memory cost, recovery time and kernel-level                 Proc. 13th USENIX Conf. File Storage Technol. (FAST),
+latency, and (v) pre-register overhead budgets and                  2015, pp. 95–110.
+agreement thresholds before testing.                                [15] W. Zhou, Z. Niu, Y. Xiong, J. Fang, and Q. Wang,
+                                                                    “3L-Cache: Low overhead and precise learning-based
+                      DECLARATIONS
+                                                                    eviction policy for caches,” in Proc. 23rd USENIX Conf.
+Data and code availability. The simulator source, trace             File Storage Technol. (FAST), 2025, pp. 237–254.
+generators with seeds, configuration files and result tables
+                                                                    [16] H. Kim, “Learning-based page replacement scheme
+are provided as supplementary material; traces are
+                                                                    for efficient I/O processing,” Sci. Rep., vol. 15, 2025, doi:
+regenerated from the seeds. Acknowledgment. The authors
+                                                                    10.1038/s41598-025-88736-4.
+thank their supervisor, Mohsin Ghouri, for guidance.
+                                                                    [17] G. Yuan, X. Li, S. Wu, Y. Zhu, D. Yang, C. Yao, X.
+                        REFERENCES                                  Tang, and G. Chen, “EACLOCK: An efficient and
+[1] N. Megiddo and D. S. Modha, “ARC: A self-tuning,                adaptive page replacement algorithm to understand your
+low overhead replacement cache,” in Proc. 2nd USENIX                workload,” IEEE Trans. Knowl. Data Eng., vol. 38, no. 11,
+Conf. File Storage Technol. (FAST), 2003, pp. 115–130.              pp. 7387–7401, 2026, doi: 10.1109/TKDE.2026.3724159.
+[2] S. Bansal and D. S. Modha, “CAR: Clock with                     [18] Y. Zhai et al., “Clock2Q+: A simple and efficient
+adaptive replacement,” in Proc. 3rd USENIX Conf. File               replacement algorithm for metadata cache in VMware
+Storage Technol. (FAST), 2004, pp. 187–200.                         vSAN,” Proc. VLDB Endow., vol. 19, no. 12, pp. 3874–
+[3] S. Jiang and X. Zhang, “LIRS: An efficient low inter-           3887, 2026, doi: 10.14778/3827998.3828002.
+reference recency set replacement policy to improve buffer          [19] H. Xia, W. Nixon, B. D. Marthen, P. Bhandari, and J.
+cache performance,” in Proc. ACM SIGMETRICS, 2002,                  Yang, “Learning-augmented heuristics: Simple yet smart,
+pp. 31–42.                                                          robust and interpretable cache eviction,” in Proc. 20th
+[4] T. Johnson and D. Shasha, “2Q: A low overhead high              USENIX Symp. Oper. Syst. Design Implement. (OSDI),
+performance buffer management replacement algorithm,”               2026, pp. 2241–2259.
+in Proc. 20th Int. Conf. Very Large Data Bases (VLDB),              [20] P. Lu, J. Lu, A. Liu, and G. Zhang, “Early concept
+1994, pp. 439–450.                                                  drift detection via prediction uncertainty,” in Proc. AAAI
+[5] J. Yang, Y. Zhang, Z. Qiu, Y. Yue, and K. V. Rashmi,            Conf. Artif. Intell., 2025; arXiv:2412.11158.
+“FIFO queues are all you need for cache eviction,” in               [21] N. Tan, Y.-C. Shih, D. Yang, and A. Salunkhe,
+Proc. 29th ACM Symp. Oper. Syst. Princ. (SOSP), 2023,               “Flexible and efficient drift detection without labels,”
+pp. 130–149.                                                        arXiv:2506.08734, 2025.
+[6] J. Gama, I. Žliobaitė, A. Bifet, M. Pechenizkiy, and A.         [22] P. Lu, J. Lu, A. Liu, E. Yu, and G. Zhang,
+Bouchachia, “A survey on concept drift adaptation,” ACM             “Autonomous concept drift threshold determination,”
+Comput. Surv., vol. 46, no. 4, Art. no. 44, 2014.                   arXiv:2511.09953, 2025.
+[7] A. Bifet and R. Gavaldà, “Learning from time-                   [23] N. Harshit and K. Mounvik, “Improving real-time
+changing data with adaptive windowing,” in Proc. SIAM               concept drift detection using a hybrid transformer-
+Int. Conf. Data Mining (SDM), 2007, pp. 443–448.                    autoencoder framework,” arXiv:2508.07085, 2025.
+[8] G. Glass and P. Cao, “Adaptive page replacement                 [24] S. Bandyopadhyay, J. Bose, and S. Roy Chowdhury,
+based on memory reference behavior,” in Proc. ACM                   “A hybrid framework for real-time data drift and anomaly
+SIGMETRICS, 1997, pp. 115–126.                                      identification using hierarchical temporal memory and
+[9] Y. Smaragdakis, S. Kaplan, and P. Wilson, “EELRU:               statistical tests,” Int. J. Math. Eng. Manag. Sci., vol. 10,
+Simple and effective adaptive page replacement,” in Proc.           no.          3,         pp. 777–796,       2025,         doi:
+ACM SIGMETRICS, 1999, pp. 122–133.                                  10.33889/ijmems.2025.10.3.039.
+[10] I. Ari, A. Amer, R. Gramacy, E. L. Miller, S. A.               [25] D. N. Assis and V. M. A. Souza, “ADWIN-U:
+Brandt, and D. D. E. Long, “ACME: Adaptive caching                  Adaptive windowing for unsupervised drift detection on
+using multiple experts,” in Proc. Workshop Distrib. Data            data streams,” Knowl. Inf. Syst., 2025, doi:
+Struct. (WDAS), 2002.                                               10.1007/s10115-025-02523-1.
+[11] K. Vietri et al., “Driving cache replacement with ML-          [26] W. Shen, Y. Chen, R. Chen, and H. Chen, “Towards
+based LeCaR,” in Proc. 10th USENIX Workshop Hot                     fully-fledged GPU multitasking via proactive memory
+Topics Storage File Syst. (HotStorage), 2018.                       scheduling,” arXiv:2512.24637, 2025.
+[12] L. V. Rodriguez et al., “Learning cache replacement            [27] Y. Zheng et al., “gpu_ext: Extensible OS policies for
+with CACHEUS,” in Proc. 19th USENIX Conf. File                      GPUs via eBPF,” arXiv:2512.12615, 2025.
+Storage Technol. (FAST), 2021, pp. 341–354.                         [28] Y. Liu, M. Yu, and J. Yang, “When fancy eviction
+[13] C. Waldspurger, T. Saemundsson, I. Ahmad, and N.               fails: Rethinking cache replacement for LLM prefix
+Park, “Cache modeling and optimization using miniature              reuse,”          arXiv:2609.28870,         2026,         doi:
+simulations,” in Proc. USENIX Annu. Tech. Conf. (ATC),              10.48550/arXiv.2609.28870.
+2017, pp. 487–498.                                                  [29] N. Patel and H. Maniar, “Comparative evaluation of
+[14] C. A. Waldspurger, N. Park, A. Garthwaite, and I.              cache replacement algorithms for time-bounded stale-
+Ahmad, “Efficient MRC construction with SHARDS,” in                 tolerant data workloads,” Int. J. Sci. Res. Technol., vol. 3,
+                                                                    no. 6, pp. 556–564, 2026, doi: 10.5281/zenodo.20576370.
+
+
+                                                               11
+[30] E. S. Page, “Continuous inspection schemes,”
+Biometrika, vol. 41, no. 1–2, pp. 100–115, 1954.
+[31] D. Narayanan, A. Donnelly, and A. Rowstron, “Write
+off-loading: Practical power management for enterprise
+storage,” ACM Trans. Storage, vol. 4, no. 3, Art. no. 10,
+2008.
+[32] L. A. Belady, “A study of replacement algorithms for
+a virtual-storage computer,” IBM Syst. J., vol. 5, no. 2,
+pp. 78–101, 1966.
+[33] F. Wilcoxon, “Individual comparisons by ranking
+methods,” Biometrics Bull., vol. 1, no. 6, pp. 80–83, 1945.
+[34] T. Azim, A. Nadeem, and A. Ailamaki, “Adaptive
+cache mode selection for queries over raw data,” in Proc.
+9th Int. Workshop Accelerating Analytics Data Manag.
+Syst. Using Modern Processor Storage Archit.
+(ADMS@VLDB), 2018, pp. 51–65.
+[35] S. Holm, “A simple sequentially rejective multiple
+test procedure,” Scand. J. Stat., vol. 6, no. 2, pp. 65–70,
+1979.
+[36] S. Jiang, F. Chen, and X. Zhang, “CLOCK-Pro: An
+effective improvement of the CLOCK replacement,” in
+Proc. USENIX Annu. Tech. Conf. (ATC), 2005, pp. 323–
+336.
+
+
+
+
+                                                              12
+

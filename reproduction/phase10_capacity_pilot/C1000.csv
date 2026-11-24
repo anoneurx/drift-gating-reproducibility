@@ -1,0 +1,4 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-webusers,0,LRU,0.79277,0,0,29.3
+real-webusers,0,S3-FIFO,0.74659,0,0,37.5
+real-webusers,0,DA,0.74673,1,11,102.7

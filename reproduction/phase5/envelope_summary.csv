@@ -1,0 +1,10 @@
+quantity,value,unit
+lower_envelope_CLOCK_start,0.000000,us
+lower_envelope_CLOCK_end,0.215539,us
+lower_envelope_S3-FIFO_start,0.215539,us
+lower_envelope_S3-FIFO_end,2.304942,us
+lower_envelope_ContShadow_start,2.304942,us
+lower_envelope_ContShadow_end,inf,us
+da_min_excess,3.268673,ns
+da_min_excess_at,2.304942,us
+da_on_lower_envelope,false,bool

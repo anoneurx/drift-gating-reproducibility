@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,LRU,0.82692,0,0,31.6
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,ARC,0.81886,0,0,37.1
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,S3-FIFO,0.81726,0,0,38.1
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,SIEVE,0.82050,0,0,16.9
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,W-TinyLFU,0.81992,0,0,144.1
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,DA,0.81759,2,6,70.2
+real-fiu_madmax-110108-112108.oracleGeneral.test,0,ContShadow,0.81681,2,21,134.6

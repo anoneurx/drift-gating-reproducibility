@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,LRU,0.76250,0,0,29.6
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,ARC,0.74560,0,0,46.3
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,S3-FIFO,0.75433,0,0,43.3
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,SIEVE,0.74622,0,0,21.7
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,W-TinyLFU,0.76272,0,0,143.1
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,DA,0.76250,0,7,73.1
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.test,0,ContShadow,0.76250,0,25,123.7

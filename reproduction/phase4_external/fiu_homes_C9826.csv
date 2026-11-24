@@ -1,0 +1,9 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_homes,0,LRU,0.46237,0,0,29.1
+real-fiu_homes,0,ARC,0.44632,0,0,42.5
+real-fiu_homes,0,S3-FIFO,0.44670,0,0,33.5
+real-fiu_homes,0,SIEVE,0.52147,0,0,15.8
+real-fiu_homes,0,W-TinyLFU,0.47092,0,0,117.8
+real-fiu_homes,0,LHD,0.93324,0,0,86.8
+real-fiu_homes,0,DA,0.46237,0,61,86.7
+real-fiu_homes,0,ContShadow,0.51362,6,241,261.6

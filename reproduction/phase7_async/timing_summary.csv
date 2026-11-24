@@ -1,0 +1,2 @@
+n_traces,sum_enqueued,sum_dropped,sum_completed,sum_applied,sum_superseded,sum_stale,mean_submit_ns_per_trace,mean_check_ns_per_trace,mean_worker_wall_ns_per_trace,mean_worker_cpu_ns_per_trace
+240,1232,0,1232,1192,0,15066,50549.683333333334,114530.01666666666,2965805.7708333335,2954330.175

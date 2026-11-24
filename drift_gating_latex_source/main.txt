@@ -1,0 +1,733 @@
+ When Does Drift Gating Pay Off? A Reproducible Measurement Study of
+                    Drift-Aware Page Replacement
+                  Muhammad Qasim, Hunain Tahir, Hussain Ahmad, and Mohsin Ghaffar Ghouri
+             University of Management and Technology (UMT), Lahore, Pakistan. M. Qasim is also with the Anoneurx Research Lab, Anoneurx.
+                                          Corresponding author: M. Qasim (e-mail: itskashie@anoneurx.com)
+
+
+Abstract—Drift-triggered policy switching is often proposed to               policy is best, but whether a system can recognize that reference
+make adaptive page replacement cheaper, but it is unclear when               behavior has changed and respond at an acceptable cost.
+the saving is worth any loss in accuracy. We report a reproducible               The stakes have grown. Containerized multi-tenant servers
+measurement study of a controller that combines a CUSUM drift
+                                                                             interleave unrelated workloads on shared memory, accelera-
+trigger, sampled shadow evaluation of candidate policies, and a
+cost-margin switching rule. A Kolmogorov–Smirnov (KS) confir-
+                                                                             tor memory is oversubscribed by multitasking and large-model
+mation stage had only a small ablation effect and is not treated             serving, and tiered memory makes a wrong eviction more ex-
+as a validated gate. On 80 non-stable generated traces, gating cut           pensive [6–8]. Recent work shows that adaptive and learned
+shadow evaluations by 76% relative to continuous evaluation (6.47            policies can reduce misses substantially [9–11], but also that
+vs. 27.39 per trace) but raised the mean miss ratio (0.453 vs. 0.423),       LRU remains competitive in some settings [8] and that policy
+and it was not significantly different from S3-FIFO (0.468; Holm-            rankings depend on the workload [12]. A principled account
+adjusted p = 0.09). On six public FIU block traces the controller            of when adaptation pays for itself is therefore needed, not only
+never switched, because the shadow cache was larger than the sam-            another adaptive algorithm.
+pled working set and could not rank policies (Cs /Dw ≥ 1); a later
+                                                                                 We use workload drift to mean a statistically meaningful
+protocol-guided check confirmed a sharp rankability boundary
+at this ratio. At matched evaluation budgets CUSUM beat peri-
+                                                                             change over time in the distribution or temporal structure of
+odic and random triggers, while an oracle trigger and continuous             page references. Two research lines address related problems.
+evaluation exposed an accuracy ceiling that Page–Hinkley and sim-            Adaptive replacement algorithms infer from feedback which
+plified ADWIN detectors did not close. A user-space minor-fault              behavior to favor: ARC shifts capacity between recency and
+calibration places the DA–ContShadow crossover near 2.2 µs (95%              frequency lists, LeCaR and CACHEUS reweight expert policies
+CI 1.44–4.06 µs), but total-time accounting that includes CLOCK              by regret, and recent learned designs reduce the cost of learning
+and S3-FIFO shows DA is never the cheapest policy on the mea-                on the eviction path [9,11,13,14]. Concept-drift research instead
+sured means: CLOCK is cheapest below 0.22 µs, S3-FIFO between                provides formal change detectors with controllable error rates,
+0.22 and 2.30 µs, and continuous evaluation above 2.30 µs, with              such as adaptive windowing and sequential tests [15–20]. A de-
+DA at least 3.2 ns per reference above the best alternative at every         tector built for a machine-learning pipeline may be too expensive,
+miss cost. DA is never best in these measurements: gating reduces
+                                                                             or may rely on labels or prediction errors that a page-reference
+shadow work but is not the cheapest total-time choice.
+                                                                             stream does not have; a continuously adapting replacement algo-
+Index Terms—page replacement, workload drift, CUSUM, shadow                  rithm, conversely, may switch behavior without any control over
+evaluation, cache eviction, negative results, reproducibility.               the rate of unnecessary switches. The closest precedent outside
+                                                                             paging is Acme [21], which keeps a shadow cache of the alter-
+                         I. I NTRODUCTION                                    native query-caching mode and switches when a significance
+Physical memory is finite. When a process references a page                  test favors it. Statistically guided cache adaptation is therefore
+that is not resident and no free frame is available, the mem-                not new. What remains open is whether drift-gated selection
+ory manager must evict a resident page. The rule that makes                  among page-replacement policies is effective once the costs of
+this choice, the page-replacement policy, affects page-fault fre-            monitoring, shadow evaluation and policy-state migration are
+quency, storage traffic, tail latency and application throughput.            counted, and how it compares with strong existing algorithms.
+Recency-based policies such as least recently used (LRU) and its                 Four constraints make drift-aware replacement hard. (a) Rate:
+CLOCK approximation remain the practical default in operating                references arrive at memory speed, so per-reference statistical
+systems, while the research literature offers frequency-aware,               work is prohibitive and monitoring must be sampled or summa-
+scan-resistant and self-tuning alternatives, including ARC [1],              rized by epoch. (b) Missing labels and policy-dependent signals:
+CAR [2], LIRS [3], 2Q [4] and S3-FIFO [5].                                   there is no ground truth for “the workload changed,” and the
+   No single policy is best for every access pattern. A sequential           miss ratio depends on the active policy, so a switch can itself
+scan can flush a cache tuned for repeated reuse, a loop slightly             create an apparent change. (c) State: policies keep different
+larger than memory makes LRU miss on every reference, and a                  metadata, and a switch must rebuild it from the resident pages.
+policy that protects a previously hot working set can retain pages           (d) Error control: false alarms waste work and cause oscillation,
+that are useless after a phase change. Real workloads move                   while missed changes leave a mismatched policy in place.
+between such regimes: a database alternates between index                        Research questions. RQ1: How does a drift-gated controller
+lookups and table scans, and a multitasking system between                   with sampled shadow evaluation compare, in miss ratio, with
+applications. The question studied here is therefore not which               continuous shadow evaluation and with strong static policies
+
+
+                                                                         1
+under controlled phase changes? RQ2: How much shadow                                   II. BACKGROUND AND R ELATED W ORK
+work does gating save, and at what miss cost does the saving              A. Adaptive replacement and drift detection in context
+outweigh any loss in accuracy? RQ3: Do the findings hold on               Prior work spans adaptive replacement [1–5,9–11,13,14,22–27],
+external traces, and what limits shadow evaluation there?                 explicit change detectors [15–20, 28–30], and sampled or
+   Contributions.                                                         shadow-based policy evaluation [21,31,32]; system studies cover
+                                                                          GPU multitasking and tiered caches [6–8, 12]. The supplemen-
+1. A controlled measurement of drift gating against continuous            tary literature table (Table S.I) maps the closest prior work to this
+   shadow evaluation and strong static baselines, on freshly gen-         study. Four gaps follow: generic detectors are rarely evaluated
+   erated phase traces, six public block traces, and instrumented         on page-reference feature streams at memory-management rates
+   real programs with whole programs held out. We report the              (Gap 1, inferred from the cited scopes), statistical change confir-
+   null and negative outcomes.                                            mation is not compared with heuristic adaptation in a controlled
+2. A cost break-even model that turns the accuracy–cost trade-            experiment (Gap 2), transition costs are not reported together
+   off into a condition on miss cost, calibrated with a measured          with accuracy (Gap 3), and studies are not comparable across
+   user-space minor-fault latency, plus a total-time envelope             workloads and metrics (Gap 4). This is a focused narrative re-
+   analysis showing that DA is never the cheapest policy in               view rather than a systematic one; the full discussion, scope and
+   these measurements (Section V).                                        caveats are in the supplement.
+3. A rankability diagnostic (Cs /Dw ) that explains why sampled
+   shadow evaluation fails on the public traces, and a fully repro-              III. C ONTROLLER AND E XPERIMENTAL P ROTOCOL
+   ducible negative-result protocol: released simulator, seeds,           Reproducibility. Every experimental number is produced by
+   configurations, per-trace CSVs, selection sweep, ablations,            released code in the accompanying package: the trace generator,
+   and scripts that regenerate every table and figure.                    all baselines, the controller, seeds and raw per-trace output,
+We do not claim a new replacement algorithm or a validated                the parameter-selection sweep (sweep_selection.py), the
+statistical gate; the effective mechanism is a CUSUM trigger              primary-study driver (run_main_study.sh), the table builder
+with sampled shadow evaluation.                                           (analyze_main_study.py), the appendix interval script
+                                                                          (appendix_intervals.py), the cost model (cost_model.
+    Summary of findings. On 80 fresh non-stable traces the                py), the public-trace converter (convert_public_traces.py)
+gated controller (DA) reduced the mean miss ratio by 20.5% rel-           and the fault-latency microbenchmark (prototype_fault_
+ative to LRU, but was not significantly different from S3-FIFO            latency.cpp).
+and was significantly worse than continuous shadow evaluation
+                                                                          A. Simulator, Workloads and Baselines
+(ContShadow) by 0.030 miss ratio, while saving 76% of shadow
+evaluations. On six public block traces the frozen controller             We implemented a single-threaded trace-driven simulator in
+never switched and was Pareto-dominated by S3-FIFO. On 15                 C++ with capacity C = 1,000 frames, excluding the first 20,000
+instrumented programs with whole programs held out it tied                references (cold fill) from reported miss ratios. All policies
+S3-FIFO at higher cost, and no comparison survived Holm cor-              see identical traces; sanity checks include LRU missing every
+rection. In total-time terms DA was never the cheapest: CLOCK,            reference of a loop larger than memory and MRU matching the
+S3-FIFO and ContShadow each occupy part of the lower enve-                offline optimum on that loop. Generated workloads combine
+lope, and DA remained at least 3.2 ns/reference above the best            five access primitives into stable, abrupt, gradual, recurring and
+alternative at every miss cost. The DA–ContShadow crossover               composite scenarios (110 traces per round: 30 stable and 20 per
+is about 2.2 µs, but S3-FIFO is cheaper than DA below 2.52 µs             non-stable scenario); full workload definitions are in Table S.II
+and CLOCK below 0.22 µs.                                                  of the supplement.
+                                                                              Methods compared. We evaluate fixed policies (LRU, FIFO,
+   Scope. The main experiments use generated traces, not traces           CLOCK, LFU-A, MRU, 2Q, ARC, S3-FIFO), adaptive compara-
+collected from running systems. The public traces are stor-               tors (LeCaR, an LPR-style re-implementation, and ContShadow,
+age/cache traces, not virtual-memory paging traces, and serve             an Acme-style control without a drift gate), the proposed DA
+only as an external check. A faithful kernel multi-generation             controller, five ablations, and OPT as a reference. Table V re-
+LRU (MGLRU) baseline is not possible in page-level trace re-              ports eleven non-proposed baselines; the paired comparison in
+play. A nine-boot QEMU guest observation later measured real              Table S.IV covers ten of them (MRU omitted). Further imple-
+in-kernel fault-path durations, but reached no reclaim function           mentation detail, including count aging and omitted baselines,
+and built no in-kernel DA policy. The simulator measures al-              is in the supplement.
+gorithmic behavior and relative cost, not kernel performance.             B. Controller Under Test
+Sections VII, IV-H and VIII state these limits in detail.
+                                                                          A fast path serves every reference with the active policy; hash-
+   The remainder of the paper is organized as follows. Section II         based sampling (probability p) feeds reuse-time and window
+gives background and related work, Section III the controller             buffers, and epoch-level work runs every W references. A two-
+and protocol, Section IV the results, Section V the cost model,           sided CUSUM on the standardized epoch miss ratio triggers
+Section VI a synthesis of when gating pays off, and Section VII           a KS confirmation on sampled reuse times; ten epochs later
+threats to validity and limitations.                                      each candidate is simulated on a sampled shadow cache, and
+
+
+                                                                      2
+                                                                  TABLE I
+                                C LOSEST PRIOR WORK AND ITS RELATION TO THIS STUDY ( ALSO IN THE SUPPLEMENT )
+
+ Work                            Mechanism                                                      Relation to this study
+ Acme [21]                       Shadow entries for the alternative query-cache mode; switch    Closest precedent for statistical switching; selects a caching
+                                 on a one-tailed t-test                                         mode, not a page-replacement policy
+ LPR [26]                        Re-access feedback; runtime switching, e.g. LRU↔MRU            Heuristic, not statistical, switching signal; the LPR-style base-
+                                                                                                line re-implements its principle
+ ARC [1],       LeCaR [13],      Capacity shifted between lists; regret-weighted experts        Continuous adaptation without explicit control of the switch
+ CACHEUS [14]                                                                                   rate
+ 3L-Cache [9], S4-FIFO [11]      Learning moved off the critical path; learned parameters for   Reduce the cost of learning; 3L-Cache overhead remains
+                                 a FIFO-family heuristic                                        above LRU
+ Clock2Q+ [10]                   Targets correlated metadata references in vSAN                 Static, workload-specific design; not implemented here
+ Set dueling (DIP/DRRIP) [33]    Sampler sets choose between two insertion policies             Low-overhead sampled selection; principle-level version in
+                                                                                                the simulator
+ Multi-gen LRU [34]              Generations aged incrementally in the kernel                   Deployed comparator; only a page-level abstraction is possi-
+                                                                                                ble in trace replay
+ Miniature simulation [31],      Spatially sampled emulation and MRC estimation                 Basis of sampled shadow evaluation; sampling can distort
+ SHARDS [32]                                                                                    rankings
+ ADWIN [16], ADWIN-U [20],       Windowed mean tests; cumulative deviation from a reference     Candidate detectors; not evaluated on page-reference streams
+ CUSUM/PH [28]                                                                                  at memory rates
+
+
+                             TABLE II                                                                       TABLE III
+          W ORKLOAD DEFINITIONS ( ALSO IN THE SUPPLEMENT )                           C ONTROLLER PARAMETERS FIXED AFTER TRAINING ( ALSO IN THE
+                                                                                                          SUPPLEMENT )
+
+Component        Definition
+                                                                                  Parameter                              Value
+LOOP             Cyclic scan over 1,200 pages (larger than C)
+ZIPF             Zipf(0.9) over 8,000 pages, randomly permuted page ids           Capacity C; epoch W                    1,000 frames; 2,000 references
+HOTSCAN          70% uniform over 600 hot pages, 30% sequential scan over         Sampling rate p                        0.2 (hash-based, spatial)
+                 20,000 pages                                                     CUSUM δ , h; baseline B                0.5, 5; 8 epochs (σ0 ≥ 0.02)
+WINDOW           Uniform over a 700-page window sliding one page per 40           KS level α; window                     10−3 ; last 3 epochs, ≥ 100 samples
+                 references                                                       Evaluation delay; cooldown             10 epochs; 4 epochs
+UNIFORM          Uniform random over 4,000 pages                                  Shadow capacity;       warm-up;        round(pC) = 200; 40%; 4
+                                                                                  blocks
+Stable           One primitive, 300,000 references (6 traces each)
+                                                                                  LCB z; horizon H; margin K             1.28; 50,000 refs; K = 0 (design default
+Abrupt           Six phases of 100,000 references; no immediate repetition
+                                                                                                                         0.1C = 100)
+                 of a type
+                                                                                  Dwell D; hysteresis window             10 epochs; 30 epochs
+Gradual          As abrupt, with linear mixture ramps of 40,000 references
+                                                                                  Migration purge age                    20,000 references
+                 at boundaries
+                                                                                  Count aging                            halved every 50 epochs
+Recurring        Two primitives alternating, 6 × 80,000 references
+Composite        Five kernel models in random order, 5 × 100,000 references
+                                                                                  D. Metrics and Statistical Analysis
+                                                                                  The primary metric is post-warm-up miss ratio. Detection uses
+a lower-confidence-bound margin rule (frozen margin K = 0)                        380 true boundaries over the 80 non-stable traces (alarm within
+selects a switch after a dwell period. The candidate set {LRU,                    30,000 references); uncertainty is a 10,000-resample percentile
+LFU-A, 2Q, MRU, S3-FIFO} was selected on training traces, so                      interval over traces, with Wilcoxon signed-rank tests and Holm
+S3-FIFO is inside DA’s candidate set and DA is nevertheless not                   correction across ten baseline comparisons. Clustered resam-
+significantly better than it. The architecture (Fig. S.I), equations,             pling has only 35 distinct resamples and is a sensitivity note, not
+all frozen parameters (Table S.III) and the KS/switching details                  the headline interval. Full definitions, activations and caveats
+are in the supplement.                                                            are in the supplement.
+
+                                                                                                               IV. R ESULTS
+C. Selection Protocol and Evaluation History                                      All numbers in Sections IV-A–IV-D come from the frozen con-
+                                                                                  figuration and the fresh test traces; raw per-trace CSVs are in
+The configuration was selected by a 48-configuration sweep on                     the reproduction package.
+47 training traces (seed 100) and frozen for the fresh test traces
+(seed 5001; 30 stable and 80 non-stable); no parameter was                        A. Replacement Quality
+changed afterwards. One earlier round (seeds 1001+) informed                      On the 80 non-stable traces the controller’s mean miss ratio
+amendment A1 before the single fresh evaluation, so these results                 was 0.453 (95% CI 0.423–0.484), 20.5% below LRU (0.570);
+reflect one round of test feedback. The full sweep, training                      the offline optimum reached 0.302 (Table V; per-trace plots in
+grid and non-retained Round-1 history are in the supplement                       Figs. S.III and S.IV of the supplement). DA was better than
+(Section S2.3, Fig. S.II).                                                        S3-FIFO (0.468) on the mean, but the paired difference was not
+
+
+                                                                              3
+          Per-reference fast path
+                                            Active policy                        On miss: evict;
+                                                                                                                       Hash sample (p = 0.2):
+             Page reference              (LRU / LFU-A / 2Q /                    update last-access
+                                           MRU / S3-FIFO)                        and aged count                    reuse-time and window buffers
+
+
+
+
+                           Per-epoch control path (every W = 2,000 references)
+
+               Stage 1: CUSUM on                 Stage 2: KS test on                  Sampled shadow
+                                                                                                                    Switch rule: LCB margin > K,
+                 epoch miss ratio               sampled reuse times                   evaluation of five             dwell and hysteresis guards
+                 (h = 5, δ = 0.5)                   (α = 10−3)                      candidates (Cs = 200)
+
+
+                                                  Policy switch: rebuild metadata from resident pages, dropping pages unreferenced in the last
+                                                                   20,000 references; the new policy then serves the fast path
+
+
+Fig. 1. Architecture of the evaluated controller: per-reference fast path (blue), sampled monitoring (yellow), shadow evaluation and switching (green), and policy
+migration (red). Only the CUSUM trigger and the sampled shadow evaluation mattered in the ablation.
+
+
+                            TABLE IV
+PAIRED DIFFERENCES , DA MINUS BASELINE ( NON - STABLE , N = 80; ALSO
+                                                                                     drift-handling claim.
+                       IN THE SUPPLEMENT )
+                                                                                     B. Ablation
+    Baseline             Mean diff. [95% CI]         W/L/T       Holm p
+                                                                                     Removing shadow evaluation raised the non-stable miss ratio
+    LRU              −0.1171 [−0.140, −0.094]         75/5/0     < 0.001             from 0.453 to 0.619, worse than LRU; all other ablations scored
+    FIFO             −0.1472 [−0.171, −0.124]         75/5/0     < 0.001
+                                                                                     0.453–0.456 (supplementary Table S.V). The KS stage fired on
+    CLOCK            −0.1065 [−0.130, −0.084]         75/5/0     < 0.001
+    LFU-A            −0.0933 [−0.116, −0.071]         74/6/0     < 0.001
+                                                                                     643 alarms and rejected 173, but changed the miss ratio little; the
+    2Q               −0.0691 [−0.090, −0.048]         71/9/0     < 0.001             cost margin and dwell rule were inactive under K = 0 and cannot
+    ARC              −0.0758 [−0.099, −0.053]         71/9/0     < 0.001             be evaluated from this ablation. The recency filter acted at 47 of
+    S3-FIFO          −0.0154 [−0.035, +0.004]        42/38/0      0.090              213 switches. Full itemized diagnostics are in the supplement.
+    LeCaR            −0.0980 [−0.121, −0.076]         72/8/0     < 0.001             S3-FIFO costs less than DA (28.5 vs. 67.4 ns per reference) but
+    LPR-style        −0.0800 [−0.098, −0.061]        70/10/0     < 0.001
+                                                                                     is less accurate, whereas ContShadow is both more accurate and
+    ContShadow       +0.0301 [+0.016, +0.045]       15/54/11     < 0.001
+                                                                                     more expensive; gating saved 76.4% of shadow evaluations (6.47
+                                                                                     vs. 27.39 per trace) without matching ContShadow’s accuracy.
+significant (Holm-adjusted p = 0.09; supplementary Table S.IV).
+It was significantly worse than continuous shadow evaluation                         C. Detection and Switching
+(ContShadow, 0.423) by 0.030 miss ratio (adjusted p < 0.001).
+DA was significantly better than eight of the ten paired baselines                   The CUSUM trigger detected 278 of 380 phase boundaries
+(all adjusted p < 0.001). The exceptions are S3-FIFO, where                          (73.2%) with a median confirmation delay of 2,000 references
+the evidence for an improvement over the strongest fixed policy                      (supplementary Table S.VI); detection was strong for abrupt and
+is weak, and ContShadow, where the difference is unfavorable:                        recurring changes and weak for gradual ones, which also pro-
+continuous evaluation was more accurate than drift-gated evalu-                      duced most false alarms. The controller switched 2.36 times per
+ation in this study.                                                                 non-stable trace against 3.15 for ContShadow; on stable traces
+                                                                                     23 spurious confirmations occurred, 22 before reference 100,000.
+    By scenario, DA was close to ContShadow on abrupt (0.370
+                                                                                     Shifted-boundary checks (seven offsets, including 333 and 1,501
+vs. 0.365) and recurring (0.398 vs. 0.384) traces but clearly
+                                                                                     references) gave 274–281 detections and 169–173 spurious con-
+behind on gradual drift (0.439 vs. 0.401) and composite traces
+                                                                                     firmations, so the sharp-change premise holds but gradual drift
+(0.604 vs. 0.541). The gradual-drift gap matters because the
+                                                                                     is not reliably detected (supplementary Table S.VII).
+premise of the paper is the detection of slow change; the CUSUM
+trigger usually reacts only after the mixture has moved.
+                                                                                     D. Simulated Cost
+    Stable-trace gain is not drift-handling gain. On the 30
+stable traces DA scored 0.3071, with 0.80 switches and 1.73                          Simulated time per reference was 25.1 ns for LRU, 8.9 for
+shadow evaluations per trace, against LRU 0.5186, S3-FIFO                            CLOCK, 28.5 for S3-FIFO, 36.8 for 2Q, 50.2 for LPR-style, 67.4
+0.3301 and ContShadow 0.3065. A stable trace contains no                             for DA and 133.4 for ContShadow (supplementary Fig. S.V):
+phase change, so this advantage comes from the initial shadow                        DA cost 2.7 times LRU and 2.4 times S3-FIFO. These are rela-
+evaluation that chooses a start policy and from continued re-                        tive simulator figures, not kernel latency; no configuration beat
+evaluation, not from responding to drift. We do not add it to the                    the best static policy on both cost and quality.
+
+
+                                                                                4
+                                                                 TABLE V
+                  M EAN MISS RATIO BY SCENARIO AND OVERALL ( FRESH TEST TRACES ; BEST NON -OPT VALUE PER COLUMN IN BOLD )
+
+                                    Method                Abrupt   Gradual   Recurring        Composite      Non-stable [95% CI]
+                                    LRU                    0.500    0.572        0.527          0.682         0.570 [0.540, 0.598]
+                                    FIFO                   0.536    0.609        0.560          0.696         0.600 [0.573, 0.627]
+                                    CLOCK                  0.487    0.558        0.515          0.677         0.559 [0.530, 0.589]
+                                    LFU-A                  0.474    0.535        0.505          0.671         0.546 [0.515, 0.576]
+                                    MRU                    0.943    0.928        0.902          0.968         0.935 [0.918, 0.949]
+                                    2Q                     0.457    0.504        0.479          0.648         0.522 [0.493, 0.551]
+                                    ARC                    0.465    0.520        0.496          0.634         0.529 [0.499, 0.557]
+                                    S3-FIFO                0.406    0.441        0.412          0.615         0.468 [0.435, 0.501]
+                                    LeCaR                  0.476    0.545        0.503          0.680         0.551 [0.520, 0.582]
+                                    LPR-style              0.477    0.535        0.474          0.646         0.533 [0.509, 0.556]
+                                    ContShadow             0.365    0.401        0.384          0.541         0.423 [0.400, 0.446]
+                                    DA                     0.370    0.439        0.398          0.604         0.453 [0.423, 0.484]
+                                    OPT (reference)        0.244    0.269        0.242          0.452         0.302 [0.281, 0.324]
+
+
+
+
+                          Trace generation (seeded)                                            OPT                           0.302
+                        5 primitives, 5 kernel models                                                                                0.423
+                                                                                         ContShadow
+                                                                                                DA                                    0.453
+
+                             Training (seed 100)                                            S3-FIFO                                    0.468
+                       15 stable + 32 non-stable traces                                          2Q                                           0.522
+                           48-configuration sweep                                                                                             0.529
+                                                                                               ARC
+                                                                                           LPR-style                                          0.533
+                           Frozen configuration A0                                           LFU-A                                             0.546
+                          lowest training miss ratio,
+                                                                                             LeCaR                                                 0.551
+                      0 stable-trace false confirmations
+                                                                                            CLOCK                                                  0.559
+                                                                                               LRU                                                  0.570
+                   Round 1 test (110 traces, seeds 1001+)                                      FIFO                                                   0.600
+                   DA worse than S3-FIFO and LPR-style
+                                                                                              MRU                                                             0.935
+
+
+                                                                                                       0.0       0.2         0.4             0.6              0.8     1.0
+                               Amendment A1
+                         recency-filtered migration;                                                     Mean miss ratio, 80 non-stable traces (95% bootstrap CI)
+                       validated on training traces only
+
+                                                                                     Fig. 3. Mean miss ratio on the 80 non-stable traces with 95% bootstrap intervals
+                            Round 2 held-out test                                    (C = 1,000).
+                         110 fresh traces (seed 5001)
+                         evaluated once, no re-tuning
+                                                                                     raw-table pointers are in the supplement.
+                 Analysis: Wilcoxon + Holm, bootstrap CIs,
+                      ablation, sensitivity, cost model
+                                                                                     F. Public Block-Trace Check
+                   blue = training stages, orange = test rounds
+                                                                                     On six FIU web/block traces from the CMU PDL collection [35],
+Fig. 2. Experimental workflow. Blue boxes are training stages and orange boxes       the frozen controller (capacity selected on an independent pilot
+are held-out test rounds.                                                            trace) made zero switches on every trace: DA, ContShadow and
+                                                                                     LRU all had mean miss 0.6753, while S3-FIFO had both lower
+E. Trigger Variants and Detector Alternatives (Post Hoc)                             miss (0.5772) and lower simulated time (31.7 vs. 82.5 ns per ref-
+These measurements were specified after the frozen main study                        erence), so DA is Pareto-dominated (supplementary Table S.XI).
+and are reported as post hoc. With matched evaluation budgets                        Gating saved 72% of shadow evaluations without an accuracy
+CUSUM beat periodic and random triggers, but an oracle trigger                       gain. The cause is a capacity–sampling fault: Cs = pC = 4,000
+(0.4335) and continuous evaluation (0.4228) mark an accuracy                         exceeded the roughly 1,100–1,800 distinct pages in a sampled
+ceiling that CUSUM (0.4529) does not reach (supplementary                            window, so all five candidates tied on compulsory misses (sup-
+Table S.VIII). On the six FIU traces the trigger variants showed                     plementary Table S.XII) and no policy could be ranked. Re-
+no benefit. One-at-a-time sweeps (supplementary Table S.IX)                          selection on training prefixes and a diagnostic cap reproduced
+are flat in δ and h, degrade at W = 4,000, and improve at p = 0.4                    the same zero-switch means; these are failed external valida-
+(0.4472), pointing to sampling noise in shadow evaluation; all                       tions, not tuned results. Converter details, pilot capacities and
+are local sensitivity checks, not re-selections. Full tables and                     re-selection numbers are in the supplement.
+
+
+                                                                                 5
+                          (a) Miss ratio by scenario                                                                                              (b) Paired differences (95% CI)
+
+                                 OPT         2Q                LPR-style          ContShadow                                FIFO
+                   0.7
+                                 LRU         S3-FIFO           DA                                                               LRU
+                   0.6                                                                                       CLOCK
+                                                                                                              LeCaR
+
+
+
+
+ Mean miss ratio
+                   0.5
+                                                                                                              LFU-A
+                   0.4                                                                                     LPR-style
+                                                                                                                               ARC
+                   0.3
+                                                                                                                                             2Q
+                   0.2                                                                                      S3-FIFO
+
+                   0.1                                                                                 ContShadow
+                                                                                                                                                      ← favors DA                                      favors baseline →
+                   0.0
+                                 Abrupt             Gradual           Recurring         Composite                                                        −0.15       −0.10          −0.05       0.00          0.05
+                                                                                                                                                     DA minus baseline, mean paired miss-ratio difference
+
+
+Fig. 4. (a) Mean miss ratio by scenario. (b) Paired differences between DA and each baseline; negative values favor DA. Intervals are not corrected for multiplicity or
+clustering.
+
+
+                            TABLE VI
+A BLATION ON THE FRESH TEST TRACES ( NON - STABLE MEAN ; ALSO IN THE                                                                         0.600
+                          SUPPLEMENT )
+                                                                                                                                             0.575             LRU
+
+
+
+
+                                                                                                              Mean miss ratio (non-stable)
+                                                                                                                                                           CLOCK
+               Variant                    Miss ratio     Switches        Shadow evals         ns/ref                                         0.550
+                                                                                                                                                                              LPR-style
+               DA                           0.453             2.36               6.47          67.4                                          0.525                     2Q
+               DA-noPurge                   0.453             2.36               6.47          68.5
+               DA-noS2                      0.456             2.27               6.76          67.9                                          0.500
+               DA-noShadow                  0.619             5.05               0.00          77.3                                          0.475
+               DA-noCost                    0.453             2.36               6.47          66.9
+                                                                                                                                                                    S3-FIFO          DA
+               DA-noDwell                   0.453             2.36               6.47          67.9                                          0.450
+               S3-FIFO (static)             0.468             0.00               0.00          28.5                                                                                              ContShadow
+               ContShadow                   0.423             3.15              27.39         133.4                                          0.425
+
+                                                                                                                                             0.400
+                                                    TABLE VII
+                                                                                                                                                     0      20        40       60         80   100     120     140
+CUSUM DETECTION AND FALSE ALARMS ON NON - STABLE TRACES ( ALSO
+                   IN THE SUPPLEMENT )
+                                                                                                                                                                    Simulated time per reference (ns)
+
+
+                         Scenario      True boundaries               Detected       Spurious               Fig. 5. Miss ratio against simulated time per reference (indicative, single-
+                                                                                                           threaded simulator).
+                         Abrupt                100                     97               16
+                         Gradual               100                     24               109
+                         Recurring             100                     96               14                 H. Additional measured checks: six PDL families and asynchronous
+                         Composite              80                     61               30                    shadow evaluation
+                         Total                 380               278 (73.2%)            169                On the six-family CMU PDL check (18 family×capacity points
+                                                                                                           from 1M-reference prefixes), DA is worse than S3-FIFO on
+G. Protocol-Guided Follow-Up Measurements                                                                  the measured means: 0.4742 versus 0.4683, with a paired
+The protocol-guided follow-ups in supplementary Table S.XIII                                               DA−S3-FIFO difference of +0.0059 that is significant after
+test repairs suggested by the negative main result; PROTOCOL.md                                            Holm correction (p = 0.0192). Table XIII reports selected
+is dated 2026-11-23, which documents intent but does not inde-                                             methods; the full nine-method table is in the supplement (Ta-
+pendently prove pre-run ordering. The sharp rankability bound-                                             ble S.XVII), together with the paired comparisons. The real
+ary at Cs /Dw = 1 gave 0 of 1,514 rankable evaluations above                                               userspace asynchronous-shadow prototype is also a negative
+it and no FIU repair gain (0.6621 at C = 20,000). CUSUM                                                    result: mean miss ratios of 0.5611, 0.5676 and 0.5599 in three
+beat periodic and random triggers at matched budgets; Page–                                                repetitions, with paired async−sync gaps of +0.1082, +0.1147
+Hinkley (0.4552), simplified ADWIN (0.4991), SIEVE (0.5557),                                               and +0.1070 (Table XIV); its 240 timing rows include 15,066
+W-TinyLFU (0.4913), LHD (0.6736) and the t-quantile robust-                                                stale decisions, 1,192 applied results and zero dropped results.
+ness check (0.4586 vs. 0.4529) did not change the conclusion:                                              Moving shadow evaluation off the critical path therefore widened
+null and negative outcomes throughout. Full Phase 1–5 detail is                                            the accuracy gap, and neither check reveals a regime in which
+in the supplement.                                                                                         DA is best.
+
+
+                                                                                                       6
+                                                                TABLE VIII
+   T RIGGER VARIANTS ON THE 80 NON - STABLE TEST TRACES ( PAIRED DIFFERENCE = DA MINUS VARIANT; SEED 0, 10,000 BOOTSTRAP RESAMPLES ;
+                                       W ILCOXON WITH H OLM CORRECTION ; ALSO IN THE SUPPLEMENT )
+
+                             Variant             Miss      Sw.    Evals        Paired diff. [95% CI]        W/L/T; Holm p
+                             DA (CUSUM)          0.4529    2.36    6.47                —                    —
+                             Oracle              0.4335    2.19    5.74     +0.0194 [+0.0061, +0.0347]      8/22/50; 0.0177
+                             Periodic (p40)      0.4687    2.52    7.22     −0.0158 [−0.0297, −0.0008]      36/26/18; 0.0177
+                             Random (r04)        0.4906    2.60    6.50     −0.0377 [−0.0585, −0.0163]      47/19/14; 0.0004
+                             ContShadow          0.4228    3.15   27.39     +0.0301 [+0.0167, +0.0454]      15/54/11; 2.5×10−5
+
+
+                                  TABLE IX                                                                    TABLE XI
+ O NE - AT- A - TIME PARAMETER SENSITIVITY ( MEAN MISS RATIO ; FROZEN              S HADOW- EVALUATION MISS COUNTS ON WEBRESEARCH AT REFERENCE
+                  VALUE IN BOLD ; ALSO IN THE SUPPLEMENT )                                        16,000 ( ALSO IN THE SUPPLEMENT )
+
+            Parameter        Values and mean miss ratio                            Setting                   LRU     LFU-A        2Q      MRU     S3-FIFO
+            W            1000 2000 4000                                            C = 20,000, Cs = 4,000    1,120    1,120      1,120    1,120    1,120
+                        0.4614 0.4529 0.5001                                       C = 1,000, Cs = 200       1,141    1,137      1,139    1,885    1,135
+            δ             0.1    0.3    0.5    0.7    1.0
+                        0.4579 0.4551 0.4529 0.4544 0.4537                        no comparison survived Holm correction (smallest adjusted p =
+            h              2      3      5      7     10
+                                                                                  0.096). DA and ContShadow tied on miss ratio, and DA cost
+                        0.4563 0.4538 0.4529 0.4547 0.4569
+            p            0.05    0.1    0.2    0.4                                59.5 ns per reference against 24.7 for S3-FIFO. Full program
+                        0.4810 0.4696 0.4529 0.4472                               list, holdout protocol and paired table are in the supplement.
+
+                             TABLE X                                                    V. C OST B REAK -E VEN AND T OTAL -T IME E NVELOPE
+  P UBLIC FIU BLOCK TRACES : MEANS OVER SIX TRACES ( ALSO IN THE
+                          SUPPLEMENT )
+                                                                                  The measured trade-off is a 0.030 miss-ratio penalty for DA
+                                                                                  against a 66.0 ns per reference time saving and 20.9 fewer
+   Method         Mean miss ratio      Mean ns/ref      Mean shadow evals         shadow evaluations per trace. Let cm be the cost of one miss and
+                                                                                  ce the cost of one shadow evaluation. With the same fast path,
+   OPT                  0.4595             0.0                 0.00
+   S3-FIFO              0.5772            31.7                 0.00
+                                                                                  total time per trace is
+   2Q                   0.6209            38.3                 0.00
+   ARC                  0.6580            37.0                 0.00                                      T = Nt0 + Nm cm + E ce ,                      (1)
+   LRU                  0.6753            25.5                 0.00
+   DA                   0.6753            82.5                13.50               where N is trace length, m the miss ratio, E shadow evaluations
+   ContShadow           0.6753           180.1                48.33               and t0 the per-reference cost excluding shadow work. DA beats
+   FIFO                 0.6808            17.6                 0.00               ContShadow iff
+                                                                                                                                       ce
+I. QEMU guest-kernel observation                                                                 (mDA − mCS ) cm + (EDA − ECS )           < 0,         (2)
+                                                                                                                                       N
+A pre-registered Linux 6.6.1 QEMU guest replayed three condi-
+tions in three fresh boots each: fixed LRU (lru_gen/enabled=                      i.e. ce > R cm with R = N(mDA − mCS )/(ECS − EDA ), so the
+0x0000), fixed MGLRU (0x0007) and a userspace CUSUM                               crossover is
+controller coupled to the same sysfs knob. Function-graph                                                 c∗m = ce /R.                    (3)
+tracing was restricted to five pre-registered fault/reclaim func-
+tions present in the guest; 191,370 durations were parsed. Ta-                    The frozen means give R = 783.28 (95% CI [426, 1187]) and a
+ble XV reports the measured fault-path durations and vm-                          measured-time crossover of about 2.2 µs (95% CI 1.44–4.06 µs);
+stat deltas. The observation is null: all nine runs show                          a direct timing build shifts it to about 3.1 µs, and the user-space
+131,138 minor faults, zero workingset_refault_anon, zero                          minor-fault calibration is 1.98–2.06 µs. DA is never the cheap-
+pgscan_anon/pgsteal_anon deltas, and zero controller tog-                         est policy on the measured means: CLOCK is cheapest below
+gles. Only handle_mm_fault and do_wp_page produced sam-                           0.216 µs, S3-FIFO between 0.216 and 2.305 µs, and ContShadow
+ples; no reclaim function was reached. The captured cgroup                        above 2.305 µs. DA is never on the envelope, with a minimum
+memory.max/memory.peak files were empty, so memory pres-                          excess of 3.27 ns/reference at 2.305 µs(bootstrap minimum-gap
+sure was not demonstrated. These are real in-kernel fault-path                    interval [−28.6, 40.2] ns). At the measured minor-fault cost
+timings under an MGLRU-enabled guest, not a kernel DA policy                      S3-FIFO is cheapest. The full derivation, direct-cost check, cali-
+or a reclaim-latency result.                                                      bration discussion and bootstrap intervals are in the supplement.
+
+J. Exploratory Real-Program Evidence                                                         VI. D ISCUSSION : W HEN D OES G ATING PAY O FF ?
+On 15 instrumented programs with whole programs held out, DA                      Hypotheses. H1 (DA beats S3-FIFO in miss ratio) and H2 (a
+scored 0.3304 against 0.3291 for S3-FIFO and 0.3540 for LRU;                      two-stage gate improves on CUSUM alone) are not supported,
+
+
+                                                                              7
+                                                                   TABLE XII
+                        P ROTOCOL - GUIDED FOLLOW- UPS : OUTCOMES AND REPRESENTATIVE NUMBERS ( ALSO IN THE SUPPLEMENT )
+
+ Follow-up                            Outcome (key numbers)
+ Phase 1: rankability                 Cs /Dw ≥ 1 gave 0 of 1,514 rankable evaluations (a sharp boundary at Cs /Dw < 1); no FIU repair gain (mean miss 0.6621 at
+                                      C = 20,000)
+ Phase 2: budget frontier             CUSUM better than periodic and random triggers at 6.2–7.0 evaluations per trace; oracle (0.4335) and ContShadow (0.4228)
+                                      mark an accuracy ceiling
+ Phase 3: detectors                   Page–Hinkley 0.4552 and simplified ADWIN 0.4991 vs. CUSUM 0.4529; neither closes the oracle gap
+ Phase 4: baselines and traces        SIEVE 0.5557, W-TinyLFU 0.4913, LHD 0.6736 on synthetic traces; no DA advantage on real traces; S3-FIFO best on
+                                      original FIU (0.6188) and DA 0.6280
+ Phase 5: robustness                  2.2 µs break-even is a calibration only; using the t-quantile for the LCB gave DA 0.4586 [0.4282, 0.4888] vs. 0.4529 [0.4224,
+                                      0.4834] (negative)
+
+
+                          TABLE XIII                                                                             TABLE XV
+  P HASE 6: SELECTED METHODS ACROSS SIX CMU PDL FAMILIES (18                             P HASE 8: REAL GUEST- KERNEL OBSERVATIONS ; FTRACE ROW IS
+                            POINTS )                                                                        HANDLE _ MM _ FAULT
+
+
+          Method          Mean miss     Shadow evals/trace     ns/ref                      Condition     Minor faults Refaults Toggles Median/p95 fault ns
+          CLOCK             0.4973              0.00             9.5                       fixed_lru      131,138         0        0        761.0/1593.0
+          LRU               0.4987              0.00            41.0                       fixed_lru      131,138         0        0        671.0/1522.0
+          S3-FIFO           0.4683             0.00            43.4                        fixed_lru      131,138         0        0        752.0/1643.9
+          DA                0.4742              2.67            94.4                       fixed_mglru    131,138         0        0        641.0/1532.0
+          ContShadow        0.4739             13.11           147.5                       fixed_mglru    131,138         0        0        711.5/1573.0
+                                                                                           fixed_mglru    131,138         0        0        741.0/1643.0
+                         TABLE XIV                                                         coupled        131,138         0        0        731.0/1673.0
+P HASE 7: REAL ASYNCHRONOUS - SHADOW PROTOTYPE , 80 NON - STABLE                           coupled        131,138         0        0        741.0/1693.0
+                          TRACES PER REPETITION                                            coupled        131,138         0        0        701.0/1583.0
+
+   Rep.      Mean miss           DA−sync [95% CI]            Win/Tie/Loss                accurate still (0.4335), so gating is a cost-saving mechanism,
+   1          0.5611        +0.1082 [+0.0726,+0.1471]          12/0/68                   not an accuracy mechanism, in these measurements.
+   2          0.5676        +0.1147 [+0.0793,+0.1537]           9/0/71                   Design lessons. Shadow evaluation is the component that
+   3          0.5599        +0.1070 [+0.0743,+0.1430]           8/0/72               matters (without it the controller is worse than LRU); CUSUM
+                                                                                     with sampled shadows cut shadow work by 76% at a 0.030 miss-
+and H3 (competitive per-reference cost) is not met: ContShadow                       ratio cost; the KS stage, cost margin and dwell rule were inactive
+was more accurate, KS changed the miss ratio little (0.456 with-                     or small-effect; and on 15 programs DA tied ContShadow but
+out vs. 0.453 with), and DA is 2.7× LRU per reference. Full                          not S3-FIFO. The effective mechanism is a CUSUM trigger with
+hypothesis table and pre-registered-scope caveats are in the sup-                    sampled shadow evaluation, not a validated two-stage gate.
+plement (Table S.XVI).
+    When gating pays off. Taken together, the measurements                                     VII. T HREATS TO VALIDITY AND L IMITATIONS
+identify where gating saves shadow work and where it sits in                         Construct validity. Generated phases have clean epoch-aligned
+total time.                                                                          boundaries and overrepresent loops larger than memory, so the
+ 1. Gating is never the cheapest option in these measurements.                       73.2% detection rate and 2,000-reference delay are conditional
+    On the measured means, CLOCK is cheapest below 0.22 µs,                          and likely optimistic; miss ratio also depends on the active policy,
+    S3-FIFO between 0.22 and 2.30 µs, and ContShadow above                           and KS (active on 643 alarms) had only a small effect.
+    2.30 µs. DA beats ContShadow only below 2.20 µs, but S3-                            Internal validity. Training-only selection was followed by
+    FIFO is cheaper than DA below 2.52 µs, so no miss-cost                           one round of test feedback, the FIU capacity was selected
+    regime makes gating the best total-time choice. At the mea-                      on an independent pilot trace, and several baselines are re-
+    sured minor-fault cost, S3-FIFO is cheapest and DA is about                      implementations that may differ from reference code; seeds
+    5 ns/reference above it.                                                         and sampling are deterministic.
+ 2. Drift is abrupt or recurring. CUSUM detected 97% of abrupt                          External validity. A single-threaded simulator omits con-
+    and 96% of recurring boundaries, but only 24% of gradual                         currency, reclaim, writeback, I/O queueing and NUMA effects;
+    ones, where it also produced most of the false alarms.                           cost figures are from an unoptimized simulator. Results at one
+ 3. Shadow caches are rankable. Sampled shadow evaluation                            capacity and trace length may not transfer, public traces are stor-
+    can rank policies only when Cs /Dw < 1; otherwise all can-                       age traces rather than paging traces, and only 15 program-level
+    didates tie on compulsory misses and the controller never                        clusters are available.
+    switches.                                                                           Statistical conclusion validity. Four autocorrelated blocks
+ 4. Accuracy is not the benefit. Continuous evaluation was more                      with a normal LCB (z = 1.28) are optimistic; a t-quantile gave
+    accurate (0.423 vs. 0.453), and an oracle trigger was more                       DA 0.4586 [0.4282,0.4888] vs. 0.4529 [0.4224,0.4834]. KS
+
+
+                                                                                 8
+                                                                 TABLE XVI
+T OTAL TIME PER REFERENCE BY MISS COST, USING THE MEASURED PER - REFERENCE TIMES AND MEAN MISS RATIOS OF THE 80 NON - STABLE TEST TRACES .
+  PANEL ( A ): BOLD MARKS THE LOWEST TOTAL IN EACH ROW; DA IS NEVER THE LOWEST, AND THE LAST COLUMN GIVES ITS EXCESS OVER THE BEST
+POLICY. PANEL ( B ): PAIRWISE CROSSING MISS COSTS ; THE DA/S3-FIFO INTERVAL IS UNSTABLE BECAUSE THE MISS - RATIO DIFFERENCE IS SMALL . A LL
+                                     VALUES ARE POINT ESTIMATES ; BOOTSTRAP INTERVALS ARE IN THE TEXT.
+
+                                                                  (a) Total time per reference (µs)
+               Miss-cost scenario                    cm (µs)    CLOCK S3-FIFO ContShadow                  DA            Cheapest         DA−best (ns)
+               DRAM (illustrative)                   0.1    0.065   0.075                    0.176       0.113       CLOCK                   47.8
+               CLOCK/S3-FIFO crossing             0.215539 0.129    0.129                    0.224       0.165   CLOCK/S3-FIFO                35.5
+               Minor-fault calibration (measured)    2.2    1.240   1.059                    1.064       1.064       S3-FIFO                   4.9
+               S3-FIFO/ContShadow crossing        2.304942 1.298    1.108                    1.108       1.111 S3-FIFO/ContShadow              3.3
+               Remote/RDMA (illustrative low)          5    2.806   2.370                    2.248       2.332     ContShadow                 84.3
+               Remote/RDMA (illustrative high)        10    5.603   4.712                    4.362       4.596     ContShadow                234.5
+               NVMe SSD (illustrative low)            20   11.197   9.395                    8.590       9.125     ContShadow                535.1
+               NVMe SSD (illustrative high)          100   55.950 46.860                    42.417      45.356     ContShadow               2939.5
+               Swap/page fault (illustrative)       1000   559.417 468.339                  422.966     452.955    ContShadow               29989.5
+
+                                                               (b) Pairwise crossing miss costs (µs)
+                                                        Pair                         Crossing         95% CI
+                                                        CLOCK / S3-FIFO                  0.216    [0.171, 0.274]
+                                                        S3-FIFO / ContShadow             2.305    [1.660, 3.678]
+                                                        DA / ContShadow                  2.196    [1.449, 4.105]
+                                                        DA / S3-FIFO                     2.517   [1.086, 22.051]
+DA/S3-FIFO interval uses 9394/10,000 positive bootstrap replicates. Minimum DA excess over the best policy: 3.27 ns/ref [-28.6, 40.2] at cm ≈ 2.30 µs; the interval
+                                                   includes zero, so the crossing is not statistically resolved.
+
+
+                           TABLE XVII
+  H YPOTHESIS OUTCOMES ( REPRODUCIBLE MAIN STUDY; ALSO IN THE
+                                                                                          and simplified ADWIN did not close the gap. The cost model,
+                          SUPPLEMENT )                                                    calibrated by a user-space minor-fault measurement, gives a
+                                                                                          DA–ContShadow crossover at about 2.2–3.1 µs, but a total-time
+         Outcome             Evidence                                                     comparison that includes CLOCK and S3-FIFO shows DA is
+                                                                                          never the cheapest policy on the measured means: CLOCK,
+H1       Not supported       DA 0.453 vs. S3-FIFO 0.468 (−0.015, adjusted
+                             p = 0.09); better than LRU and seven other base-             S3-FIFO and ContShadow each occupy part of the lower enve-
+                             lines                                                        lope, and DA remains at least 3.2 ns/reference above the best
+H2       Not supported       ContShadow had a lower miss ratio; KS was ac-                alternative at every miss cost. The measurements therefore do
+                             tive on all 643 alarms but changed the miss ratio            not identify a regime in which drift gating pays off in total time;
+                             little (0.456 without vs. 0.453 with); detection rate
+                             73.2%                                                        DA is never best in these measurements, and they identify only
+H3       Not met             2.7× LRU per reference; DA is never on the lower             a regime in which it is cheaper than continuous evaluation. A
+                             total-time envelope (minimum excess 3.27 ns/ref              nine-boot QEMU guest observation produced real fault-path du-
+                             at cm ≈ 2.30 µs)                                             rations but no reclaim event, no controller toggle and no kernel
+                                                                                          DA policy; stronger claims require additional production traces
+p-values are not calibrated error rates, clustered traces limit                           and kernel-level replacement measurements.
+power, and small non-significant differences should not be read
+as no effect. Full threats and scope-of-claims discussion is in the                                                   D ECLARATIONS
+supplement.
+                                                                                          Data and code availability, funding, conflicts of interest and use
+                           VIII. C ONCLUSION                                              of AI-assisted tools are declared in the supplementary material;
+This paper asked when drift gating pays off in page replace-                              the QEMU guest build and controller sources are released, but
+ment and answered it as a reproducible measurement study. A                               no in-kernel DA replacement prototype was built.
+CUSUM-triggered controller with sampled shadow evaluation
+                                                                                                                        R EFERENCES
+saved 76% of shadow evaluations relative to continuous evalu-
+ation on 80 non-stable generated traces, but had a higher miss                              [1] N. Megiddo and D. S. Modha, “ARC: A self-tuning, low overhead replace-
+                                                                                                ment cache,” in Proc. 2nd USENIX Conf. File Storage Technol. (FAST),
+ratio (0.453 vs. 0.423) and was not significantly different from                                2003, pp. 115–130.
+S3-FIFO (Holm-adjusted p = 0.09). On public FIU traces it
+                                                                                            [2] S. Bansal and D. S. Modha, “CAR: Clock with adaptive replacement,” in
+never switched, because the shadow cache exceeded the sam-                                      Proc. 3rd USENIX Conf. File Storage Technol. (FAST), 2004, pp. 187–
+pled working set; follow-ups located a sharp rankability bound-                                 200.
+ary at Cs /Dw = 1 without a meaningful repair gain. CUSUM                                   [3] S. Jiang and X. Zhang, “LIRS: An efficient low inter-reference recency
+beat periodic and random triggers at matched budgets but not                                    set replacement policy to improve buffer cache performance,” in Proc.
+an oracle trigger or continuous evaluation, and Page–Hinkley                                    ACM SIGMETRICS, 2002, pp. 31–42.
+
+
+                                                                                     9
+                                 3500               lower envelope
+                                                                                                                      [16] A. Bifet and R. Gavaldà, “Learning from time-changing data with adaptive
+                                                                                                                           windowing,” in Proc. SIAM Int. Conf. Data Mining (SDM), 2007, pp. 443–
+                                                    CLOCK
+
+
+
+
+ Total time per reference (ns)
+                                 3000               S3-FIFO
+                                                    ContShadow
+                                                                                                                           448.
+                                                                                                                      [17] P. Lu, J. Lu, A. Liu, and G. Zhang, “Early concept drift detection
+                                                    DA (gated)
+                                 2500               measured minor fault                                                   via prediction uncertainty,” in Proc. AAAI Conf. Artif. Intell., 2025;
+                                                                                                                           arXiv:2412.11158.
+
+                                 2000                                                                                 [18] N. Tan, Y.-C. Shih, D. Yang, and A. Salunkhe, “Flexible and efficient
+                                                                                                                           drift detection without labels,” arXiv:2506.08734, 2025.
+
+                                 1500                                                zoom: CLOCK/S3
+                                                                                                                      [19] P. Lu, J. Lu, A. Liu, E. Yu, and G. Zhang, “Autonomous concept drift
+                                                                                                                           threshold determination,” arXiv:2511.09953, 2025.
+                                                                            200
+                                 1000                                       100
+                                                                                                                      [20] D. N. Assis and V. M. A. Souza, “ADWIN-U: Adaptive windowing for
+                                                                                                                           unsupervised drift detection on data streams,” Knowl. Inf. Syst., 2025, doi:
+                                                                                                                           10.1007/s10115-025-02523-1.
+                                  500       0.216                   2.305     0
+                                                                              0.00         0.20       0.35            [21] T. Azim, A. Nadeem, and A. Ailamaki, “Adaptive cache mode selec-
+                                                                                                                           tion for queries over raw data,” in Proc. 9th Int. Workshop Accelerating
+                                    0                                                                                      Analytics Data Manag. Syst. Using Modern Processor Storage Archit.
+                                        0              1        2      3     4                    5          6             (ADMS@VLDB), 2018, pp. 51–65.
+                                                               Miss cost cm ( s)                                      [22] G. Glass and P. Cao, “Adaptive page replacement based on memory
+                                                                                                                           reference behavior,” in Proc. ACM SIGMETRICS, 1997, pp. 115–126.
+Fig. 6. Total time per reference versus miss cost for CLOCK, S3-FIFO, Con-                                            [23] Y. Smaragdakis, S. Kaplan, and P. Wilson, “EELRU: Simple and effective
+tShadow and DA, with the lower envelope of the three comparators (black                                                    adaptive page replacement,” in Proc. ACM SIGMETRICS, 1999, pp. 122–
+dashed). CLOCK is cheapest below 0.216 µs, S3-FIFO between 0.216 and                                                       133.
+2.305 µs, and ContShadow above 2.305 µs; DA is never on the envelope, with                                            [24] S. Jiang, F. Chen, and X. Zhang, “CLOCK-Pro: An effective improvement
+a minimum excess of 3.27 ns/reference at 2.305 µs. The orange band is the                                                  of the CLOCK replacement,” in Proc. USENIX Annu. Tech. Conf. (ATC),
+measured minor-fault cost. The inset zooms the CLOCK/S3-FIFO crossing.                                                     2005, pp. 323–336.
+                                                                                                                      [25] I. Ari, A. Amer, R. Gramacy, E. L. Miller, S. A. Brandt, and D. D. E. Long,
+   [4] T. Johnson and D. Shasha, “2Q: A low overhead high performance buffer                                               “ACME: Adaptive caching using multiple experts,” in Proc. Workshop
+       management replacement algorithm,” in Proc. 20th Int. Conf. Very Large                                              Distrib. Data Struct. (WDAS), 2002.
+       Data Bases (VLDB), 1994, pp. 439–450.
+                                                                                                                      [26] H. Kim, “Learning-based page replacement scheme for efficient I/O
+   [5] J. Yang, Y. Zhang, Z. Qiu, Y. Yue, and K. V. Rashmi, “FIFO queues are                                               processing,” Sci. Rep., vol. 15, 2025, doi: 10.1038/s41598-025-88736-4.
+       all you need for cache eviction,” in Proc. 29th ACM Symp. Oper. Syst.
+       Princ. (SOSP), 2023, pp. 130–149.                                                                              [27] G. Yuan, X. Li, S. Wu, Y. Zhu, D. Yang, C. Yao, X. Tang, and G. Chen,
+                                                                                                                           “EACLOCK: An efficient and adaptive page replacement algorithm to
+   [6] W. Shen, Y. Chen, R. Chen, and H. Chen, “Towards fully-fledged GPU                                                  understand your workload,” IEEE Trans. Knowl. Data Eng., vol. 38, no.
+       multitasking via proactive memory scheduling,” arXiv:2512.24637, 2025.                                              11, pp. 7387–7401, 2026, doi: 10.1109/TKDE.2026.3724159.
+   [7] Y. Zheng et al., “gpu_ext: Extensible OS policies for GPUs via eBPF,”                                          [28] E. S. Page, “Continuous inspection schemes,” Biometrika, vol. 41, no.
+       arXiv:2512.12615, 2025.                                                                                             1–2, pp. 100–115, 1954.
+   [8] Y. Liu, M. Yu, and J. Yang, “When fancy eviction fails: Rethinking                                             [29] N. Harshit and K. Mounvik, “Improving real-time concept drift detection
+       cache replacement for LLM prefix reuse,” arXiv:2609.28870, 2026, doi:                                               using a hybrid transformer-autoencoder framework,” arXiv:2508.07085,
+       10.48550/arXiv.2609.28870.                                                                                          2025.
+   [9] W. Zhou, Z. Niu, Y. Xiong, J. Fang, and Q. Wang, “3L-Cache: Low                                                [30] S. Bandyopadhyay, J. Bose, and S. Roy Chowdhury, “A hybrid framework
+       overhead and precise learning-based eviction policy for caches,” in Proc.                                           for real-time data drift and anomaly identification using hierarchical
+       23rd USENIX Conf. File Storage Technol. (FAST), 2025, pp. 237–254.                                                  temporal memory and statistical tests,” Int. J. Math. Eng. Manag. Sci.,
+                                                                                                                           vol. 10, no. 3, pp. 777–796, 2025, doi: 10.33889/ijmems.2025.10.3.039.
+[10] Y. Zhai et al., “Clock2Q+: A simple and efficient replacement algorithm
+     for metadata cache in VMware vSAN,” Proc. VLDB Endow., vol. 19, no.                                              [31] C. Waldspurger, T. Saemundsson, I. Ahmad, and N. Park, “Cache mod-
+     12, pp. 3874–3887, 2026, doi: 10.14778/3827998.3828002.                                                               eling and optimization using miniature simulations,” in Proc. USENIX
+                                                                                                                           Annu. Tech. Conf. (ATC), 2017, pp. 487–498.
+[11] H. Xia, W. Nixon, B. D. Marthen, P. Bhandari, and J. Yang, “Learning-
+     augmented heuristics: Simple yet smart, robust and interpretable cache                                           [32] C. A. Waldspurger, N. Park, A. Garthwaite, and I. Ahmad, “Efficient
+     eviction,” in Proc. 20th USENIX Symp. Oper. Syst. Design Implement.                                                   MRC construction with SHARDS,” in Proc. 13th USENIX Conf. File
+     (OSDI), 2026, pp. 2241–2259.                                                                                          Storage Technol. (FAST), 2015, pp. 95–110.
+
+[12] N. Patel and H. Maniar, “Comparative evaluation of cache replace-                                                [33] M. K. Qureshi, A. Jaleel, Y. N. Patt, S. C. Steely Jr., and J. Emer,
+     ment algorithms for time-bounded stale-tolerant data workloads,” Int.                                                 “Adaptive insertion policies for high performance caching,” in Proc.
+     J. Sci. Res. Technol., vol. 3, no. 6, pp. 556–564, 2026, doi: 10.5281/zen-                                            34th Int. Symp. Comput. Archit. (ISCA), 2007, pp. 381–391, doi:
+     odo.20576370.                                                                                                         10.1145/1250662.1250709.
+                                                                                                                      [34] Linux Kernel Organization, “Multi-gen LRU,” Linux kernel documenta-
+[13] K. Vietri et al., “Driving cache replacement with ML-based LeCaR,” in
+                                                                                                                           tion, 2026. [Online]. Available: https://docs.kernel.org/mm/multigen_lru.
+     Proc. 10th USENIX Workshop Hot Topics Storage File Syst. (HotStorage),
+                                                                                                                           html
+     2018.
+                                                                                                                      [35] CMU Parallel Data Laboratory, “Cache eviction tactics: cacheDatasets
+[14] L. V. Rodriguez et al., “Learning cache replacement with CACHEUS,”
+                                                                                                                           trace collection,” online data repository and format README, accessed
+     in Proc. 19th USENIX Conf. File Storage Technol. (FAST), 2021, pp.
+                                                                                                                           Nov. 2026. [Online]. Available: https://pdl.cmu.edu/CacheEviction/
+     341–354.
+                                                                                                                           index.shtml; https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/
+[15] J. Gama, I. Žliobaitė, A. Bifet, M. Pechenizkiy, and A. Bouchachia, “A                                               cacheDatasets/
+     survey on concept drift adaptation,” ACM Comput. Surv., vol. 46, no. 4,
+     Art. no. 44, 2014.
+
+
+                                                                                                                 10
+

@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-binarysearch_s101,0,LRU,0.40379,0,0,26.7
+real-binarysearch_s101,0,ARC,0.36969,0,0,34.0
+real-binarysearch_s101,0,S3-FIFO,0.32678,0,0,19.9
+real-binarysearch_s101,0,SIEVE,0.36439,0,0,11.0
+real-binarysearch_s101,0,W-TinyLFU,0.35495,0,0,96.7
+real-binarysearch_s101,0,DA,0.32511,1,2,32.5
+real-binarysearch_s101,0,ContShadow,0.32511,1,16,63.3

@@ -1,0 +1,70 @@
+#!/bin/sh
+set -x
+mknod /dev/null c 1 3 2>/dev/null || true
+chmod 666 /dev/null 2>/dev/null || true
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t debugfs debugfs /sys/kernel/debug
+mount -t cgroup2 none /sys/fs/cgroup
+mkdir -p /sys/fs/cgroup/da
+mkdir -p /mnt/results
+mount -t 9p -o trans=virtio,version=9p2000.L results /mnt/results
+
+COND=$(cat /mnt/results/condition)
+REP=$(cat /mnt/results/repetition)
+OUT=/mnt/results/$COND/$REP
+mkdir -p "$OUT"
+
+cat /sys/fs/cgroup/da/memory.max > "$OUT/cgroup_memory_max.txt" 2>/dev/null || true
+cat /sys/fs/cgroup/da/memory.swap.max > "$OUT/cgroup_memory_swap_max.txt" 2>/dev/null || true
+uname -a > "$OUT/guest_uname.txt"
+cat /proc/version > "$OUT/guest_version.txt"
+cat /sys/kernel/mm/lru_gen/enabled > "$OUT/lru_enabled_before.txt"
+cat /sys/kernel/mm/lru_gen/min_ttl_ms > "$OUT/min_ttl_ms.txt"
+cp /sys/kernel/debug/tracing/available_filter_functions "$OUT/available_filter_functions.txt"
+cp /proc/vmstat "$OUT/vmstat_before.txt"
+
+if [ "$COND" = "discover" ]; then
+  echo done > "$OUT/done"
+  sync
+  poweroff -f
+fi
+
+case "$COND" in
+  fixed_lru)   echo 0x0000 > /sys/kernel/mm/lru_gen/enabled ;;
+  fixed_mglru) echo 0x0007 > /sys/kernel/mm/lru_gen/enabled ;;
+  coupled)     echo 0x0007 > /sys/kernel/mm/lru_gen/enabled ;;
+  *) echo 0x0007 > /sys/kernel/mm/lru_gen/enabled ;;
+esac
+
+TRACE=/sys/kernel/debug/tracing
+echo 0 > "$TRACE/tracing_on"
+echo function_graph > "$TRACE/current_tracer"
+if [ -f /mnt/results/ftrace_functions.txt ]; then
+  cp /mnt/results/ftrace_functions.txt "$TRACE/set_ftrace_filter"
+fi
+cp "$TRACE/trace" "$OUT/ftrace_empty.txt"
+echo 1 > "$TRACE/tracing_on"
+
+if [ "$COND" = "coupled" ]; then
+  rm -f "$OUT/ctl_stop"
+  /guest_da_ctl "$OUT/ctl" > "$OUT/ctl_stdout.txt" 2>&1 &
+  CTL=$!
+fi
+
+/guest_workload > "$OUT/workload.txt" 2>&1
+
+if [ "$COND" = "coupled" ]; then
+  touch "$OUT/ctl_stop"
+  wait "$CTL"
+fi
+
+cat /sys/fs/cgroup/da/memory.peak > "$OUT/cgroup_memory_peak.txt" 2>/dev/null || true
+echo 0 > "$TRACE/tracing_on"
+cp "$TRACE/trace" "$OUT/ftrace.txt"
+echo > "$TRACE/trace"
+cat /proc/vmstat > "$OUT/vmstat_after.txt"
+cat /sys/kernel/mm/lru_gen/enabled > "$OUT/lru_enabled_after.txt"
+echo done > "$OUT/done"
+sync
+poweroff -f

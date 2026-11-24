@@ -1,0 +1,1 @@
+Linux version 6.6.1 (kashie@anoneurx-edge-01) (gcc-15 (Debian 15.3.0-4) 15.3.0, GNU ld (GNU Binutils for Debian) 2.47) #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026

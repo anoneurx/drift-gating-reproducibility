@@ -1,0 +1,137 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[utf8]{inputenc}
+\begin{document}
+
+\title{Supplementary Material for ``When Does Drift Gating Pay Off? A
+Reproducible Measurement Study of Drift-Aware Page Replacement''}
+\author{M. Qasim, H. Tahir, H. Ahmad, and M. G. Ghouri}
+\maketitle
+
+\section{S1.\ Exact commands}
+
+All commands are run from \texttt{reproduction/}. The authoritative simulator
+source is \texttt{sim_full.cpp}; \texttt{sim\_full\_diag.cpp} and
+\texttt{sim\_full\_bench.cpp} are additive diagnostic and timing-only builds.
+
+\subsection{S1.1 Primary study}
+\begin{verbatim}
+g++ -O2 -std=c++17 -o sim_full sim_full.cpp
+python3 sweep_selection.py --jobs 4
+./sim_full --seed 100 --stable-per-prim 3 --per-scenario 8 \
+  --ncand 5 --kfrac 0 --z 1.28 --edelay 10 \
+  --out main_study_training.csv --det main_study_training_detection.csv
+./sim_full --seed 5001 --ncand 5 --kfrac 0 --z 1.28 --edelay 10 --ablations \
+  --out main_study_results.csv --det main_study_detection.csv
+\end{verbatim}
+
+\subsection{S1.2 Boundary offsets (Table IX)}
+\begin{verbatim}
+for off in 250 500 1000 1370; do
+  ./sim_full --seed 5001 --ncand 5 --kfrac 0 --z 1.28 --edelay 10 \
+    --da-only --phase-offset $off \
+    --out results_offset${off}.csv --det detection_offset${off}.csv
+done
+python3 generate_offset_table.py
+\end{verbatim}
+Offset 0 is \texttt{main\_study\_detection.csv}. The script reads all five
+CSVs and writes \texttt{latex/offset\_table.tex}.
+
+\subsection{S1.3 Public FIU traces}
+\begin{verbatim}
+python3 convert_public_traces.py --all --limit 1000000
+./sim_full --np 1048576 --C 20000 --warm 100000 \
+  --ncand 5 --kfrac 0 --z 1.28 --edelay 10 \
+  --s3frac 0.05 --twoqkin 125 --lprthr 0.1 \
+  --lecarlr 0.6 --lirsfrac 0.05 \
+  --methods LRU,FIFO,2Q,ARC,S3-FIFO,DA,ContShadow,OPT \
+  --trace fiu_homes-110108-112108.oracleGeneral.bin \
+  --trace fiu_ikki-110108-112108.oracleGeneral.bin \
+  --trace fiu_madmax-110108-112108.oracleGeneral.bin \
+  --trace fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.bin \
+  --trace fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.bin \
+  --trace fiu_webresearch-030409-033109.oracleGeneral.bin \
+  --out public_trace_results.csv --det public_trace_detection.csv
+\end{verbatim}
+
+\subsection{S1.4 Public-trace diagnostics}
+\begin{verbatim}
+g++ -O2 -std=c++17 -o sim_full_diag sim_full_diag.cpp
+./sim_full_diag --np 1048576 --C 20000 --warm 100000 --ncand 5 \
+  --kfrac 0 --z 1.28 --edelay 10 --s3frac 0.05 --twoqkin 125 \
+  --lprthr 0.1 --lecarlr 0.6 --lirsfrac 0.05 \
+  --methods LRU,S3-FIFO,DA,ContShadow \
+  --detail-log public_detail.csv \
+  --out public_diag_results.csv --det public_diag_detection.csv \
+  --trace <the six fiu_*.bin files above>
+\end{verbatim}
+The diagnostic build is behaviourally identical to the released simulator:
+0 mismatches in \texttt{scenario, seed, method, miss\_ratio, switches,
+shadow\_evals} over the 110-trace main study, and byte-identical detection CSVs.
+
+\subsection{S1.5 Public-trace parameter re-selection}
+\begin{verbatim}
+python3 split_public_traces.py          # 500k train / held-out suffix
+python3 sweep_public_selection.py       # 48 configs on six prefixes
+sh run_public_reselect.sh               # frozen vs re-selected on suffixes
+\end{verbatim}
+
+\subsection{S1.6 Cost model and direct evaluation timing}
+\begin{verbatim}
+python3 cost_model.py
+python3 bootstrap_cost_model.py
+g++ -O2 -std=c++17 -o sim_full_bench sim_full_bench.cpp
+./sim_full_bench --seed 5001 --ncand 5 --kfrac 0 --z 1.28 --edelay 10 \
+  --da-only --out bench_main.csv --det bench_main_det.csv
+\end{verbatim}
+
+\section{S2.\ Raw CSV rows removed from the body}
+
+\subsection{S2.1 Detection schema}
+The nine columns of every detection CSV are: scenario, seed, method, number of
+true boundaries, detected boundaries, detection delays (semicolon-separated),
+spurious confirmations, total confirmations, and false confirmations after
+reference 100,000.
+
+\subsection{S2.2 Offset 0 and 1{,}370 first rows per scenario}
+\begin{verbatim}
+stable,5001,DA,0,0,,1,1,0
+abrupt,6001,DA,5,5,2000;2000;4000;2000;2000;,1,6,0
+gradual,7001,DA,5,1,0;,5,6,0
+recurring,8001,DA,5,5,4000;2000;4000;2000;4000;,1,6,0
+composite,9001,DA,4,3,2000;2000;2000;,2,5,0
+\end{verbatim}
+\begin{verbatim}
+stable,5001,DA,0,0,,1,1,0
+abrupt,6001,DA,5,5,630;630;2630;630;2630;,1,6,0
+gradual,7001,DA,5,1,630;,5,6,0
+recurring,8001,DA,5,5,2630;630;2630;630;2630;,1,6,0
+composite,9001,DA,4,3,630;630;630;,2,5,0
+\end{verbatim}
+
+\subsection{S2.3 Stable-trace confirmation positions}
+The 23 confirmations on stable traces occur at references
+18{,}000 ($\times 6$), 28{,}000 ($\times 5$), 30{,}000 ($\times 2$),
+34{,}000 ($\times 2$), 36{,}000, 38{,}000, 56{,}000, 68{,}000 ($\times 2$),
+72{,}000, 74{,}000 and 160{,}000. Only the last exceeds reference 100{,}000.
+
+\subsection{S2.4 Public-trace per-candidate diagnostics}
+\texttt{public\_diagnostic\_summary.csv} records, for each trace, the initial
+candidate pick, the first evaluation's miss counts for candidates 0--4
+(0 LRU, 1 LFU-A, 2 2Q, 3 MRU, 4 S3-FIFO), the maximum CUSUM statistics, and the
+number of confirmed alarms. All six initial picks were candidate 0 and all
+five first-evaluation counts were identical.
+
+\section{S3.\ Diagnostic event-log schema}
+The \texttt{--detail-log} CSV has columns kind, scenario, seed, method, ep, t,
+field, value. Kinds are \texttt{eval} (window size, start epoch, raw block
+count and per-candidate miss totals), \texttt{decide} (cost margin, active
+candidate, per-candidate margin, lower confidence bound and score, final pick),
+\texttt{cusum} (standardised miss deviation and both CUSUM statistics before
+and after update), \texttt{alarm} (KS $p$-value, sample size and confirmation
+flag), \texttt{wait} (dwell blocks), \texttt{switch} (purge counts) and
+\texttt{component} (per-trace activation totals). All logging calls are
+no-ops unless \texttt{--detail-log} is supplied.
+
+\end{document}

@@ -1,0 +1,126 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Conceptual Background}{2}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{II}{2}{Conceptual Background}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Page Replacement and Workload Phases}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Workload Drift and Statistical Detection}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Earlier Adaptive Replacement and Cache Modelling}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Review Scope and Approach}{3}{section.3}\protected@file@percent }
+\newlabel{sec:review}{{III}{3}{Review Scope and Approach}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Adaptive and Learning-Based Replacement}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Drift Detection}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}GPU, Multi-Tier and Benchmark Studies}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Previous Research Gaps}{4}{section.4}\protected@file@percent }
+\newlabel{sec:gaps}{{IV}{4}{Previous Research Gaps}{section.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Experimental Methodology and Results}{4}{section.5}\protected@file@percent }
+\newlabel{sec:eval}{{V}{4}{Experimental Methodology and Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}Simulator, Workloads and Baselines}{4}{subsection.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Experimental workflow. Blue boxes are training stages, orange boxes are held-out test rounds.}}{5}{figure.1}\protected@file@percent }
+\newlabel{fig:workflow}{{1}{5}{Experimental workflow. Blue boxes are training stages, orange boxes are held-out test rounds}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Workload Definitions}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:workloads}{{I}{5}{Workload Definitions}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Methods Compared}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:methods}{{II}{5}{Methods Compared}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Controller Under Test}{5}{subsection.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Architecture of the evaluated controller: per-reference fast path (blue), per-epoch control path (orange), statistical decision points, and policy-switching feedback.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:arch}{{2}{6}{Architecture of the evaluated controller: per-reference fast path (blue), per-epoch control path (orange), statistical decision points, and policy-switching feedback}{figure.2}{}}
+\newlabel{eq:cusumplus}{{1}{6}{Controller Under Test}{equation.1}{}}
+\newlabel{eq:cusumminus}{{2}{6}{Controller Under Test}{equation.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Controller Parameters Fixed After Training}}{6}{table.3}\protected@file@percent }
+\newlabel{tab:params}{{III}{6}{Controller Parameters Fixed After Training}{table.3}{}}
+\newlabel{eq:switch}{{3}{6}{Controller Under Test}{equation.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}Metrics and Statistical Analysis}{6}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}Replacement Quality}{7}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Mean Miss Ratio by Scenario and Overall (Fresh Test Traces)}}{7}{table.4}\protected@file@percent }
+\newlabel{tab:quality}{{IV}{7}{Mean Miss Ratio by Scenario and Overall (Fresh Test Traces)}{table.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Mean miss ratio on the 80 non-stable traces with 95\% bootstrap intervals (reproducible main study, $C = 1{,}000$).}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:overall}{{3}{7}{Mean miss ratio on the 80 non-stable traces with 95\% bootstrap intervals (reproducible main study, $C = 1{,}000$)}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Mean miss ratio by scenario on the fresh test traces.}}{7}{figure.4}\protected@file@percent }
+\newlabel{fig:scenario}{{4}{7}{Mean miss ratio by scenario on the fresh test traces}{figure.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Paired Differences, DA Minus Baseline (Non-Stable, $N = 80$)}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:paired}{{V}{7}{Paired Differences, DA Minus Baseline (Non-Stable, $N = 80$)}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Paired differences in miss ratio between DA and each baseline on the 80 non-stable traces (negative favours DA).}}{8}{figure.5}\protected@file@percent }
+\newlabel{fig:paired}{{5}{8}{Paired differences in miss ratio between DA and each baseline on the 80 non-stable traces (negative favours DA)}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}Ablation}{8}{subsection.5.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-F}}Detection, Switching and Cost}{8}{subsection.5.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Ablation on the Fresh Test Traces (Non-Stable Mean)}}{8}{table.6}\protected@file@percent }
+\newlabel{tab:ablation}{{VI}{8}{Ablation on the Fresh Test Traces (Non-Stable Mean)}{table.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Ablation: non-stable miss ratio and shadow evaluations per trace.}}{8}{figure.6}\protected@file@percent }
+\newlabel{fig:ablation}{{6}{8}{Ablation: non-stable miss ratio and shadow evaluations per trace}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Miss ratio against simulated time per reference (indicative, single-threaded simulator); S3-FIFO is included as a static comparator.}}{9}{figure.7}\protected@file@percent }
+\newlabel{fig:cost}{{7}{9}{Miss ratio against simulated time per reference (indicative, single-threaded simulator); S3-FIFO is included as a static comparator}{figure.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-G}}Post Hoc Measurement Experiments}{9}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:posthoc}{{\mbox  {V-G}}{9}{Post Hoc Measurement Experiments}{subsection.5.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-H}}Public Block-Trace Check}{9}{subsection.5.8}\protected@file@percent }
+\newlabel{sec:public}{{\mbox  {V-H}}{9}{Public Block-Trace Check}{subsection.5.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Public FIU Block Traces: Means Over Six Traces (Raw Output \texttt  {public\_trace\_results.csv})}}{10}{table.7}\protected@file@percent }
+\newlabel{tab:public}{{VII}{10}{Public FIU Block Traces: Means Over Six Traces (Raw Output \texttt {public\_trace\_results.csv})}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-I}}Pre-specified Follow-up Measurements}{10}{subsection.5.9}\protected@file@percent }
+\newlabel{sec:prespecified}{{\mbox  {V-I}}{10}{Pre-specified Follow-up Measurements}{subsection.5.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-J}}Cost Break-Even and Total-Time Envelope}{10}{subsection.5.10}\protected@file@percent }
+\newlabel{sec:breakeven}{{\mbox  {V-J}}{10}{Cost Break-Even and Total-Time Envelope}{subsection.5.10}{}}
+\newlabel{eq:cost}{{4}{10}{Cost Break-Even and Total-Time Envelope}{equation.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Pre-specified follow-ups: outcome and representative numbers. Details and raw-table pointers are in Section S4 of the supplementary material.}}{11}{table.8}\protected@file@percent }
+\newlabel{tab:prespec}{{VIII}{11}{Pre-specified follow-ups: outcome and representative numbers. Details and raw-table pointers are in Section S4 of the supplementary material}{table.8}{}}
+\newlabel{eq:breakeven}{{5}{11}{Cost Break-Even and Total-Time Envelope}{equation.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-K}}Capacity Sensitivity}{11}{subsection.5.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-L}}Hypothesis Outcomes}{11}{subsection.5.12}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Total time per reference by miss cost, using the measured per-reference times and mean miss ratios of the 80 non-stable test traces. Panel (a): bold marks the lowest total in each row; DA is never the lowest, and the last column gives its excess over the best policy. Panel (b): pairwise crossing miss costs; the DA/S3-FIFO interval is unstable because the miss-ratio difference is small. All values are point estimates; bootstrap intervals are in the text.}}{12}{table.9}\protected@file@percent }
+\newlabel{tab:breakeven}{{IX}{12}{Total time per reference by miss cost, using the measured per-reference times and mean miss ratios of the 80 non-stable test traces. Panel (a): bold marks the lowest total in each row; DA is never the lowest, and the last column gives its excess over the best policy. Panel (b): pairwise crossing miss costs; the DA/S3-FIFO interval is unstable because the miss-ratio difference is small. All values are point estimates; bootstrap intervals are in the text}{table.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Total time per reference versus miss cost for CLOCK, S3-FIFO, ContShadow and DA, with the lower envelope of the three comparators (black dashed). CLOCK is cheapest below 0.216\,$\mu $s, S3-FIFO between 0.216 and 2.305\,$\mu $s, and ContShadow above 2.305\,$\mu $s; DA is never on the envelope, with a minimum excess of 3.27\,ns/reference at 2.305\,$\mu $s. The orange band is the measured minor-fault cost; the inset zooms the CLOCK/S3-FIFO crossing.}}{12}{figure.8}\protected@file@percent }
+\newlabel{fig:breakeven}{{8}{12}{Total time per reference versus miss cost for CLOCK, S3-FIFO, ContShadow and DA, with the lower envelope of the three comparators (black dashed). CLOCK is cheapest below 0.216\,$\mu $s, S3-FIFO between 0.216 and 2.305\,$\mu $s, and ContShadow above 2.305\,$\mu $s; DA is never on the envelope, with a minimum excess of 3.27\,ns/reference at 2.305\,$\mu $s. The orange band is the measured minor-fault cost; the inset zooms the CLOCK/S3-FIFO crossing}{figure.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Hypothesis Outcomes (Reproducible Main Study)}}{12}{table.10}\protected@file@percent }
+\newlabel{tab:hypotheses}{{X}{12}{Hypothesis Outcomes (Reproducible Main Study)}{table.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Threats to Validity}{12}{section.6}\protected@file@percent }
+\newlabel{sec:threats}{{VI}{12}{Threats to Validity}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Limitations and Scope of Claims}{13}{section.7}\protected@file@percent }
+\newlabel{sec:limits}{{VII}{13}{Limitations and Scope of Claims}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{14}{section.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{VIII}{14}{Conclusion}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{Appendix: Exploratory Real-Program Evidence}{14}{section*.1}\protected@file@percent }
+\bibcite{r1}{1}
+\bibcite{r2}{2}
+\bibcite{r3}{3}
+\bibcite{r4}{4}
+\bibcite{r5}{5}
+\bibcite{r6}{6}
+\bibcite{r7}{7}
+\bibcite{r8}{8}
+\bibcite{r9}{9}
+\bibcite{r10}{10}
+\bibcite{r11}{11}
+\bibcite{r12}{12}
+\bibcite{r13}{13}
+\bibcite{r14}{14}
+\bibcite{r15}{15}
+\bibcite{r16}{16}
+\bibcite{r17}{17}
+\bibcite{r18}{18}
+\bibcite{r19}{19}
+\bibcite{r20}{20}
+\bibcite{r21}{21}
+\bibcite{r22}{22}
+\bibcite{r23}{23}
+\bibcite{r24}{24}
+\bibcite{r25}{25}
+\bibcite{r26}{26}
+\bibcite{r27}{27}
+\bibcite{r28}{28}
+\bibcite{r29}{29}
+\bibcite{r30}{30}
+\bibcite{r31}{31}
+\@writefile{toc}{\contentsline {section}{Declarations}{15}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{15}{section*.3}\protected@file@percent }
+\bibcite{r32}{32}
+\bibcite{r33}{33}
+\bibcite{r34}{34}
+\bibcite{r35}{35}
+\bibcite{r36}{36}
+\bibcite{r37}{37}
+\bibcite{r38}{38}
+\bibcite{r39}{39}
+\gdef \@abspage@last{16}

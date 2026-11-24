@@ -1,0 +1,3 @@
+variant,assumption,DA_crit_ns_per_ref_excl_eval_overhead,CS_crit_ns_per_ref_excl_eval_overhead,delta_crit_ns_per_ref_DA_minus_CS,DA_background_evals_per_trace,CS_background_evals_per_trace,note
+sync_measured,measured from sim_full ns/ref (includes eval overhead on critical path),67.36,133.36,-66.00000000000001,6.475,27.387,baseline
+async_analytic,ASSUMPTION: shadow eval fully off critical path; no eval latency on request path; same miss ratios; background CPU proportional to evals,46.92253098165138,46.91660787559634,0.005923106055035987,6.475,27.387,critical path favors lower miss ratio; DA worse by delta_m*c_m

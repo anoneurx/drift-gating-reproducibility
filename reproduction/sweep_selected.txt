@@ -1,0 +1,6 @@
+ncand=5
+kfrac=0
+edelay=10
+z=1.28
+train_miss_nonstable=0.44005
+stable_false_after_100k=0

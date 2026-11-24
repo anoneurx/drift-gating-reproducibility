@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-bfs,0,LRU,0.03422,0,0,31.7
+real-bfs,0,ARC,0.03431,0,0,35.1
+real-bfs,0,S3-FIFO,0.02769,0,0,7.3
+real-bfs,0,SIEVE,0.03454,0,0,5.2
+real-bfs,0,W-TinyLFU,0.03170,0,0,98.2
+real-bfs,0,DA,0.02769,1,1,20.2
+real-bfs,0,ContShadow,0.02769,1,16,67.6

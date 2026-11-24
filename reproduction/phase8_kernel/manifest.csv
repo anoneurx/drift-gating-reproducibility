@@ -1,0 +1,13 @@
+kernel,6.6.1
+url,https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.1.tar.xz
+build_root,/home/kashie/opencode_kernel_build
+build_utc,2026-11-24T15:40:16Z
+kernel_compiler,gcc-15 -std=gnu11
+guest_compiler,gcc (Debian 16.2.0-3) 16.2.0
+bison,bison (GNU Bison) 3.8.2
+libelf_install,/home/kashie/opencode_kernel_build/elfutils-install
+libelf_source,elfutils-0.191
+controller_interval_ms,10
+controller_h,5
+controller_delta,0.5
+controller_edelay,10

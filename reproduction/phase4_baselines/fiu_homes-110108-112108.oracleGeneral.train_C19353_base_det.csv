@@ -1,0 +1,2 @@
+scenario,seed,method,n_bounds,detected,delays,spurious,confirms,false_after_100k
+real-fiu_homes-110108-112108.oracleGeneral.train,0,DA,0,0,,4,4,0

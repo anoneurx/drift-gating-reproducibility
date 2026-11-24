@@ -1,0 +1,135 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./supplement.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-08-10>
+(./IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+** ATTENTION: Single column mode is not typically used with IEEE publications.
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/l3kernel/l3backend-pdftex.def)
+(./supplement.aux)
+-- Lines per column: 58 (exact).
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/grfext/grfext.sty
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty))
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1pcr.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 17--20
+[]\OT1/ptm/m/n/10 All com-mands are run from \OT1/pcr/m/n/10 reproduction/\OT1/
+ptm/m/n/10 . The au-thor-i-ta-tive sim-u-la-tor source is \OT1/pcr/m/n/10 sim_f
+ull.cpp\OT1/ptm/m/n/10 ;
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-
+dist/fonts/enc/dvips/base/8r.enc}]
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
+Underfull \hbox (badness 2452) in paragraph at lines 153--153
+[]\OT1/ptm/m/n/9 CLOCK man-age-ment com-bined with 2Q-
+
+Underfull \hbox (badness 4441) in paragraph at lines 155--155
+[]\OT1/ptm/m/n/9 Prediction-uncertainty in-dex with adap-tive
+
+Underfull \hbox (badness 4699) in paragraph at lines 163--163
+[]\OT1/ptm/m/n/9 Tier-aware LLM prefix-cache re-place-ment
+
+Underfull \hbox (badness 4913) in paragraph at lines 165--165
+[]\OT1/ptm/m/n/9 Statistical cache-
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--180
+[]\OT1/ptm/m/n/8 LPR switches LRU/MRU heuris-ti-cally [16];
+
+Underfull \hbox (badness 6859) in paragraph at lines 180--180
+\OT1/ptm/m/n/8 LeCaR/CACHEUS reweight ex-perts [11], [12]; Acme
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsptm.fd) [2] [3] [4]
+Underfull \hbox (badness 10000) in paragraph at lines 293--307
+[]\OT1/ptm/m/it/10 Phase 5: cost/uncertainty ro-bust-ness. \OT1/ptm/m/n/10 The 
+DA--ContShadow break-even was ex-tended to il-lus-tra-tive
+
+Underfull \hbox (badness 2707) in paragraph at lines 293--307
+\OT1/ptm/m/n/10 DRAM/NVMe/remote/swap miss penal-ties with the 2.2$\OML/cmm/m/i
+t/10 ^^V$\OT1/ptm/m/n/10 s minor-fault as cal-i-bra-tion only. A total-time en-
+ve-lope
+
+LaTeX Font Warning: Font shape `OT1/ptm/m/scit' undefined
+(Font)              using `OT1/ptm/m/it' instead on input line 321.
+
+[5 <./fig_phase2_frontier.png>] [6] [7] [8] [9 <./figs/fig6_ablation.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 715--731
+[]\OT1/ptm/m/it/10 Trigger vari-ants (syn-thetic, post hoc). \OT1/ptm/m/n/10 Th
+e re-leased sim-u-la-tor was mod-i-fied to add \OT1/pcr/m/n/10 --trigger
+
+Underfull \hbox (badness 10000) in paragraph at lines 715--731
+\OT1/pcr/m/n/10 cusum|periodic|random|oracle\OT1/ptm/m/n/10 , \OT1/pcr/m/n/10 -
+-trigger-period\OT1/ptm/m/n/10 , \OT1/pcr/m/n/10 --trigger-rand\OT1/ptm/m/n/10 
+, \OT1/pcr/m/n/10 --trigger-seed\OT1/ptm/m/n/10 , and
+
+Underfull \hbox (badness 5331) in paragraph at lines 751--762
+\OT1/ptm/m/n/10 with nonzero switches/evals in all tested cells (\OT1/pcr/m/n/1
+0 rankability_real/synth_sweep.csv\OT1/ptm/m/n/10 ). The FIU sweep
+[10 <./figs/fig7_cost.png>] [11]
+Underfull \hbox (badness 3713) in paragraph at lines 887--904
+\OT1/ptm/m/n/10 of $\OT1/cmr/m/n/10 [0\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 171\OML
+/cmm/m/it/10 ; \OT1/cmr/m/n/10 0\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 274] \OML/cmm
+/m/it/10 ^^V$\OT1/ptm/m/n/10 s (CLOCK/S3-FIFO), $\OT1/cmr/m/n/10 [1\OML/cmm/m/i
+t/10 :\OT1/cmr/m/n/10 660\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 3\OML/cmm/m/it/10 :
+\OT1/cmr/m/n/10 678] \OML/cmm/m/it/10 ^^V$\OT1/ptm/m/n/10 s (S3-FIFO/ContShadow
+), $\OT1/cmr/m/n/10 [1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 449\OML/cmm/m/it/10 ; \
+OT1/cmr/m/n/10 4\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 105] \OML/cmm/m/it/10 ^^V$\OT
+1/ptm/m/n/10 s (DA/ContShadow)
+[12] [13] (./phase6_pdl_table.tex)
+Underfull \hbox (badness 1565) in paragraph at lines 1170--1178
+[]\OT1/ptm/m/n/10 The real user-space asyn-chronous shadow worker was run three
+ times on the 80 non-stable seed-5001 traces.
+
+Underfull \hbox (badness 5022) in paragraph at lines 1170--1178
+\OT1/ptm/m/n/10 The mea-sured mean miss ra-tios were 0.5611, 0.5676 and 0.5599;
+ paired async-minus-sync dif-fer-ences were
+[14] (./phase8_kernel_ftrace_table.tex) [15] (./supplement.aux) )
+(see the transcript file for additional information)</usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
+lic/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/f
+onts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/ty
+pe1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
+/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on supplement.pdf (15 pages, 384928 bytes).
+Transcript written on supplement.log.

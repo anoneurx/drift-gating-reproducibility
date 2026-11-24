@@ -1,0 +1,3 @@
+/sys/fs/cgroup/da/memory.max: No such file or directory
+/sys/fs/cgroup/da/memory.swap.max: No such file or directory
+workload,refs=1000000,warm=100000,elapsed_ns=738890642.0,access_ns_sum=500296937.0,minflt=131138,majflt=0

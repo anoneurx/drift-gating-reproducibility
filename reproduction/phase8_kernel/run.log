@@ -1,0 +1,14 @@
+discovery boot
+selected 5 ftrace functions: do_swap_page, do_wp_page, handle_mm_fault, reclaim_pages, shrink_folio_list
+running fixed_lru rep 1
+running fixed_lru rep 2
+running fixed_lru rep 3
+running fixed_mglru rep 1
+running fixed_mglru rep 2
+running fixed_mglru rep 3
+running coupled rep 1
+running coupled rep 2
+running coupled rep 3
+parsed 191370 ftrace duration samples into /home/kashie/Sem 5/research/reproduction/phase8_kernel/ftrace_durations.csv
+summarized 9 guest runs and 18 ftrace function groups
+kernel phase complete

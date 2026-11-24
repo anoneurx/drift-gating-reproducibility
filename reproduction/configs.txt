@@ -1,0 +1,14 @@
+# Exploratory simulator configurations (all ASSUMPTION values are marked in source)
+C=1000
+warmup=100000 (real traces), 20000 (synthetic)
+trace_length=300000
+DA.z=1.28 (also tested 1.638, identical)
+DA.candidate_set={LRU,LFU-A,2Q,MRU} or {LRU,LFU-A,2Q,MRU,S3-FIFO}
+DA.Kfrac=0 or 0.05 (selected per fold on training programs only)
+S3FIFO.small_fraction=0.05 (tuned; also 0.1, 0.2, 0.3)
+TwoQ.Kin=125 (tuned; also 250, 500, 750)
+LPR.ghost_threshold=0.1 (tuned; also 0.01, 0.05, 0.2)
+LeCaR.learning_rate=0.6 (tuned; also 0.15, 0.3, 0.45)
+LIRS.LIR_fraction=0.05 (tuned; also 0.1, 0.2)
+MGLRU.generations=4, aging=C references
+SetDuel.sampler_sets=16, sampler_size=C/16, duel_period=C references
