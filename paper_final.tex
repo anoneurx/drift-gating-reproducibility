@@ -1356,11 +1356,17 @@ Phase 6; the [39] project page, FTP listing, exact FIU trace filename, README
 and site-wide non-commercial copyright notice were verified, but no
 dataset-specific licence file was found, so use is reported as non-commercial
 research with citation rather than as use under a dataset licence. A
-kernel-faithful MGLRU baseline, an in-kernel
-replacement prototype, and a real asynchronous shadow-evaluation prototype were
-not built; in-kernel page-fault and reclaim latency were not measured. The cost
-calibration is a user-space minor-fault microbenchmark. These limitations
-bound the claims to the evaluated simulator, traces, and calibration.
+kernel-faithful MGLRU baseline and an in-kernel replacement prototype were not
+built. A real userspace asynchronous shadow-evaluation prototype was built and
+measured: across 1{,}232 completed evaluations the worker spent 577.8\,$\mu$s
+wall and 575.5\,$\mu$s CPU per evaluation, and at the frozen model's ratio
+$R=783$ this implies a 0.74\,$\mu$s miss-cost break-even, below the
+1.44--4.06\,$\mu$s interval and the 1.98--2.06\,$\mu$s minor-fault calibration.
+It is an unoptimised userspace measurement, not kernel or optimised latency,
+and the prototype was worse than synchronous DA. In-kernel fault-path
+durations were measured in a QEMU guest, but reclaim latency was not reached.
+The cost calibration is a user-space minor-fault microbenchmark. These
+limitations bound the claims to the evaluated simulator, traces, and calibration.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1608,7 +1614,7 @@ doi: 10.48550/arXiv.2609.28870.
 replacement algorithms for time-bounded stale-tolerant data workloads,''
 \emph{Int. J. Sci. Res. Technol.}, vol. 3, no. 6, pp. 556--564, 2026, doi:
 10.5281/zenodo.20576370. \url{https://doi.org/10.5281/zenodo.20576370};
-\url{https://ijsrtjournal.com/article/comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tolerant-data-workloads}.
+\href{https://ijsrtjournal.com/article/comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tolerant-data-workloads}{publisher landing page}.
 
 \bibitem{r30} E. S. Page, ``Continuous inspection schemes,'' \emph{Biometrika},
 vol. 41, no. 1--2, pp. 100--115, 1954.

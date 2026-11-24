@@ -103,6 +103,20 @@ Crossref, arXiv API, Zenodo API and publisher pages:
 Independent run on a 1,200-page loop at C=1,000: LRU 1.000, MRU = OPT = 0.165.
 Matches the paper's stated sanity checks.
 
+### 2.5 Real shadow-evaluation cost (Q1 gap closed, 2026-11-24)
+
+- `reproduction/phase7_async/timing.csv` records real worker-thread timings from
+  three `--async-shadow` repetitions: 1,232 completed evaluations, 711.8 ms wall
+  and 709.0 ms CPU, i.e. 577.8 us and 575.5 us per completed evaluation.
+- With `R=783.28` from `reproduction/cost_model.csv`, the measured 577.8 us per
+  evaluation implies a 0.74 us miss-cost break-even, below the 1.44--4.06 us
+  bootstrap interval and the 1.98--2.06 us minor-fault calibration. This is an
+  unoptimised userspace prototype measurement, not kernel or optimised latency;
+  it does not overturn the total-time conclusion.
+- The stale "MSR/Alibaba/Twitter not run" and "async prototype not measured"
+  entries in `NOT_DONE.md` are now struck through and superseded by the Phase 6
+  manifest and Phase 7 timings.
+
 ---
 
 ## 3. Claims that are NOT verified / contradicted (fix before submission)

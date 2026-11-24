@@ -205,9 +205,16 @@ Three real repetitions on the 80 non-stable traces gave mean miss ratios
 0.5611, 0.5676 and 0.5599; paired async-minus-synchronous differences are
 +0.1082, +0.1147 and +0.1070 with bootstrap CIs excluding zero. The timing CSV
 has 240 rows, 15,066 stale decisions, 1,192 applied results and zero dropped
-requests. The prototype is therefore **worse** than synchronous DA; this is
-reported as measured, with no tuning. `phase5/async_model.csv` remains an
-analytical model and is not compared as if it were a prototype measurement.
+requests. Its timings also give a direct cost for the implemented shadow
+evaluator: 1,232 completed evaluations took 711.8 ms wall and 709.0 ms CPU
+(577.8 and 575.5 us each). With R=783 from `cost_model.csv`, 577.8 us
+per evaluation implies a 0.74 us miss-cost break-even, below the
+1.44--4.06 us bootstrap interval and the 1.98--2.06 us minor-fault
+calibration. This is an unoptimised userspace prototype measurement, not a
+kernel or optimised latency. The prototype is therefore **worse** than
+synchronous DA; this is reported as measured, with no tuning.
+`phase5/async_model.csv` remains an analytical model and is not compared as if
+it were a prototype measurement.
 
 ## Phase 8: QEMU guest kernel (build/run recipe)
 

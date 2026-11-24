@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-11-24: Q1 shadow-evaluation cost measured and stale not-run entries fixed
+
+- **Change:** Extended `reproduction/phase7_async/analyze_async.py` to aggregate worker time per completed shadow evaluation. `timing_summary.csv` now records 1,232 completed evaluations, 711.8 ms worker wall, 709.0 ms worker CPU, 577.8 us wall and 575.5 us CPU per evaluation, and a 0.74 us implied miss-cost break-even at `R=783.28`.
+- **Change:** Added the direct measurement and its caveats to the main and supplement sources in both LaTeX trees and to `paper_final.tex`; it is explicitly an unoptimised userspace prototype timing, not kernel or optimised latency, and does not create a regime where DA is cheaper than continuous evaluation.
+- **Change:** Struck through and superseded stale `NOT_DONE.md` entries saying MSR/Alibaba/Twitter and other PDL families were not run, and that the real async shadow-evaluation prototype was not measured; Phase 6 and Phase 7 artifacts are cited instead.
+- **Change:** Added the new numbers to `claims_to_sources.csv`, `check_paper_numbers.py`, `PROTOCOL.md`, `reproduction/README.md`, `AUDIT_REPORT.md` and `selfaudit.md`. Rebuilt the consolidated PDF; no frozen seed-5001 result was modified.
+- **Change:** Replaced the long inline publisher URL for Patel & Maniar with a linked label in all bibliography sources, removing the bibliography overfull hbox introduced by the earlier URL expansion.
+
 ## 2026-11-24: Single updated PDF; stale manuscript PDFs removed
 
 - **Change:** Created `Drift_Aware_Page_Replacement_UPDATED.pdf` by concatenating the current `drift_gating_latex_source/main.pdf` (11 pages) and `drift_gating_latex_source/supplement.pdf` (13 pages), for 24 pages total.

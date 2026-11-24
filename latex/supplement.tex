@@ -1178,7 +1178,18 @@ $+0.1070$, with win/tie/loss counts 12/0/68, 9/0/71 and 8/0/72. The worker
 timing summary (\texttt{phase7\_async/timing\_summary.csv}) records 240
 non-stable timing rows, 15,066 stale decisions, 1,192 applied results, 0
 dropped results and 0 superseded results. Async execution is therefore clearly
-worse than the synchronous controller in these measurements.
+worse than the synchronous controller in these measurements. The same timings
+give a direct measurement of the implemented shadow evaluator: across 1{,}232
+completed evaluations the worker used 711.8\,ms wall and 709.0\,ms CPU
+(577.8 and 575.5\,$\mu$s per evaluation); enqueueing cost 9.85\,$\mu$s per
+submitted request and the main thread spent 0.115\,ms per trace checking
+worker status. This estimate is lower than the separate 2.46\,ms timing-only
+build, so the two unoptimised userspace measurements bracket the 1.72\,ms cost
+implied by the frozen time decomposition. At $R=783$, 577.8\,$\mu$s per
+evaluation implies a miss-cost break-even of 0.74\,$\mu$s, below the
+1.44--4.06\,$\mu$s bootstrap interval and the 1.98--2.06\,$\mu$s minor-fault
+calibration. It is a prototype-side timing; no kernel shadow evaluator was
+built or measured.
 
 A Linux 6.6.1 guest kernel was then built from source under an unprivileged
 user path and booted nine times under QEMU: three fresh boots each for fixed

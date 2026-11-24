@@ -5,6 +5,19 @@ Source of truth for every change between
 
 ---
 
+## Q1 SHADOW-EVALUATION COST (2026-11-24)
+
+The last outstanding Q1 item was a real measurement of shadow-evaluation cost,
+not another cost-model assumption. `reproduction/phase7_async/timing.csv` now
+yields 1,232 completed evaluations, 711.8 ms worker wall and 709.0 ms CPU
+(577.8 and 575.5 us per evaluation). At `R=783.28` this implies a 0.74 us
+miss-cost break-even, below the 1.44--4.06 us bootstrap interval and the
+1.98--2.06 us minor-fault calibration. This is an unoptimised userspace
+prototype measurement, not kernel or optimised latency, and it does not make DA
+cheaper than continuous evaluation. The stale `NOT_DONE.md` entries saying the
+other PDL families were not run and the async prototype was not measured are
+struck through and superseded. No frozen seed-5001 result changed.
+
 ## SINGLE PDF DELIVERABLE (2026-11-24)
 
 All superseded manuscript PDFs were removed. The only delivered manuscript PDF

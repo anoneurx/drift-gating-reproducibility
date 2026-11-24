@@ -475,6 +475,19 @@ def main():
     for rep, exp in [("1", 0.1082), ("2", 0.1147), ("3", 0.1070)]:
         check(f"phase7 async rep {rep} DA-minus-sync", exp,
               float(p7p[rep]["mean_async_minus_sync"]))
+    p7t = load("phase7_async/timing_summary.csv")[0]
+    check("phase7 completed evaluations", 1232, int(p7t["sum_completed"]), 0)
+    check("phase7 worker wall total ms", 711.8,
+          float(p7t["sum_worker_wall_ns"]) / 1e6, 0.1, " ms")
+    check("phase7 worker CPU total ms", 709.0,
+          float(p7t["sum_worker_cpu_ns"]) / 1e6, 0.1, " ms")
+    check("phase7 mean shadow-eval wall us", 577.8,
+          float(p7t["mean_wall_ns_per_completed_eval"]) / 1000, 0.1, " us")
+    check("phase7 mean shadow-eval CPU us", 575.5,
+          float(p7t["mean_cpu_ns_per_completed_eval"]) / 1000, 0.1, " us")
+    r7 = float(cm["break_even_ratio_R"])
+    check("phase7 measured-cost miss break-even us", 0.74,
+          float(p7t["mean_wall_ns_per_completed_eval"]) / 1000 / r7, 0.01, " us")
 
     # Phase 8: real guest-kernel measurements (read from the generated CSVs).
     k8 = load("phase8_kernel/kernel_summary.csv")
@@ -579,6 +592,13 @@ def main():
     drift_main = drift_fragment("main.tex")
     check("drift main cites independent capacity pilot", True,
           "capacity selected on an independent pilot trace" in drift_main)
+    for rel in ["latex/main.tex", "paper_final.tex",
+                "drift_gating_latex_source/main_template.tex",
+                "drift_gating_latex_source/main.tex"]:
+        with open(os.path.join(HERE, "..", rel)) as fh:
+            txt = fh.read()
+        check(f"{rel} reports measured shadow-eval cost", True,
+              "577.8" in txt and "575.5" in txt and "0.74" in txt)
 
     fails = [c for c in CHECKS if not c[0]]
     for ok, claim, exp, act, unit in CHECKS:

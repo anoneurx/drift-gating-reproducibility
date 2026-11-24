@@ -604,9 +604,25 @@ Completed evaluations & 1{,}232 \\
 Applied results & 1{,}192 \\
 Superseded results & 0 \\
 Stale decisions observed & 15{,}066 \\
+Worker wall time & 711.8\,ms \\
+Worker CPU time & 709.0\,ms \\
+Mean worker wall per completed evaluation & 577.8\,\us \\
+Mean worker CPU per completed evaluation & 575.5\,\us \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+The Phase 7 timings are a direct measurement of the implemented shadow
+evaluator, not a simulator assumption. Across 1{,}232 completed evaluations the
+worker used 711.8\,ms wall and 709.0\,ms CPU (577.8 and 575.5\,\us{} per
+evaluation); enqueueing cost 9.85\,\us{} per submitted request and the main
+thread spent 0.115\,ms per trace checking worker status. This estimate is lower
+than the separate 2.46\,ms timing-only build in the cost section, so
+the two unoptimised userspace measurements bracket the 1.72\,ms cost implied by
+the frozen time decomposition. At $R=783$, 577.8\,\us{} per evaluation implies
+a miss-cost break-even of 0.74\,\us{}, below the 1.44--4.06\,\us{} bootstrap
+interval and the 1.98--2.06\,\us{} minor-fault calibration. The result remains
+a prototype-side timing: no kernel shadow evaluator was built or measured.
 
 \subsection{QEMU guest-kernel observation (Phase 8)}
 

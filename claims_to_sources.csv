@@ -129,6 +129,10 @@ Phase 7 async timing rows,240,reproduction/phase7_async/timing_summary.csv,three
 Phase 7 async stale decisions,15066,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
 Phase 7 async applied results,1192,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
 Phase 7 async dropped requests,0,reproduction/phase7_async/timing_summary.csv,measured worker-thread prototype counters
+Phase 7 completed shadow evaluations,1232,reproduction/phase7_async/timing_summary.csv,sum of completed worker requests across 240 timing rows
+Phase 7 measured shadow-eval wall cost,577.8 us per eval,reproduction/phase7_async/timing_summary.csv; reproduction/phase7_async/timing.csv,711793385 ns worker wall / 1232 completed evaluations; unoptimised userspace prototype
+Phase 7 measured shadow-eval CPU cost,575.5 us per eval,reproduction/phase7_async/timing_summary.csv; reproduction/phase7_async/timing.csv,709039242 ns thread CPU / 1232 completed evaluations; unoptimised userspace prototype
+Phase 7 measured-cost miss break-even,0.74 us,reproduction/phase7_async/timing_summary.csv; reproduction/cost_model.csv,577.754 us per eval / R=783.28; not a kernel latency
 Phase 7 async PDL repetitions count,3,reproduction/phase7_async/summary.csv,three real --async-shadow repetitions
 Phase 6 PDL family count,6,reproduction/phase6_pdl/manifest.csv,one 1M-reference prefix per family
 Phase 8 real guest runs,9,reproduction/phase8_kernel/kernel_summary.csv,three fresh QEMU boots per condition (fixed_lru/fixed_mglru/coupled)

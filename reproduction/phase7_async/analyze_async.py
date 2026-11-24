@@ -2,7 +2,7 @@
 """Aggregate real Phase 7 async-shadow prototype runs against frozen sync DA."""
 import csv
 import os
-from statistics import mean
+from statistics import mean, median
 
 import numpy as np
 from scipy.stats import wilcoxon
@@ -81,18 +81,34 @@ def main():
             if r["scenario"] == "stable":
                 continue
             timing.append({k: r[k] for k in r})
+    sum_enqueued = sum(int(r["enqueued"]) for r in timing)
+    sum_completed = sum(int(r["completed"]) for r in timing)
+    sum_wall = sum(float(r["worker_wall_ns"]) for r in timing)
+    sum_cpu = sum(float(r["worker_cpu_ns"]) for r in timing)
+    sum_submit = sum(float(r["submit_ns"]) for r in timing)
+    sum_check = sum(float(r["check_ns"]) for r in timing)
+    per_eval_wall = [float(r["worker_wall_ns"]) / int(r["completed"]) for r in timing
+                     if int(r["completed"])]
     tsum = {
         "n_traces": len(timing),
-        "sum_enqueued": sum(int(r["enqueued"]) for r in timing),
+        "sum_enqueued": sum_enqueued,
         "sum_dropped": sum(int(r["dropped"]) for r in timing),
-        "sum_completed": sum(int(r["completed"]) for r in timing),
+        "sum_completed": sum_completed,
         "sum_applied": sum(int(r["applied"]) for r in timing),
         "sum_superseded": sum(int(r["superseded"]) for r in timing),
         "sum_stale": sum(int(r["stale"]) for r in timing),
+        "sum_submit_ns": sum_submit,
+        "sum_check_ns": sum_check,
+        "sum_worker_wall_ns": sum_wall,
+        "sum_worker_cpu_ns": sum_cpu,
         "mean_submit_ns_per_trace": mean(float(r["submit_ns"]) for r in timing),
         "mean_check_ns_per_trace": mean(float(r["check_ns"]) for r in timing),
         "mean_worker_wall_ns_per_trace": mean(float(r["worker_wall_ns"]) for r in timing),
         "mean_worker_cpu_ns_per_trace": mean(float(r["worker_cpu_ns"]) for r in timing),
+        "mean_submit_ns_per_enqueued_eval": sum_submit / sum_enqueued,
+        "mean_wall_ns_per_completed_eval": sum_wall / sum_completed,
+        "mean_cpu_ns_per_completed_eval": sum_cpu / sum_completed,
+        "median_wall_ns_per_completed_eval": median(per_eval_wall),
     }
     write_csv(os.path.join(HERE, "timing_summary.csv"), list(tsum), [tsum])
     print(f"aggregated {len(reps)} async repetitions over {len(sync)} non-stable traces")

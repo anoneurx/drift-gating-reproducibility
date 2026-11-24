@@ -1,2 +1,2 @@
-n_traces,sum_enqueued,sum_dropped,sum_completed,sum_applied,sum_superseded,sum_stale,mean_submit_ns_per_trace,mean_check_ns_per_trace,mean_worker_wall_ns_per_trace,mean_worker_cpu_ns_per_trace
-240,1232,0,1232,1192,0,15066,50549.683333333334,114530.01666666666,2965805.7708333335,2954330.175
+n_traces,sum_enqueued,sum_dropped,sum_completed,sum_applied,sum_superseded,sum_stale,sum_submit_ns,sum_check_ns,sum_worker_wall_ns,sum_worker_cpu_ns,mean_submit_ns_per_trace,mean_check_ns_per_trace,mean_worker_wall_ns_per_trace,mean_worker_cpu_ns_per_trace,mean_submit_ns_per_enqueued_eval,mean_wall_ns_per_completed_eval,mean_cpu_ns_per_completed_eval,median_wall_ns_per_completed_eval
+240,1232,0,1232,1192,0,15066,12131924.0,27487204.0,711793385.0,709039242.0,50549.683333333334,114530.01666666666,2965805.7708333335,2954330.175,9847.34090909091,577754.3709415584,575518.8652597403,547425.6666666667

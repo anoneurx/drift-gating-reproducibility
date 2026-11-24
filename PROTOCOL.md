@@ -232,6 +232,13 @@ Use is non-commercial scholarly research with citation of the PDL/README citatio
 - Metrics: miss ratio, switches, enqueued/dropped/superseded/stale-eval counts, critical-path ns/ref, worker wall/CPU ms, queue wait.
 - Paired bootstrap over 80 non-stable traces, B=10000, seed 20261126, plus Wilcoxon+Holm for miss ratio. Report null or negative outcomes directly.
 
+### Execution record: direct shadow-evaluation cost (post hoc)
+
+- The three real `--async-shadow` repetitions produced 240 non-stable timing rows in `reproduction/phase7_async/timing.csv`. `analyze_async.py` records 1,232 enqueued and completed evaluations, zero dropped requests, 1,192 applied results and 15,066 stale decisions.
+- Measured worker time was 711,793,385 ns wall and 709,039,242 ns CPU, giving 577.8 us wall and 575.5 us CPU per completed evaluation; enqueueing cost 9.85 us per submitted request and the main thread spent 0.115 ms per trace checking worker status.
+- At the frozen cost-model ratio R=783.28 (`reproduction/cost_model.csv`), 577.8 us per evaluation implies a miss-cost break-even of 0.74 us. This lies below the 1.44--4.06 us bootstrap interval and the 1.98--2.06 us user-space minor-fault calibration. The separate timing-only build in Phase 5 measured 2.46 ms per evaluation, so the two unoptimised userspace measurements bracket the 1.72 ms implied by the frozen time decomposition.
+- These are real timings of the implemented userspace shadow-evaluation routine in an unoptimised prototype. No kernel shadow evaluator was built or measured, and no frozen main-study result is replaced by these numbers.
+
 ## Phase 8 - QEMU guest kernel: real MGLRU and in-kernel latency (post hoc record)
 
 **Recorded date:** 2026-11-24 (post hoc; see version history)

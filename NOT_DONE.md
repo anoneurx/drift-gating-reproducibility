@@ -5,7 +5,7 @@ Items not achievable with real data in this workspace run are listed here and ar
 ## External-validity gaps
 - **Kernel-faithful MGLRU baseline / in-kernel replacement prototype.** Not built. The MGLRU-style baseline is a page-level abstraction without kernel aging/reclaim-pressure signals.
 - **Production virtual-memory paging traces.** Not collected. Public traces are FIU storage block/cache prefixes; synthetic traces have generated phase boundaries.
-- **In-kernel page-fault or reclaim latency.** Not measured. Cost calibration uses a user-space minor-fault microbenchmark (`prototype_fault_latency.cpp`).
+- **In-kernel page-fault or reclaim latency.** ~~Not measured.~~ **Superseded on 2026-11-24:** Phase 8 measured real in-kernel fault-path durations in a QEMU guest (641--761 ns median for `handle_mm_fault`), but no reclaim function was reached, so reclaim latency remains unmeasured. Cost calibration still uses the user-space minor-fault microbenchmark (`prototype_fault_latency.cpp`).
 
 ## Repaired capacity-sampling correction (Task B)
 - **Public traces:** Re-selection on 500,000-reference training prefixes with the recorded post hoc repair (`Cs=min(round(p*C), round(f*D_w)), f=1.0`, `--cs-cap-f 1.0`) produced the same selected configuration and identical held-out miss ratio/switches as the original controller. Command/seed/output recorded below; no improvement observed.
@@ -50,11 +50,11 @@ Items not achievable with real data in this workspace run are listed here and ar
 - Cost-claim correction (re-analysis of the same frozen seed-5001 data, not a new experiment): `phase5/total_time_envelope.py` and `phase5/bootstrap_total_time.py` regenerate total-time Table XIII and Fig. 6 over CLOCK, S3-FIFO, ContShadow and DA. The lower envelope is CLOCK below 0.215539 us, S3-FIFO 0.215539-2.304942 us and ContShadow above 2.304942 us; DA is never on it (minimum excess 3.268673 ns/ref at 2.304942 us, bootstrap 95% CI [-28.597766, 40.231357] ns includes zero). The earlier claim that gating pays off only when misses are cheap is withdrawn; point estimates show DA is never best in these measurements.
 
 ### Still NOT DONE / blocked
-- External traces not in workspace/licensed: MSR Cambridge (SNIA IOTTA terms), Alibaba, Tencent, CloudPhysics, Twitter/Meta. No substitution made.
+- ~~External traces not in workspace/licensed: MSR Cambridge (SNIA IOTTA terms), Alibaba, Tencent, CloudPhysics, Twitter/Meta. No substitution made.~~ **Superseded on 2026-11-24:** bounded 1M-reference prefixes of all six remaining PDL families were streamed and run in Phase 6; see `reproduction/phase6_pdl/manifest.csv` and `PROTOCOL.md`.
 - LHD not implemented.
 - W-TinyLFU/SIEVE/ADWIN/PH are simplified independent implementations, not authors' reference code.
 - FIU files are 500k-request prepared splits; original .zst not in workspace.
-- Kernel-faithful MGLRU, in-kernel replacement prototype, real async shadow-evaluation prototype, in-kernel page-fault/reclaim latency - not built/measured.
+- ~~Kernel-faithful MGLRU, in-kernel replacement prototype, real async shadow-evaluation prototype, in-kernel page-fault/reclaim latency - not built/measured.~~ **Superseded on 2026-11-24:** the real async shadow-evaluation prototype was built, run three times and timed in Phase 7, including 577.8 us wall per completed evaluation; Phase 8 measured real in-kernel fault-path durations. A kernel-faithful MGLRU baseline, an in-kernel DA policy and reclaim latency are still not built/measured.
 - ~~[39] URL/licence still unverified; do not assert.~~ **Superseded on 2026-11-24:** all five primary pages verified; see `REFERENCE_VERIFICATION.md`.
 - Full statistical rerun with block-bootstrap CIs across all affected analyses not completed for every legacy script; main new results use 10k bootstrap seed 0 where stated.
 - Manuscript is 17 pages (over 10-12 target); compression pass still needed.
@@ -70,8 +70,8 @@ Items not achievable with real data in this workspace run are listed here and ar
 - **Compression:** main 17 -> 15 pages (arraystretch, figure widths, literature/appendix/detail tables moved to 5-page supplement); supplement.pdf rebuilt.
 
 ### Still NOT DONE / blocked
-- Remaining PDL traces (MSR, Alibaba, Tencent, CloudPhysics, Twitter, Meta) not downloaded or run.
-- Kernel-faithful MGLRU, in-kernel replacement prototype, real async shadow-eval prototype, in-kernel page-fault/reclaim latency - not built/measured.
+- ~~Remaining PDL traces (MSR, Alibaba, Tencent, CloudPhysics, Twitter, Meta) not downloaded or run.~~ **Superseded on 2026-11-24:** all six families were downloaded as bounded 1M-reference prefixes and run in Phase 6; see `reproduction/phase6_pdl/manifest.csv`.
+- ~~Kernel-faithful MGLRU, in-kernel replacement prototype, real async shadow-eval prototype, in-kernel page-fault/reclaim latency - not built/measured.~~ **Superseded on 2026-11-24:** Phase 7 built and timed a real async shadow-eval prototype (577.8 us wall per completed evaluation); Phase 8 measured in-kernel fault-path durations. The kernel-faithful MGLRU baseline, in-kernel DA policy and reclaim latency remain unmeasured.
 - SIEVE/W-TinyLFU/ADWIN/PH/LHD remain simplified independent implementations.
 - Main paper 15 pages + 5-page supplement at that point: above the original 10-12 page target. Phase 9 compression by moving detail to the supplement is in progress; no result content is deleted.
 

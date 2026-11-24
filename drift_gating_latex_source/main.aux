@@ -95,35 +95,35 @@
 \@writefile{lot}{\contentsline {table}{\numberline {X}{\ignorespaces Public FIU block traces: means over six traces (also in the supplement)}}{7}{table.caption.15}\protected@file@percent }
 \newlabel{tab:fiu_main}{{X}{7}{Public FIU block traces: means over six traces (also in the supplement)}{table.caption.15}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {IV-I}QEMU guest-kernel observation}{7}{subsection.4.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {IV-J}Exploratory Real-Program Evidence}{7}{subsection.4.10}\protected@file@percent }
-\newlabel{sec:programs}{{IV-J}{7}{Exploratory Real-Program Evidence}{subsection.4.10}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XI}{\ignorespaces Shadow-evaluation miss counts on webresearch at reference 16{,}000 (also in the supplement)}}{7}{table.caption.16}\protected@file@percent }
 \newlabel{tab:rank_main}{{XI}{7}{Shadow-evaluation miss counts on webresearch at reference 16{,}000 (also in the supplement)}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {IV-J}Exploratory Real-Program Evidence}{7}{subsection.4.10}\protected@file@percent }
+\newlabel{sec:programs}{{IV-J}{7}{Exploratory Real-Program Evidence}{subsection.4.10}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {V}Cost Break-Even and Total-Time Envelope}{7}{section.5}\protected@file@percent }
 \newlabel{sec:cost}{{V}{7}{Cost Break-Even and Total-Time Envelope}{section.5}{}}
 \newlabel{eq:breakeven}{{3}{7}{Cost Break-Even and Total-Time Envelope}{equation.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Discussion: When Does Gating Pay Off?}{7}{section.6}\protected@file@percent }
-\newlabel{sec:discussion}{{VI}{7}{Discussion: When Does Gating Pay Off?}{section.6}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XII}{\ignorespaces Post hoc follow-ups: outcomes and representative numbers (also in the supplement)}}{8}{table.caption.17}\protected@file@percent }
 \newlabel{tab:followups_main}{{XII}{8}{Post hoc follow-ups: outcomes and representative numbers (also in the supplement)}{table.caption.17}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XIII}{\ignorespaces Phase 6: selected methods across six CMU PDL families (18 points)}}{8}{table.caption.18}\protected@file@percent }
 \newlabel{tab:pdl_main}{{XIII}{8}{Phase 6: selected methods across six CMU PDL families (18 points)}{table.caption.18}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XIV}{\ignorespaces Phase 7: real asynchronous-shadow prototype, 80 non-stable traces per repetition}}{8}{table.caption.19}\protected@file@percent }
 \newlabel{tab:async_main}{{XIV}{8}{Phase 7: real asynchronous-shadow prototype, 80 non-stable traces per repetition}{table.caption.19}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Discussion: When Does Gating Pay Off?}{8}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{VI}{8}{Discussion: When Does Gating Pay Off?}{section.6}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XV}{\ignorespaces Phase 8: real guest-kernel observations; ftrace row is handle\_mm\_fault}}{8}{table.caption.20}\protected@file@percent }
 \newlabel{tab:kernel_main}{{XV}{8}{Phase 8: real guest-kernel observations; ftrace row is handle\_mm\_fault}{table.caption.20}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {VII}Threats to Validity and Limitations}{8}{section.7}\protected@file@percent }
 \newlabel{sec:threats}{{VII}{8}{Threats to Validity and Limitations}{section.7}{}}
 \bibcite{arc}{1}
-\bibcite{car}{2}
-\bibcite{lirs}{3}
-\bibcite{twoq}{4}
 \@writefile{lot}{\contentsline {table}{\numberline {XVI}{\ignorespaces Total time per reference by miss cost, using the measured per-reference times and mean miss ratios of the 80 non-stable test traces. Panel (a): bold marks the lowest total in each row; DA is never the lowest, and the last column gives its excess over the best policy. Panel (b): pairwise crossing miss costs; the DA/S3-FIFO interval is unstable because the miss-ratio difference is small. All values are point estimates; bootstrap intervals are in the text.}}{9}{table.caption.21}\protected@file@percent }
 \newlabel{tab:breakeven}{{XVI}{9}{Total time per reference by miss cost, using the measured per-reference times and mean miss ratios of the 80 non-stable test traces. Panel (a): bold marks the lowest total in each row; DA is never the lowest, and the last column gives its excess over the best policy. Panel (b): pairwise crossing miss costs; the DA/S3-FIFO interval is unstable because the miss-ratio difference is small. All values are point estimates; bootstrap intervals are in the text}{table.caption.21}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {XVII}{\ignorespaces Hypothesis outcomes (reproducible main study; also in the supplement)}}{9}{table.caption.23}\protected@file@percent }
 \newlabel{tab:hyp_main}{{XVII}{9}{Hypothesis outcomes (reproducible main study; also in the supplement)}{table.caption.23}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{9}{section.8}\protected@file@percent }
 \newlabel{sec:conclusion}{{VIII}{9}{Conclusion}{section.8}{}}
+\bibcite{car}{2}
+\bibcite{lirs}{3}
+\bibcite{twoq}{4}
 \bibcite{s3fifo}{5}
 \bibcite{msched}{6}
 \bibcite{gpuext}{7}
@@ -153,8 +153,8 @@
 \bibcite{mini}{31}
 \bibcite{shards}{32}
 \bibcite{dip}{33}
-\bibcite{mglru}{34}
-\bibcite{pdl}{35}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Total time per reference versus miss cost for CLOCK, S3-FIFO, ContShadow and DA, with the lower envelope of the three comparators (black dashed). CLOCK is cheapest below 0.216\,\textmu s, S3-FIFO between 0.216 and 2.305\,\textmu s, and ContShadow above 2.305\,\textmu s; DA is never on the envelope, with a minimum excess of 3.27\,ns/reference at 2.305\,\textmu s. The orange band is the measured minor-fault cost. The inset zooms the CLOCK/S3-FIFO crossing.}}{10}{figure.caption.22}\protected@file@percent }
 \newlabel{fig:breakeven}{{6}{10}{Total time per reference versus miss cost for CLOCK, S3-FIFO, ContShadow and DA, with the lower envelope of the three comparators (black dashed). CLOCK is cheapest below 0.216\us , S3-FIFO between 0.216 and 2.305\us , and ContShadow above 2.305\us ; DA is never on the envelope, with a minimum excess of 3.27\,ns/reference at 2.305\us . The orange band is the measured minor-fault cost. The inset zooms the CLOCK/S3-FIFO crossing}{figure.caption.22}{}}
+\bibcite{mglru}{34}
+\bibcite{pdl}{35}
 \gdef \@abspage@last{11}
