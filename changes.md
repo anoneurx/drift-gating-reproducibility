@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-11-24: Single updated PDF; stale manuscript PDFs removed
+
+- **Change:** Created `Drift_Aware_Page_Replacement_UPDATED.pdf` by concatenating the current `drift_gating_latex_source/main.pdf` (11 pages) and `drift_gating_latex_source/supplement.pdf` (13 pages), for 24 pages total.
+- **Change:** Removed all superseded manuscript PDFs from the repository root, both LaTeX trees and `reproduction/`; retained only figure PDFs needed by the LaTeX sources.
+- **Change:** Updated `reproduction/final_hygiene.py` to validate the single consolidated PDF instead of deleted per-tree PDFs.
+- **Note:** The main and supplement retain their independent reference numbering, so the consolidated PDF contains main `[12]`/`[27]` and supplement `[41]`.
+
 ## 2026-11-24: Reviewer-flagged references verified and corrected
 
 - **Change:** Kept Patel & Maniar and EACLOCK after DOI/publisher verification; added direct DOI/journal URLs and the Nov. 2026 EACLOCK issue date to all bibliography sources.

@@ -5,6 +5,13 @@ Source of truth for every change between
 
 ---
 
+## SINGLE PDF DELIVERABLE (2026-11-24)
+
+All superseded manuscript PDFs were removed. The only delivered manuscript PDF
+is `Drift_Aware_Page_Replacement_UPDATED.pdf`, a 24-page concatenation of the
+current 11-page main paper and 13-page supplement. Figure PDFs used by the
+LaTeX sources were retained.
+
 ## REFERENCE FIX: REVIEWER-FLAGGED [12]/[27]/[41] (2026-11-24)
 
 Patel & Maniar and EACLOCK were verified from DOI/publisher pages and retained

@@ -2,8 +2,8 @@
 """Read-only final hygiene report for the two paper trees.
 
 This script creates no data. It verifies the frozen main-study artifacts,
-runs the numeric checker, and reports page counts, undefined references,
-overfull hboxes, and placeholder tokens in both compiled manuscripts.
+runs the numeric checker, and reports the consolidated PDF page count, undefined
+references, overfull hboxes, and placeholder tokens in both manuscript sources.
 """
 import hashlib
 import os
@@ -14,6 +14,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 TREES = [ROOT / "drift_gating_latex_source", ROOT / "latex"]
+UNIFIED_PDF = ROOT / "Drift_Aware_Page_Replacement_UPDATED.pdf"
 FROZEN = {
     "main_study_results.csv": "155d28a2d9dc33e11e37f1ae289f221d51d99c239f386a310136c4b84a6844e9",
     "main_study_detection.csv": "c97b5283cbcbafd38aa23949f7025995f4416b0700631388c80095c002a6d8a2",
@@ -99,24 +100,24 @@ def main():
         "No independently timestamped version")) and "**post hoc**" in plow
     ok &= good
     print(f"  {'PASS' if good else 'FAIL'} PROTOCOL.md: version history + post hoc status")
-    for tree in TREES:
-        txt = pdf_text(tree / "main.pdf").lower()
-        hits = [phrase for phrase in AFFIRMATIVE if phrase in txt]
-        good = "post hoc" in txt and not hits
-        ok &= good
-        print(f"  {'PASS' if good else 'FAIL'} {tree.name}/main.pdf: "
-              f"{'post hoc wording in compiled PDF' if good else 'stale or missing wording'}")
+    txt = pdf_text(UNIFIED_PDF).lower()
+    hits = [phrase for phrase in AFFIRMATIVE if phrase in txt]
+    good = "post hoc" in txt and not hits
+    ok &= good
+    print(f"  {'PASS' if good else 'FAIL'} {UNIFIED_PDF.name}: "
+          f"{'post hoc wording in compiled PDF' if good else 'stale or missing wording'}")
 
+    print("\nCompiled output")
+    pages = pdf_pages(UNIFIED_PDF)
+    print(f"  {UNIFIED_PDF.name}: {pages} pages")
+    good = pages == 24
+    ok &= good
+    if not good:
+        print("    FAIL unified PDF is not 24 pages (11 main + 13 supplement)")
     for tree in TREES:
         print(f"\n{tree.name}")
         for stem in ("main", "supplement"):
-            pdf = tree / f"{stem}.pdf"
             log = tree / f"{stem}.log"
-            pages = pdf_pages(pdf)
-            print(f"  {stem}: {pages} pages")
-            if stem == "main" and isinstance(pages, int) and not 10 <= pages <= 12:
-                ok = False
-                print(f"    FAIL main PDF outside 10-12 page target")
             if log.exists():
                 text = log.read_text(errors="replace")
                 undef = count(r"undefined (?:references|reference)", text)

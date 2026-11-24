@@ -33,6 +33,9 @@ licence. It says that the trace was used for non-commercial research with
 citation, and that no dataset-specific licence file was found. This wording is
 now used in `drift_gating_latex_source/main.tex`,
 `drift_gating_latex_source/supplement.tex`, `paper_final.tex`, `latex/main.tex`
-and `latex/supplement.tex`. The current PDFs generated from those sources were
-rebuilt. Older timestamped revision PDFs in the repository root are retained
-for provenance and were not rebuilt.
+and `latex/supplement.tex`. All manuscript PDF versions were then removed and
+replaced by one consolidated deliverable,
+`Drift_Aware_Page_Replacement_UPDATED.pdf`, which concatenates the current
+11-page main paper and 13-page supplement (24 pages total). Figure PDFs under
+`drift_gating_latex_source/figs/` and `reproduction/` are source assets and were
+retained.

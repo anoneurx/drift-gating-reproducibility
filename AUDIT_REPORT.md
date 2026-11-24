@@ -5,6 +5,11 @@ Scope: `latex/main.tex` / `latex/main.pdf` (12 pages), `reproduction/` (source,
 CSVs, analysis scripts), `recovery/` (provenance notes), and external
 verification of the cited literature.
 
+Note: this is a historical audit snapshot dated 2026-11-22. PDF filenames in
+the snapshot refer to files that existed then; those manuscript PDFs were later
+removed in favor of the single deliverable
+`Drift_Aware_Page_Replacement_UPDATED.pdf`.
+
 ## Overall verdict
 
 **Structurally complete but NOT yet claim-complete.** The paper compiles

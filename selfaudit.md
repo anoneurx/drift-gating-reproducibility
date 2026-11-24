@@ -1,5 +1,9 @@
 # Self Audit
 
+Note: build notes below are historical. All superseded manuscript PDFs were
+removed and replaced by `Drift_Aware_Page_Replacement_UPDATED.pdf`; figure PDFs
+needed by LaTeX were retained.
+
 ## Rule 1: No placeholders, no "TBD/XX/[insert]", no mock/estimated/simulated-for-illustration/imagined data
 **Met.** Manuscript body grep for `TBD, XX, insert, session, change log, NOT_DONE, placeholder, lorem` (case-insensitive) in `latex/main.tex`/`paper_final.tex` returns only legitimate `insert` substrings in "insertion" words (3 matches). No TBD/XX/placeholder/lorem/mock/estimated/imagined data in manuscript body. All new numbers come from real simulator runs or released CSVs.
 
