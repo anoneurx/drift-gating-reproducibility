@@ -3,6 +3,7 @@
 ## Version history and evidentiary status
 
 - `8d69a4667ca71a05b79034180b7e42766cfaa66a` — `2026-11-24T17:27:05+01:00` — `Snapshot research artifacts before post hoc relabeling` (pre-relabel snapshot; this file was present in it as then written).
+- `e238f52af4e5fce9dedc3ad06190f043ced8841b` — `2026-11-24T17:34:24+01:00` — `Relabel all follow-ups as post hoc and document git provenance` (this relabeling commit).
 - No independently timestamped version of this file predating the runs it describes was found. The internal dates below are author-recorded labels, not audited prospective registration timestamps.
 - Therefore Phases 1--10 are **post hoc** records. They are reported as post hoc follow-ups in the manuscript and audit files, not as protocol-guided or prospectively registered results.
 - Frozen main-study results (seed 5001, C=1000, default config) are not changed.
