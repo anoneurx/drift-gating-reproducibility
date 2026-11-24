@@ -154,14 +154,14 @@ Miss ratio per trace/capacity; paired comparisons across traces/capacities where
 **Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### [39] verification (done by webfetch, reported)
-- Both [39] URLs are live. The FTP index lists `fiu`, `msr`, `alibabaBlock`, `tencentBlock`, `cloudphysics`, `twitter`, `metaKV`, etc. README states zstd trace format and citation requirements. PDL copyright notice (https://pdl.cmu.edu/Publications/copyright.shtml) says documents/software are provided for timely dissemination of scholarly work on a **non-commercial basis**, copyright remains with authors, and copying for commercial redistribution/republication/dissemination/reposting requires explicit permission. No explicit dataset licence file was found; we use only publicly downloadable traces for non-commercial research with citation, and state this.
+- Both [39] URLs are live. The FTP index lists `fiu`, `msr`, `alibabaBlock`, `tencentBlock`, `cloudphysics`, `twitter`, `metaKV`, etc.; the `fiu/` listing contains `fiu_madmax-110108-112108.oracleGeneral.zst` (HTTP 200, Content-Length 3,189,409). README states zstd 24-byte record format and citation requirements. PDL copyright notice (https://pdl.cmu.edu/Publications/copyright.shtml) says documents/software are provided for timely dissemination of scholarly work on a **non-commercial basis**, copyright remains with authors, and copying for commercial redistribution/republication/dissemination/reposting requires explicit permission. No dataset-specific licence file was found; we use only publicly downloadable traces for non-commercial research with citation and do not claim a dataset licence.
 
 ### LHD (Least Hit Density, Beckmann et al., NSDI 2018)
 - Implement a **simplified independent** LHD-style hit-density heuristic in `sim_full.cpp` (uniform object size; score = (hits+prior)/(age+1); min-heap with lazy invalidation). It is NOT the paper's exact conditional-probability estimator; report as a heuristic with this limitation.
 - Register as method `LHD`, compile, smoke-check, then include in synthetic and real-trace runs. No tuning on test results.
 
 ### External traces
-- Download a small, publicly served subset from [39] (CMU PDL cacheDatasets `fiu/` directory; non-commercial research use with citation). Convert with `convert_public_traces.py` (24-byte records, zstd). If a trace is too large for full replay, convert an explicit request prefix and state the exact limit; no silent truncation. Capacities 1/5/10% WSS as in Phase 4a.
+- Download a small, publicly served subset from [39] (CMU PDL cacheDatasets `fiu/` directory; e.g. `fiu_madmax-110108-112108.oracleGeneral.zst`; non-commercial research use with citation, no dataset-specific licence asserted). Convert with `convert_public_traces.py` (24-byte records, zstd). If a trace is too large for full replay, convert an explicit request prefix and state the exact limit; no silent truncation. Capacities 1/5/10% WSS as in Phase 4a.
 - Compare DA, ContShadow, SIEVE, W-TinyLFU, LHD, S3-FIFO, ARC, LRU with paired per-trace results; report raw CSVs and means.
 
 ## Phase 5e - Total-time envelope re-analysis (2026-11-24)
@@ -188,7 +188,7 @@ This is a new external-validity experiment. It does not change the frozen seed-5
 5. Twitter sample10: `https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/twitter/sample10/cluster10.oracleGeneral.sample10.zst`
 6. MetaKV: `https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/metaKV/202206_kv_traces_all.csv.oracleGeneral.zst`
 
-Use is non-commercial scholarly research with citation of the PDL/README citations. No explicit dataset licence file was found; this limitation is reported.
+Use is non-commercial scholarly research with citation of the PDL/README citations. No dataset-specific licence file was found; PDL's site-wide notice states only that server materials are provided on a non-commercial basis. This limitation is reported.
 
 ### Conversion and prefix rule
 

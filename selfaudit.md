@@ -9,8 +9,8 @@
 ## Rule 3: Never tune/select/reword results to look better; null/negative results stay; any change made after seeing test results labeled "post hoc"
 **Met.** Repaired capacity-sampling correction remained identical/no improvement and is labeled post hoc. Trigger/param/rankability measurements are labeled post hoc in `latex/main.tex` Section `sec:posthoc` and in `NOT_DONE.md`. FIU oracle produced 0 confirms (no bounds) and is reported as not evidence of benefit. Negative/worse cases retained (periodic/random worse than DA, W=4000 worse, FIU C=20000 zero switches).
 
-## Rule 4: Do not invent references, datasets, venues, or quartiles; add citation only if verified. [39] URL/licence for user verification; do not assert it
-**Met.** No references/datasets/venues/quartiles added. [39] remains cited as CMU PDL cacheDatasets; no URL/licence asserted. `NOT_DONE.md` flags [39] for user verification.
+## Rule 4: Do not invent references, datasets, venues, or quartiles; add citation only if verified
+**Met after 2026-11-24 fix.** Patel & Maniar and EACLOCK were retained only after DOI/publisher verification. [39]/supplement [41] remains CMU PDL cacheDatasets; project page, FTP listing, exact FIU `madmax` filename, README and PDL copyright page were verified. No dataset-specific licence is claimed. Evidence is in `REFERENCE_VERIFICATION.md`; `NOT_DONE.md` no longer flags these as unverified.
 
 ## Rule 5: Manuscript body must contain no process language
 **Met.** `latex/main.tex`/`paper_final.tex` have no `in this session`, `as requested`, `previous report/version`, `change log`, `NOT_DONE`. Process details are in `NOT_DONE.md`, `selfaudit.md`, `changes.md`, `claims_to_sources.csv`.

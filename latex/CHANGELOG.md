@@ -5,6 +5,16 @@ Source of truth for every change between
 
 ---
 
+## REFERENCE FIX: REVIEWER-FLAGGED [12]/[27]/[41] (2026-11-24)
+
+Patel & Maniar and EACLOCK were verified from DOI/publisher pages and retained
+with direct URLs added. The CMU PDL entry was retained after verifying the
+project page, `cacheDatasets` FTP listing, exact FIU `madmax` filename and
+README, but the licence sentence was narrowed: PDL's site-wide copyright notice
+says materials are provided on a non-commercial basis and no dataset-specific
+licence file was found. No performance number changed. Evidence is in
+`REFERENCE_VERIFICATION.md`; current PDFs and generated text were rebuilt.
+
 ## PHASE 10: INDEPENDENT CAPACITY PILOT (2026-11-24)
 
 A reviewer noted that the FIU replay capacity $C=20{,}000$ had been chosen from

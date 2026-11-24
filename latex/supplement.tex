@@ -277,11 +277,14 @@ DA 0.5477, LRU 0.5496 and LHD 0.6979 (FIU 0.9577, 15-program 0.6462). On FIU,
 S3-FIFO/ARC were best and DA 0.7087 was worse than LRU 0.7011; on 15-program
 traces, S3-FIFO was best (0.4828) and DA 0.5155 was near ContShadow/PH/ADWIN.
 
-The [39] URLs were verified: the CMU PDL repository publicly hosts FIU, MSR,
-Alibaba, Tencent, CloudPhysics, Twitter and Meta traces; its copyright notice
-permits non-commercial scholarly use with citation, and no explicit dataset
-licence file was found. We downloaded three original FIU traces (madmax
-918,010 refs and webresearch 3,274,061 refs in full; homes as a stated
+The [39] project page, FTP listing, README and site-wide copyright notice were
+verified: the CMU PDL repository publicly hosts FIU, MSR, Alibaba, Tencent,
+CloudPhysics, Twitter and Meta traces, and the FIU listing contains
+\texttt{fiu\_madmax-110108-112108.oracleGeneral.zst}. The README states the
+zstd-compressed 24-byte record format and citation requirements but no
+dataset-specific licence; the copyright notice says distributed materials are
+provided on a non-commercial basis. We downloaded three original FIU traces
+(madmax 918,010 refs and webresearch 3,274,061 refs in full; homes as a stated
 5,000,000-request prefix) and replayed them at 1/5/10\% WSS. Across nine
 trace-capacity points, S3-FIFO had the lowest mean miss (0.6188), followed by
 ARC 0.6208 and DA 0.6280; W-TinyLFU 0.6306, ContShadow 0.6335, LRU 0.6412,
@@ -1081,9 +1084,11 @@ traces, and three original FIU traces downloaded from [39] at deterministic
 The main remaining gaps are external validity and system implementation.
 Bounded 1M-reference prefixes of the other six PDL families (MSR Cambridge,
 Alibaba, Tencent, CloudPhysics, Twitter and MetaKV) were downloaded and run in
-Phase~6 (Section~S14); the [39] repository and its non-commercial
-scholarly-use terms were verified but no explicit dataset licence file was
-found. A real asynchronous shadow-evaluation prototype was built and measured in
+Phase~6 (Section~S14); the [39] repository, FIU trace filename, README and
+site-wide non-commercial copyright notice were verified, but no
+dataset-specific licence file was found, so use is reported as non-commercial
+research with citation rather than as use under a dataset licence. A real
+asynchronous shadow-evaluation prototype was built and measured in
 Phase~7. A kernel-faithful MGLRU baseline and an in-kernel DA replacement
 prototype were not built; the Phase~8 guest observed the kernel's existing
 MGLRU and measured fault-path latency, but no reclaim event was reached. The

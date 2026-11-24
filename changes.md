@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-11-24: Reviewer-flagged references verified and corrected
+
+- **Change:** Kept Patel & Maniar and EACLOCK after DOI/publisher verification; added direct DOI/journal URLs and the Nov. 2026 EACLOCK issue date to all bibliography sources.
+- **Change:** Narrowed the CMU PDL licence wording. The manuscript now states the verified project page, FTP `cacheDatasets` listing, exact FIU `madmax` filename and README format/citation terms, and explicitly says no dataset-specific licence file was found; use is described as non-commercial research with citation, not as use under a dataset licence.
+- **Evidence:** `REFERENCE_VERIFICATION.md`; `AUDIT_REPORT.md` section 2.3a; `claims_to_sources.csv`.
+- **Files:** `drift_gating_latex_source/build.py`, `drift_gating_latex_source/main.tex`, `drift_gating_latex_source/supplement.tex`, `paper_final.tex`, `latex/main.tex`, `latex/supplement.tex`, and audit/protocol ledgers. Rebuilt current PDFs and regenerated `main.txt`/`paper.txt`; no performance result changed.
+
 ## 2026-11-23: Real post hoc experiments integrated; manuscript/audit updated
 
 ### Post hoc simulator/code (real, labeled)

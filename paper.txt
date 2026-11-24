@@ -726,7 +726,8 @@ thank their supervisor, Mohsin Ghouri, for guidance.
                         REFERENCES                                  Tang, and G. Chen, “EACLOCK: An efficient and
 [1] N. Megiddo and D. S. Modha, “ARC: A self-tuning,                adaptive page replacement algorithm to understand your
 low overhead replacement cache,” in Proc. 2nd USENIX                workload,” IEEE Trans. Knowl. Data Eng., vol. 38, no. 11,
-Conf. File Storage Technol. (FAST), 2003, pp. 115–130.              pp. 7387–7401, 2026, doi: 10.1109/TKDE.2026.3724159.
+Conf. File Storage Technol. (FAST), 2003, pp. 115–130.              pp. 7387–7401, Nov. 2026, doi: 10.1109/TKDE.2026.3724159.
+                                                                    https://doi.org/10.1109/TKDE.2026.3724159.
 [2] S. Bansal and D. S. Modha, “CAR: Clock with                     [18] Y. Zhai et al., “Clock2Q+: A simple and efficient
 adaptive replacement,” in Proc. 3rd USENIX Conf. File               replacement algorithm for metadata cache in VMware
 Storage Technol. (FAST), 2004, pp. 187–200.                         vSAN,” Proc. VLDB Endow., vol. 19, no. 12, pp. 3874–
@@ -771,6 +772,8 @@ simulations,” in Proc. USENIX Annu. Tech. Conf. (ATC),              10.48550/a
 [14] C. A. Waldspurger, N. Park, A. Garthwaite, and I.              cache replacement algorithms for time-bounded stale-
 Ahmad, “Efficient MRC construction with SHARDS,” in                 tolerant data workloads,” Int. J. Sci. Res. Technol., vol. 3,
                                                                     no. 6, pp. 556–564, 2026, doi: 10.5281/zenodo.20576370.
+                                                                    https://doi.org/10.5281/zenodo.20576370;
+                                                                    https://ijsrtjournal.com/article/comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tolerant-data-workloads.
 
 
                                                                11

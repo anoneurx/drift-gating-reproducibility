@@ -79,7 +79,10 @@ Phase5 break-even R,783.28, reproduction/cost_model.csv,cost_model.py
 Phase5 break-even direct us,2.1962, reproduction/cost_model.csv,cost_model.py
 Phase5 t3 DA miss,0.4586, reproduction/phase5/t3_seed5001.csv,mean non-stable miss with --lcb-dist t3
 Phase5 t3 delta vs default,+0.0057, reproduction/phase5/t3_seed5001.csv; reproduction/main_study_results.csv,0.4586-0.4529
-[39] URLs live and external traces present,verified 2026-11-23,webfetch pdl.cmu.edu/CacheEviction/index.shtml and ftp listing,README citation terms; PDL copyright non-commercial scholarly use
+[39]/[41] URLs live and external traces present,verified 2026-11-24,webfetch pdl.cmu.edu/CacheEviction/index.shtml and ftp listing,README citation terms; PDL copyright non-commercial basis only; no dataset-specific licence
+[41] FIU madmax filename,fiu_madmax-110108-112108.oracleGeneral.zst,webfetch ftp listing /fiu/ and curl -sSIL exact URL,HTTP 200 Content-Length 3189409
+[12] Patel and Maniar,verified 2026-11-24,https://doi.org/10.5281/zenodo.20576370 and ijsrtjournal article page,title authors vol 3 no 6 pp 556-564 2026
+[27] EACLOCK,verified 2026-11-24,https://doi.org/10.1109/TKDE.2026.3724159 and CSDL/IEEE pages,title authors vol 38 no 11 pp 7387-7401 Nov 2026
 LHD synth mean miss,0.6736, reproduction/phase4_lhd/synth_lhd.csv,mean non-stable miss seed 5001
 LHD real mean miss,0.6979, reproduction/phase4_lhd/*_lhd.csv,mean over real trace-capacity points
 External PDL S3-FIFO mean,0.6188, reproduction/phase4_external/external_summary.csv,mean over 9 trace-capacity points (3 FIU originals)

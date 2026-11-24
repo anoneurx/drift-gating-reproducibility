@@ -37,7 +37,7 @@ Items not achievable with real data in this workspace run are listed here and ar
 - ~~ADWIN / Page-Hinkley detectors: not implemented.~~ **Superseded:** both are implemented as simplified independent detectors and were run.
 - ~~Real asynchronous shadow-evaluation prototype: not implemented.~~ **Superseded on 2026-11-24:** `sim_full_async.cpp` with a real worker thread was built and run three times (Phase 7, below).
 - **Kernel-faithful MGLRU / in-kernel replacement policy:** still not built and outside the approved kernel scope; the approved scope is a guest-kernel MGLRU observation, real in-kernel fault/reclaim latency, and a userspace coupled controller.
-- **Reference [39] URL/licence:** URLs and non-commercial scholarly-use terms were verified; no explicit dataset licence file was found and no new dataset licence claim is made.
+- **Reference [39]/supplement [41] URL/licence:** verified on 2026-11-24; project page, FTP listing, exact FIU `madmax` filename, README and PDL copyright page. No dataset-specific licence file exists; manuscript now reports non-commercial research with citation, not a dataset licence.
 
 ## Phase 1-5 post hoc follow-ups (2026-11-23)
 
@@ -55,14 +55,15 @@ Items not achievable with real data in this workspace run are listed here and ar
 - W-TinyLFU/SIEVE/ADWIN/PH are simplified independent implementations, not authors' reference code.
 - FIU files are 500k-request prepared splits; original .zst not in workspace.
 - Kernel-faithful MGLRU, in-kernel replacement prototype, real async shadow-evaluation prototype, in-kernel page-fault/reclaim latency - not built/measured.
-- [39] URL/licence still unverified; do not assert.
+- ~~[39] URL/licence still unverified; do not assert.~~ **Superseded on 2026-11-24:** all five primary pages verified; see `REFERENCE_VERIFICATION.md`.
 - Full statistical rerun with block-bootstrap CIs across all affected analyses not completed for every legacy script; main new results use 10k bootstrap seed 0 where stated.
 - Manuscript is 17 pages (over 10-12 target); compression pass still needed.
 
 ## Remaining-part pass (same day, after Phase 1-5 report)
 
 ### Newly completed
-- **[39] verified by webfetch:** both URLs live; FTP index lists fiu/msr/alibabaBlock/tencentBlock/cloudphysics/twitter/metaKV. README states zstd format + citation; PDL copyright notice (pdl.cmu.edu/Publications/copyright.shtml) covers non-commercial scholarly use with citation; no explicit dataset licence file found.
+- **[39]/[41] verified by webfetch:** both URLs live; FTP index lists fiu/msr/alibabaBlock/tencentBlock/cloudphysics/twitter/metaKV. The FIU listing contains `fiu_madmax-110108-112108.oracleGeneral.zst` (HTTP 200, 3,189,409 bytes). README states zstd format + citation; PDL copyright notice (pdl.cmu.edu/Publications/copyright.shtml) says materials are provided on a non-commercial basis; no dataset-specific licence file found.
+- **Reviewer-flagged [12]/[27] retained:** Patel & Maniar DOI/landing page and EACLOCK DOI/CSDL/IEEE pages resolve with matching metadata; direct URLs added to bibliography entries; no references removed.
 - **LHD implemented:** simplified independent hit-density heuristic (Beckmann NSDI 2018 inspired; score=(hits+1)/(age+1), unit-size objects, exact min-score set). Registered as `--methods LHD`; synth miss 0.6736, real 0.6979, FIU 0.9577, 15-prog 0.6462. Far worse than LRU/S3-FIFO - negative result for this simplification.
 - **External traces obtained:** 3 original FIU traces from [39] (madmax 918,010 refs full; webresearch 3,274,061 refs full; homes 5,000,000-request prefix - explicitly stated). Converted with `convert_public_traces.py`; replayed at 1/5/10% WSS in `reproduction/phase4_external/` (9 points). Means: S3-FIFO 0.6188, ARC 0.6208, DA 0.6280, W-TinyLFU 0.6306, ContShadow 0.6335, LRU 0.6412, SIEVE 0.6538, LHD 0.9358.
 - **claims_to_sources.csv** extended to 87 rows; **check_paper_numbers.py** extended to 285/285 PASS.

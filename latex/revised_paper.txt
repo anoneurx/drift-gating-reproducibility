@@ -611,7 +611,7 @@ tics, and post hoc follow-ups: a CUSUM-triggered controller                     
 with sampled shadow evaluation is compared against contin-                         Data and code availability. The simulator, trace
 uous shadow evaluation, static baselines, trigger alternatives,                  generators, seeds, configuration files, raw per-trace output
 PH/ADWIN detectors, and SIEVE/W-TinyLFU baselines; a                             and analysis scripts for the reproducible main study are
-                                                                                                                                                         10
+                                                                                                                                                     10
 
 
 
@@ -641,12 +641,11 @@ phase8_kernel/; no in-kernel DA replacement prototype                           
                                                                               [17] G. Yuan, X. Li, S. Wu, Y. Zhu, D. Yang, C. Yao, X. Tang, and G. Chen,
 was built.                                                                         “EACLOCK: An efficient and adaptive page replacement algorithm to
    Funding. This research was conducted independently with-                        understand your workload,” IEEE Trans. Knowl. Data Eng., vol. 38,
-out external financial funding.                                                    no. 11, pp. 7387–7401, 2026, doi: 10.1109/TKDE.2026.3724159. https:
-                                                                                   //doi.org/10.1109/TKDE.2026.3724159.
+out external financial funding.                                                    no. 11, pp. 7387–7401, Nov. 2026, doi: 10.1109/TKDE.2026.3724159.
+                                                                                   https://doi.org/10.1109/TKDE.2026.3724159.
    Conflict of interest. M. Qasim is affiliated with both the                 [18] Y. Zhai et al., “Clock2Q+: A simple and efficient replacement algorithm
 University of Management and Technology (UMT), Lahore,                             for metadata cache in VMware vSAN,” Proc. VLDB Endow., vol. 19,
-                                                                                   no. 12, pp. 3874–3887, 2026, doi: 10.14778/3827998.3828002.
-and Anoneurx Research Lab, Anoneurx; the corresponding-
+and Anoneurx Research Lab, Anoneurx; the corresponding-                            no. 12, pp. 3874–3887, 2026, doi: 10.14778/3827998.3828002.
                                                                               [19] H. Xia, W. Nixon, B. D. Marthen, P. Bhandari, and J. Yang, “Learning-
 author e-mail is at Anoneurx. The other authors are affiliated                     augmented heuristics: Simple yet smart, robust and interpretable cache
 with UMT. Anoneurx Astra, a tool developed at Anoneurx,                            eviction,” in Proc. 20th USENIX Symp. Oper. Syst. Design Implement.
@@ -677,25 +676,27 @@ full responsibility for the content of the paper.                               
     187–200.                                                                  [28] Y. Liu, M. Yu, and J. Yang, “When fancy eviction fails: Rethinking
 [3] S. Jiang and X. Zhang, “LIRS: An efficient low inter-reference recency         cache replacement for LLM prefix reuse,” arXiv:2609.28870, 2026, doi:
     set replacement policy to improve buffer cache performance,” in Proc.          10.48550/arXiv.2609.28870.
-    ACM SIGMETRICS, 2002, pp. 31–42.                                          [29] N. Patel and H. Maniar, “Comparative evaluation of cache replacement
-[4] T. Johnson and D. Shasha, “2Q: A low overhead high performance buffer          algorithms for time-bounded stale-tolerant data workloads,” Int. J. Sci.
-    management replacement algorithm,” in Proc. 20th Int. Conf. Very Large         Res. Technol., vol. 3, no. 6, pp. 556–564, 2026, doi: 10.5281/zen-
-    Data Bases (VLDB), 1994, pp. 439–450.                                          odo.20576370. https://doi.org/10.5281/zenodo.20576370.
-[5] J. Yang, Y. Zhang, Z. Qiu, Y. Yue, and K. V. Rashmi, “FIFO queues are     [30] E. S. Page, “Continuous inspection schemes,” Biometrika, vol. 41, no.
-    all you need for cache eviction,” in Proc. 29th ACM Symp. Oper. Syst.          1–2, pp. 100–115, 1954.
-    Princ. (SOSP), 2023, pp. 130–149.                                         [31] D. Narayanan, A. Donnelly, and A. Rowstron, “Write off-loading: Prac-
-[6] J. Gama, I. Žliobaitė, A. Bifet, M. Pechenizkiy, and A. Bouchachia, “A        tical power management for enterprise storage,” ACM Trans. Storage,
-    survey on concept drift adaptation,” ACM Comput. Surv., vol. 46, no. 4,        vol. 4, no. 3, Art. no. 10, 2008.
-    Art. no. 44, 2014.                                                        [32] L. A. Belady, “A study of replacement algorithms for a virtual-storage
-[7] A. Bifet and R. Gavaldà, “Learning from time-changing data with                computer,” IBM Syst. J., vol. 5, no. 2, pp. 78–101, 1966.
-    adaptive windowing,” in Proc. SIAM Int. Conf. Data Mining (SDM),          [33] F. Wilcoxon, “Individual comparisons by ranking methods,” Biometrics
-    2007, pp. 443–448.                                                             Bull., vol. 1, no. 6, pp. 80–83, 1945.
-[8] G. Glass and P. Cao, “Adaptive page replacement based on memory           [34] T. Azim, A. Nadeem, and A. Ailamaki, “Adaptive cache mode selection
-    reference behavior,” in Proc. ACM SIGMETRICS, 1997, pp. 115–126.               for queries over raw data,” in Proc. 9th Int. Workshop Accelerating
-                                                                               11
+    ACM SIGMETRICS, 2002, pp. 31–42.                                          [29] N. Patel and H. Maniar, “Comparative evaluation of cache
+[4] T. Johnson and D. Shasha, “2Q: A low overhead high performance buffer          replacement        algorithms     for     time-bounded         stale-tolerant
+    management replacement algorithm,” in Proc. 20th Int. Conf. Very Large         data workloads,” Int. J. Sci. Res. Technol., vol. 3, no. 6,
+    Data Bases (VLDB), 1994, pp. 439–450.                                          pp. 556–564, 2026, doi: 10.5281/zenodo.20576370. https:
+[5] J. Yang, Y. Zhang, Z. Qiu, Y. Yue, and K. V. Rashmi, “FIFO queues are          //doi.org/10.5281/zenodo.20576370;          https://ijsrtjournal.com/article/
+    all you need for cache eviction,” in Proc. 29th ACM Symp. Oper. Syst.          comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tol
+    Princ. (SOSP), 2023, pp. 130–149.                                         [30] E. S. Page, “Continuous inspection schemes,” Biometrika, vol. 41, no.
+[6] J. Gama, I. Žliobaitė, A. Bifet, M. Pechenizkiy, and A. Bouchachia, “A        1–2, pp. 100–115, 1954.
+    survey on concept drift adaptation,” ACM Comput. Surv., vol. 46, no. 4,   [31] D. Narayanan, A. Donnelly, and A. Rowstron, “Write off-loading: Prac-
+    Art. no. 44, 2014.                                                             tical power management for enterprise storage,” ACM Trans. Storage,
+[7] A. Bifet and R. Gavaldà, “Learning from time-changing data with                vol. 4, no. 3, Art. no. 10, 2008.
+    adaptive windowing,” in Proc. SIAM Int. Conf. Data Mining (SDM),          [32] L. A. Belady, “A study of replacement algorithms for a virtual-storage
+    2007, pp. 443–448.                                                             computer,” IBM Syst. J., vol. 5, no. 2, pp. 78–101, 1966.
+[8] G. Glass and P. Cao, “Adaptive page replacement based on memory           [33] F. Wilcoxon, “Individual comparisons by ranking methods,” Biometrics
+    reference behavior,” in Proc. ACM SIGMETRICS, 1997, pp. 115–126.               Bull., vol. 1, no. 6, pp. 80–83, 1945.
+                                                                                   11
 
 
 
+[34] T. Azim, A. Nadeem, and A. Ailamaki, “Adaptive cache mode selection
+     for queries over raw data,” in Proc. 9th Int. Workshop Accelerating
      Analytics Data Manag. Syst. Using Modern Processor Storage Archit.
      (ADMS@VLDB), 2018, pp. 51–65.
 [35] S. Holm, “A simple sequentially rejective multiple test procedure,”
@@ -710,10 +711,17 @@ full responsibility for the content of the paper.                               
 [38] Linux Kernel Organization, “Multi-gen LRU,” Linux kernel documen-
      tation, 2026. [Online]. Available: https://docs.kernel.org/mm/multigen_
      lru.html
-[39] CMU Parallel Data Laboratory, “Cache eviction tactics: cacheDatasets
-     trace collection,” online data repository and format README, accessed
-     Nov. 2026. PDL’s copyright notice permits non-commercial scholarly
-     use with citation; no explicit dataset licence file was found. [On-
-     line]. Available: https://pdl.cmu.edu/CacheEviction/index.shtml; https:
-     //ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/
+[39] CMU Parallel Data Laboratory, “Cache eviction tactics:
+     cacheDatasets trace collection,” online data repository and format
+     README, accessed Nov. 24, 2026. The project page links to
+     the cacheDatasets repository; its FIU directory contains
+     fiu_madmax-110108-112108.oracleGeneral.zst.                            The
+     README specifies zstd-compressed 24-byte request records and
+     citation requirements, but no dataset-specific licence; PDL’s site-
+     wide copyright notice says materials distributed by the server
+     are provided on a non-commercial basis. [Online]. Available:
+     https://pdl.cmu.edu/CacheEviction/index.shtml;        https://ftp.pdl.cmu.
+     edu/pub/datasets/twemcacheWorkload/cacheDatasets/;         https://ftp.pdl.
+     cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/README;
+     https://pdl.cmu.edu/Publications/copyright.shtml.
 

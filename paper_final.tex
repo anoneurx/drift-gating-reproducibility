@@ -1349,11 +1349,14 @@ used 6 FIU public split traces (500k-request prepared splits), 15-program
 traces, and three original FIU traces downloaded from [39] at deterministic
 1/5/10\% WSS capacities.
 
-The main remaining gaps are external validity and system implementation. The
-other publicly listed PDL traces (MSR Cambridge, Alibaba, Tencent,
-CloudPhysics, Twitter, Meta) were not downloaded or run; the [39] repository
-and its non-commercial scholarly-use terms were verified but no explicit
-dataset licence file was found. A kernel-faithful MGLRU baseline, an in-kernel
+The main remaining gaps are external validity and system implementation.
+Bounded 1M-reference prefixes of the other six PDL families (MSR Cambridge,
+Alibaba, Tencent, CloudPhysics, Twitter and MetaKV) were downloaded and run in
+Phase 6; the [39] project page, FTP listing, exact FIU trace filename, README
+and site-wide non-commercial copyright notice were verified, but no
+dataset-specific licence file was found, so use is reported as non-commercial
+research with citation rather than as use under a dataset licence. A
+kernel-faithful MGLRU baseline, an in-kernel
 replacement prototype, and a real asynchronous shadow-evaluation prototype were
 not built; in-kernel page-fault and reclaim latency were not measured. The cost
 calibration is a user-space minor-fault microbenchmark. These limitations
@@ -1555,7 +1558,7 @@ I/O processing,'' \emph{Sci. Rep.}, vol. 15, 2025, doi:
 \bibitem{r17} G. Yuan, X. Li, S. Wu, Y. Zhu, D. Yang, C. Yao, X. Tang, and G.
 Chen, ``EACLOCK: An efficient and adaptive page replacement algorithm to
 understand your workload,'' \emph{IEEE Trans. Knowl. Data Eng.}, vol. 38,
-no. 11, pp. 7387--7401, 2026, doi: 10.1109/TKDE.2026.3724159.
+no. 11, pp. 7387--7401, Nov. 2026, doi: 10.1109/TKDE.2026.3724159.
 \url{https://doi.org/10.1109/TKDE.2026.3724159}.
 
 \bibitem{r18} Y. Zhai \emph{et al.}, ``Clock2Q+: A simple and efficient
@@ -1604,7 +1607,8 @@ doi: 10.48550/arXiv.2609.28870.
 \bibitem{r29} N. Patel and H. Maniar, ``Comparative evaluation of cache
 replacement algorithms for time-bounded stale-tolerant data workloads,''
 \emph{Int. J. Sci. Res. Technol.}, vol. 3, no. 6, pp. 556--564, 2026, doi:
-10.5281/zenodo.20576370. \url{https://doi.org/10.5281/zenodo.20576370}.
+10.5281/zenodo.20576370. \url{https://doi.org/10.5281/zenodo.20576370};
+\url{https://ijsrtjournal.com/article/comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tolerant-data-workloads}.
 
 \bibitem{r30} E. S. Page, ``Continuous inspection schemes,'' \emph{Biometrika},
 vol. 41, no. 1--2, pp. 100--115, 1954.
@@ -1643,10 +1647,16 @@ documentation, 2026. [Online]. Available:
 
 \bibitem{r39} CMU Parallel Data Laboratory, ``Cache eviction tactics:
 cacheDatasets trace collection,'' online data repository and format README,
-accessed Nov. 2026. PDL's copyright notice permits non-commercial scholarly
-use with citation; no explicit dataset licence file was found. [Online].
+accessed Nov. 24, 2026. The project page links to the \texttt{cacheDatasets}
+repository; its FIU directory contains
+\texttt{fiu\_madmax-110108-112108.oracleGeneral.zst}. The README specifies
+zstd-compressed 24-byte request records and citation requirements, but no
+dataset-specific licence; PDL's site-wide copyright notice says materials
+distributed by the server are provided on a non-commercial basis. [Online].
 Available: \url{https://pdl.cmu.edu/CacheEviction/index.shtml};
-\url{https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/}
+\url{https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/};
+\url{https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/README};
+\url{https://pdl.cmu.edu/Publications/copyright.shtml}.
 
 \end{thebibliography}
 

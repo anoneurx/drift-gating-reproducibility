@@ -66,15 +66,32 @@ Crossref, arXiv API, Zenodo API and publisher pages:
 
 - [15] 3L-Cache: 4,855 traces (USENIX FAST'25 abstract) — correct.
 - [16] LPR: LRU/MRU regret-based switching (Scientific Reports 15, 4721) — correct.
-- [17] EACLOCK DOI 10.1109/TKDE.2026.3724159 — resolves, title/year correct.
+- [17] EACLOCK DOI 10.1109/TKDE.2026.3724159 — resolves; DOI metadata gives Yuan et al., *IEEE TKDE* 38(11), 7387--7401, Nov. 2026, matching the citation; the CSDL/IEEE pages resolve to the same title.
 - [18] Clock2Q+ DOI 10.14778/3827998.3828002 — resolves; "up to 28.5% lower
   miss ratio than S3-FIFO on metadata traces" is a correct "up to" claim.
 - [19] S4-FIFO, OSDI'26 — exists; description correct.
 - [20]–[27] arXiv IDs/titles/dates all resolve.
 - [28] arXiv:2609.28870 — exists.
-- [29] Zenodo 10.5281/zenodo.20576370 — abstract confirms "ARC highest on
-  average" and workload-dependent ranking.
+- [29] Zenodo 10.5281/zenodo.20576370 — DOI and journal page resolve; Patel
+  Nilen and Himanshu Maniar, *Int. J. Sci. Res. Technol.* 3(6), 556--564, 2026,
+  with matching title. The abstract confirms "ARC highest on average" and
+  workload-dependent ranking.
 - [34] Acme — abstract confirms "at most 16%, 4% on average" vs optimal mode.
+
+### 2.3a Reviewer-flagged references — PASS (2026-11-24)
+
+- Main-paper [12] / older [29] (Patel & Maniar): kept, with DOI URL and journal
+  article URL added to all bibliography sources.
+- Main-paper [27] / older [17] (EACLOCK): kept, with DOI URL and Nov. 2026 issue
+  date added to all bibliography sources.
+- Supplement [41] / older [39] (CMU PDL): kept, but the licence wording was
+  narrowed. The cache-eviction project page links to `cacheDatasets`; the FTP
+  `fiu/` listing contains `fiu_madmax-110108-112108.oracleGeneral.zst` (HTTP
+  200, Content-Length 3,189,409). The README specifies zstd 24-byte records and
+  citation papers but no dataset-specific licence. PDL's copyright page says
+  server materials are provided on a non-commercial basis; it does not grant a
+  named dataset licence. Manuscript text now says exactly this. Details are in
+  `REFERENCE_VERIFICATION.md`.
 
 ### 2.4 Simulator sanity checks — PASS (with caveat below)
 
