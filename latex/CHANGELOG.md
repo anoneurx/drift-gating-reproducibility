@@ -9,11 +9,11 @@ Source of truth for every change between
 
 A reviewer noted that the FIU replay capacity $C=20{,}000$ had been chosen from
 a pilot on `webresearch`, one of the six evaluated traces. Phase 10 was
-registered in `PROTOCOL.md` **before** the trace was downloaded or converted.
+recorded in `PROTOCOL.md` (post hoc; see version history).
 The non-evaluation FIU trace
 `fiu_webusers-030409-033109.oracleGeneral.zst` was streamed for exactly
 1,000,000 records (WSS 72539; SHA256 in `phase10_capacity_pilot/manifest.csv`),
-and the pre-registered seven-capacity grid re-selected $C=20{,}000$: the
+and the recorded post hoc seven-capacity grid re-selected $C=20{,}000$: the
 smallest capacity with both miss ratios $\ge 0.01$ and an LRU--S3-FIFO gap
 $\ge 0.10$ was $C=20{,}000$ (0.73590/0.52726, gap 0.20864; $C=10{,}000$ gave
 0.74182/0.73317, gap 0.00865). No public performance number changed; only the
@@ -259,7 +259,7 @@ title question is answered with a measured break-even.
   resolvable URL. Verified via Crossref (`10.1109/TKDE.2026.3724159`) and the
   Zenodo API (record 20576370). A verification note was added to
   `reproduction/README.md`.
-* H3 and H4 wording changed from "pre-registered" claims to explicitly
+* H3 and H4 wording changed from earlier prospective-registration claims to explicitly
   **post hoc** in Section V and in the threats-to-validity paragraph.
 
 ---

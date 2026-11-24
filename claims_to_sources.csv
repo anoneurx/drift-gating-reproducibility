@@ -145,5 +145,5 @@ Phase 10 independent pilot trace WSS,72539,reproduction/phase10_capacity_pilot/m
 Phase 10 pilot C=10000 LRU/S3-FIFO miss,0.74182/0.73317,reproduction/phase10_capacity_pilot/C10000.csv,seed 0; gap 0.00865 fails the 0.10 separation rule
 Phase 10 pilot C=20000 LRU/S3-FIFO miss,0.73590/0.52726,reproduction/phase10_capacity_pilot/C20000.csv,seed 0; gap 0.20864 qualifies; smallest qualifying capacity selected
 Phase 10 pilot C=50000 LRU/S3-FIFO miss,0.18981/0.03674,reproduction/phase10_capacity_pilot/C50000.csv,seed 0; both non-saturated but larger than the selected capacity
-Phase 10 selected capacity,20000,reproduction/phase10_capacity_pilot/selection.csv,pre-registered rule in PROTOCOL.md Phase 10; applied once by select_capacity.py
+Phase 10 selected capacity,20000,reproduction/phase10_capacity_pilot/selection.csv,recorded post hoc rule in PROTOCOL.md Phase 10; applied once by select_capacity.py
 Phase 10 provenance effect,no performance-number change,reproduction/public_trace_results.csv; latex/supplement.tex; drift_gating_latex_source/supplement.tex,independent pilot re-selects the already frozen C=20000; only provenance text updated

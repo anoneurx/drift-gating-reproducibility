@@ -130,68 +130,82 @@ Underfull \hbox (badness 10000) in paragraph at lines 616--622
 Underfull \hbox (badness 10000) in paragraph at lines 616--622
 \T1/pcr/m/n/10 reproduction/rankability_real/\T1/ptm/m/n/10 ; com-mands,
 
-Underfull \hbox (badness 10000) in paragraph at lines 680--684
-[]\T1/ptm/m/n/10 The fol-low-ing mea-sure-ments were pre-specified in
+Underfull \hbox (badness 10000) in paragraph at lines 680--685
+[]\T1/ptm/m/n/10 The fol-low-ing mea-sure-ments are recorded in
 
-Underfull \hbox (badness 2351) in paragraph at lines 697--697
+Underfull \hbox (badness 2285) in paragraph at lines 680--685
+\T1/pcr/m/n/10 PROTOCOL.md \T1/ptm/m/n/10 (first com-mit-ted to git on 2026-11-
+24;
+
+Underfull \hbox (badness 2351) in paragraph at lines 698--698
 []|\T1/ptm/m/n/8 Phase 3 de-
 
-Underfull \hbox (badness 3386) in paragraph at lines 699--699
+Underfull \hbox (badness 3386) in paragraph at lines 700--700
 []|\T1/ptm/m/n/8 Phase 5 ro-
 (./phase6_pdl_main_table.tex) (./phase7_async_main_table.tex)
 (./phase8_kernel_main_table.tex)
-Underfull \hbox (badness 3525) in paragraph at lines 711--713
-[]\T1/ptm/m/n/10 A pre-registered Linux 6.6.1 QEMU guest re-played
+Underfull \hbox (badness 10000) in paragraph at lines 712--714
+[]\T1/ptm/m/n/10 A post hoc Linux 6.6.1 QEMU guest re-played
 
-Underfull \hbox (badness 1953) in paragraph at lines 711--713
+Underfull \hbox (badness 1953) in paragraph at lines 712--714
 \T1/ptm/m/n/10 three con-di-tions in three fresh boots each: fixed LRU
 
-Underfull \hbox (badness 5741) in paragraph at lines 711--713
+Underfull \hbox (badness 5741) in paragraph at lines 712--714
 \T1/ptm/m/n/10 and a user-space CUSUM con-troller cou-pled to the
 
-Underfull \hbox (badness 2478) in paragraph at lines 711--713
+Underfull \hbox (badness 2478) in paragraph at lines 712--714
 \T1/ptm/m/n/10 same sysfs knob. Function-graph trac-ing was re-stricted
 
-Underfull \hbox (badness 3118) in paragraph at lines 711--713
-\T1/ptm/m/n/10 to five pre-registered fault/reclaim func-tions present in
+Underfull \hbox (badness 3108) in paragraph at lines 712--714
+\T1/ptm/m/n/10 to five recorded fault/reclaim func-tions present in the
 
-Underfull \hbox (badness 3492) in paragraph at lines 711--713
+Underfull \hbox (badness 1442) in paragraph at lines 712--714
+\T1/ptm/m/n/10 guest; 191,370 du-ra-tions were parsed. Ta-ble []VI[] re-ports
+
+Underfull \hbox (badness 7238) in paragraph at lines 712--714
+\T1/ptm/m/n/10 the mea-sured fault-path du-ra-tions and vm-stat deltas.
+
+Underfull \hbox (badness 3492) in paragraph at lines 712--714
 \T1/ptm/m/n/10 The ob-ser-va-tion is null: all nine runs show 131,138
 
-Underfull \hbox (badness 1430) in paragraph at lines 711--713
+Underfull \hbox (badness 1430) in paragraph at lines 712--714
 \T1/ptm/m/n/10 mi-nor faults, zero \T1/pcr/m/n/10 workingset_refault_anon\T1/pt
 m/m/n/10 , zero
+
+Underfull \hbox (badness 5036) in paragraph at lines 712--714
+\T1/ptm/m/n/10 tog-gles. Only \T1/pcr/m/n/10 handle_mm_fault \T1/ptm/m/n/10 and
+ \T1/pcr/m/n/10 do_wp_page
 [7] (./total_time_table.tex)
-Underfull \hbox (badness 5446) in paragraph at lines 787--793
+Underfull \hbox (badness 5446) in paragraph at lines 788--794
 []\T1/ptm/m/n/10 Threats in-clude gen-er-ated traces with epoch-aligned
 [8 <./figs/fig8_breakeven.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 844--861
+Underfull \hbox (badness 10000) in paragraph at lines 845--862
 []\T1/ptm/m/it/10 Data and code avail-abil-ity. \T1/ptm/m/n/10 The sim-u-la-tor
 , trace
 
-Underfull \hbox (badness 10000) in paragraph at lines 844--861
+Underfull \hbox (badness 10000) in paragraph at lines 845--862
 \T1/ptm/m/n/10 to-gether with \T1/pcr/m/n/10 prototype_fault_latency.cpp
 
-Underfull \hbox (badness 10000) in paragraph at lines 844--861
+Underfull \hbox (badness 10000) in paragraph at lines 845--862
 \T1/ptm/m/n/10 re-gen-er-ates the break-even anal-y-sis, and
 
-Underfull \hbox (badness 10000) in paragraph at lines 844--861
+Underfull \hbox (badness 10000) in paragraph at lines 845--862
 \T1/pcr/m/n/10 phase5/total_time_envelope.py \T1/ptm/m/n/10 re-gen-er-ates
 
-Underfull \hbox (badness 1412) in paragraph at lines 844--861
+Underfull \hbox (badness 1412) in paragraph at lines 845--862
 \T1/ptm/m/n/10 de-tec-tion CSVs are in-cluded in the same pack-age; the
 
-Underfull \hbox (badness 1629) in paragraph at lines 844--861
+Underfull \hbox (badness 1629) in paragraph at lines 845--862
 \T1/ptm/m/n/10 The QEMU guest-kernel build, work-load and con-troller
 
-Underfull \hbox (badness 1810) in paragraph at lines 844--861
+Underfull \hbox (badness 1810) in paragraph at lines 845--862
 \T1/ptm/m/n/10 sources, raw traces and de-rived CSVs are in-cluded in
 [9]
-Underfull \hbox (badness 2564) in paragraph at lines 874--879
+Underfull \hbox (badness 2564) in paragraph at lines 875--880
 []\T1/ptm/m/it/10 Use of AI-assisted tools. \T1/ptm/m/n/10 AI-assisted tools, i
 n-clud-ing
 
-Underfull \hbox (badness 3343) in paragraph at lines 975--980
+Underfull \hbox (badness 3343) in paragraph at lines 976--981
 \T1/ptm/m/n/8 ing hi-er-ar-chi-cal tem-po-ral mem-ory and sta-tis-ti-cal tests,
 '' \T1/ptm/m/it/8 Int. J.
 [10] [11] (./main.aux) )
@@ -212,5 +226,5 @@ pe1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
 /utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
 ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (11 pages, 865306 bytes).
+Output written on main.pdf (11 pages, 864999 bytes).
 Transcript written on main.log.

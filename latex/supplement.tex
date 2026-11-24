@@ -232,7 +232,7 @@ MGLRU-style & $-0.0244$ [$-0.0475$, $-0.0052$] & 8/4/3 & 0.299 \\
 \bottomrule
 \end{tabular}
 \end{table}
-\section{S4. Detailed Pre-specified Follow-ups}
+\section{S4. Detailed Post Hoc Follow-ups}
 
 \emph{Phase 1: rankability rule.} A per-shadow-evaluation diagnostic logged
 $C_s$, $D_w$, and rankability (candidate miss counts not all equal) over
@@ -254,7 +254,7 @@ most matched pairs); Oracle reached 0.4335 at 5.74 evals and ContShadow
 0.4228 at 27.39 evals, confirming an accuracy ceiling above CUSUM.
 
 \emph{Phase 3: other detectors.} Page-Hinkley (PH) and a simplified scalar
-ADWIN were pre-specified, tuned on seed 100, and evaluated once on seed 5001.
+ADWIN were specified in the post hoc protocol record, tuned on seed 100, and evaluated once on seed 5001.
 PH selected ($\delta{=}0.001,\lambda{=}2$): miss 0.4552 [0.4212,0.4894],
 3.52 evals, recall 0.505 (192/380), spurious 10, mean delay 10,052 refs,
 oracle-gap fraction $-0.120$. ADWIN selected ($\delta{=}0.05$): miss 0.4991
@@ -308,7 +308,7 @@ a negative robustness result.
 \begin{figure}[!t]
 \centering
 \includegraphics[width=0.85\columnwidth]{fig_phase2_frontier.png}
-\caption{Pre-specified Phase 2 budget-matched trigger frontier on 80 non-stable
+\caption{Post hoc Phase 2 budget-matched trigger frontier on 80 non-stable
 seed-5001 traces. CUSUM dominates periodic/random at similar budgets, but
 Oracle and ContShadow expose the remaining accuracy ceiling.}
 \label{fig:phase2-frontier}
@@ -597,7 +597,7 @@ traces only using the same 48-configuration grid and selection rule with
 ($n_{\mathrm{cand}}{=}5$, $K{=}0$, delay 10). Evaluated once on the 80
 non-stable and 30 stable held-out test traces, the repaired controller
 produced miss ratios, switch counts, and shadow-evaluation counts identical to
-the original pre-specified controller. This post hoc correction therefore did
+the original controller. This post hoc correction therefore did
 not change the synthetic-trace outcome.
 
 
@@ -773,7 +773,7 @@ trace were used, except \texttt{madmax}, which contains 918,010 requests; the
 single-thread page-id array requires \texttt{--np 1048576}. The replay
 capacity $C = 20{,}000$ was selected on a \emph{separate} PDL trace,
 \texttt{fiu\_webusers-030409-033109.oracleGeneral.zst}, which is not one of the
-six evaluated traces. The pre-registered grid was $C \in \{1000, 5000, 10000,
+six evaluated traces. The recorded post hoc grid was $C \in \{1000, 5000, 10000,
 15000, 20000, 25000, 50000\}$ with seed 0, methods LRU and S3-FIFO (DA was also
 run for the record). The rule selected the smallest $C$ at which both miss
 ratios were at least 0.01 and LRU exceeded S3-FIFO by at least 0.10: at
@@ -1002,7 +1002,7 @@ limited to the evaluated workload families.
 \emph{Statistical conclusion validity.} The switching rule applies a normal
 quantile ($z = 1.28$) to only four autocorrelated shadow blocks; a
 $t$-quantile with three degrees of freedom is about 1.64, so the nominal 90\%
-bound is optimistic. A pre-specified seed-5001 robustness run with
+bound is optimistic. A post hoc seed-5001 robustness run with
 $t_{0.90,3}$ gave DA miss 0.4586 [0.4282,0.4888] vs default 0.4529
 [0.4224,0.4834]. KS $p$-values on dependent, tied reuse times are not calibrated error rates,
 so the confirmation stage provides a heuristic gate rather than formal error
@@ -1013,8 +1013,7 @@ validated two-stage statistical gate is claimed. Traces within a scenario share 
 so the effective number of independent workloads is smaller than 80, and the
 stated $p$-values and intervals describe variability over generated traces,
 not over real workloads. Wilcoxon tests with ten corrected comparisons have
-limited power for differences of about 0.01 in mean miss ratio. No
-pre-registered cost budget or agreement threshold was specified. Several secondary results (for
+limited power for differences of about 0.01 in mean miss ratio. No cost budget or agreement threshold was specified before the study. Several secondary results (for
 for example the small KS ablation difference) are small or non-significant
 differences and should not be read as evidence of no effect.
 
@@ -1067,7 +1066,7 @@ bootstrap of the synthetic main study has only 35 distinct resamples and is
 reported as a coarse sensitivity check only. The literature review is
 narrative, not systematic, and its limitations in Table~I are partly inferred.
 
-Post hoc measurements (Section~V-J) and pre-specified follow-ups
+Post hoc measurements (Section~V-J) and recorded post hoc follow-ups
 (Section~V-K) characterize trigger variants, rankability,
 detector alternatives, stronger baselines, and cost uncertainty. The oracle
 trigger uses synthetic ground-truth boundaries and is not deployable; the FIU
@@ -1189,7 +1188,7 @@ absent \texttt{/dev/null}, a filter file outside the mounted results directory
 and missing \texttt{uname}) were recorded in \texttt{PROTOCOL.md} and discarded
 before any measurement; no number from them is used here.
 
-Function-graph tracing was restricted to the five pre-registered fault and
+Function-graph tracing was restricted to the five recorded fault and
 reclaim functions present in the guest. Parsing the raw traces yielded 191,370
 per-function duration samples in 18 condition$\times$repetition$\times$function
 groups, all reproduced in Table~\ref{tab:kernel_ftrace}. Only

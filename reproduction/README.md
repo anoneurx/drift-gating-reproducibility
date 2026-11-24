@@ -20,7 +20,7 @@ its numbers are not used in any claim.
 | `phase6_pdl/` | Six 1M-reference CMU PDL prefixes (MSR, Alibaba, Tencent, CloudPhysics, Twitter sample10, MetaKV), manifest with hashes, 18 raw family x capacity runs, summaries and paired statistics. |
 | `phase7_async/` | Three real async-shadow prototype repetitions on 80 non-stable seed-5001 traces; raw CSVs, detection CSVs, timing CSV, summary and paired analysis. |
 | `phase8_kernel/` | QEMU guest kernel build scripts, workload/controller sources, boot runs and parsers. Guest measurements are reported only when raw CSVs exist. |
-| `phase10_capacity_pilot/` | Independent pre-registered capacity pilot on the non-evaluation FIU `webusers` trace: 1M-record manifest with SHA256, seven raw capacity CSVs, exact commands and `selection.csv`. Re-selects C=20000; no public performance result changed. |
+| `phase10_capacity_pilot/` | Independent post hoc capacity pilot on the non-evaluation FIU `webusers` trace: 1M-record manifest with SHA256, seven raw capacity CSVs, exact commands and `selection.csv`. Re-selects C=20000; no public performance result changed. |
 | `generate_phase_tables.py` | Generates Phase 6--8 LaTeX fragments for both paper trees directly from measured CSVs; no hand-entered numbers. |
 | `final_hygiene.py` | Read-only final check of frozen SHA256s, numeric checker, PDF page counts, undefined references, overfull hboxes and placeholder tokens. |
 | `sweep_selection.py` | **Released parameter-selection sweep.** Runs all 48 configurations of candidate-set size x cost margin x evaluation delay on training traces with the released simulator and writes `sweep_results.csv` and `sweep_selected.txt`. |
@@ -42,7 +42,7 @@ its numbers are not used in any claim.
 | `convert_public_traces.py` | Converts public CMU PDL FIU block traces (packed 24-byte records) to page-id traces for `sim_full`. |
 | `public_trace_results.csv`, `public_trace_detection.csv` | Raw frozen public-trace run. DA/ContShadow/LRU miss 0.6753, DA zero switches; DA Pareto-dominated by S3-FIFO (0.5772 miss, 31.7 vs 82.5 ns/ref). |
 | `public_pilot_C*.csv` | Superseded webresearch-only pilot (C = 1000..50000), retained for provenance; it is no longer the selection source. |
-| `phase10_capacity_pilot/C*.csv` | Independent selection pilot on `webusers` (C = 1000..50000, seed 0): LRU/S3-FIFO 0.74182/0.73317 at C=10000 and 0.73590/0.52726 at C=20000; the pre-registered rule selected C=20000. |
+| `phase10_capacity_pilot/C*.csv` | Independent selection pilot on `webusers` (C = 1000..50000, seed 0): LRU/S3-FIFO 0.74182/0.73317 at C=10000 and 0.73590/0.52726 at C=20000; the recorded post hoc rule selected C=20000. |
 | `public_diagnostic_summary.csv` | Per-trace public diagnostic summary: initial pick, first-eval candidate miss totals, CUSUM maxima, confirmed alarms. |
 | `split_public_traces.py` | Splits the six public traces into 500k training prefixes and held-out suffixes. |
 | `sweep_public_selection.py` | 48-config DA re-selection on public training prefixes (capacity--sampling fault makes all configs inert at C=20000). |
@@ -131,7 +131,7 @@ project page `https://pdl.cmu.edu/CacheEviction/index.shtml`, cited as [39]).
 
 - **Independent capacity pilot:** `phase10_capacity_pilot/`. The separate
   non-evaluation FIU trace `webusers` was streamed for exactly 1,000,000
-  records (WSS 72539, SHA256 recorded in its manifest). The pre-registered
+  records (WSS 72539, SHA256 recorded in its manifest). The recorded post hoc
   smallest-qualifying-capacity rule selected C=20000: LRU/S3-FIFO were
   0.74182/0.73317 at C=10000 (gap 0.00865) and 0.73590/0.52726 at C=20000
   (gap 0.20864). The older `public_pilot_C*.csv` webresearch-only pilot is
@@ -156,7 +156,7 @@ project page `https://pdl.cmu.edu/CacheEviction/index.shtml`, cited as [39]).
 
 ## Phase 6: six further CMU PDL families
 
-Pre-registered in `PROTOCOL.md` before any run. `phase6_pdl/convert_pdl_prefix.py`
+Post hoc, recorded in `PROTOCOL.md`; see its version history for timestamp status. `phase6_pdl/convert_pdl_prefix.py`
 streams exactly 1,000,000 packed 24-byte records from each of six URLs and writes
 `phase6_pdl/manifest.csv` (HTTP status, bytes consumed, WSS, max id, SHA256).
 `phase6_pdl/run_pdl.py` runs nine methods at three capacities per family
@@ -184,7 +184,7 @@ each file was downloaded.
 
 ## Phase 7: real asynchronous-shadow prototype
 
-Pre-registered in `PROTOCOL.md` before any `--async-shadow` run. Build and run:
+Post hoc, recorded in `PROTOCOL.md`; see its version history for timestamp status. Build and run:
 
 ```sh
 g++ -O2 -std=c++17 -pthread -o sim_async sim_full_async.cpp
@@ -226,7 +226,7 @@ python3 generate_phase_tables.py
 
 The build downloads Linux 6.6.1 into `/home/kashie/opencode_kernel_build`,
 records the tarball SHA256 in `phase8_kernel/kernel_tarball.sha256`, applies the
-pre-registered config options, and writes `bzImage`, `kernel.config`,
+recorded config options, and writes `bzImage`, `kernel.config`,
 `manifest.csv`, compiler/bison versions and the full `build.log`. Because the
 host lacks system `bison` and libelf headers, local bison 3.8.2 and elfutils
 0.191 libelf are built under the same scratch path; neither changes the kernel
@@ -235,7 +235,7 @@ real-mode code, so the recorded clean build passes
 `CC="gcc-15 -std=gnu11" HOSTCC="gcc-15 -std=gnu11"` as make command-line
 variables (environment variables are overridden by the kernel Makefiles).
 
-`run_guest.sh` performs one discovery boot to select only pre-registered ftrace
+`run_guest.sh` performs one discovery boot to select only recorded ftrace
 functions present in the guest, then three fresh boots for each of
 `fixed_lru`, `fixed_mglru` and `coupled`. Console output, guest `uname`, vmstat
 before/after, controller samples/toggles and raw function-graph traces are kept

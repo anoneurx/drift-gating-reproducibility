@@ -1,17 +1,22 @@
 # PROTOCOL
 
-Pre-specified experiment protocols. Entries are written before running the corresponding experiments. Frozen main-study results (seed 5001, C=1000, default config) are not changed.
+## Version history and evidentiary status
 
-## Phase 1 - Rankability rule (pre-specified before running)
+- `8d69a4667ca71a05b79034180b7e42766cfaa66a` — `2026-11-24T17:27:05+01:00` — `Snapshot research artifacts before post hoc relabeling` (pre-relabel snapshot; this file was present in it as then written).
+- No independently timestamped version of this file predating the runs it describes was found. The internal dates below are author-recorded labels, not audited prospective registration timestamps.
+- Therefore Phases 1--10 are **post hoc** records. They are reported as post hoc follow-ups in the manuscript and audit files, not as protocol-guided or prospectively registered results.
+- Frozen main-study results (seed 5001, C=1000, default config) are not changed.
 
-**Date pre-specified:** 2026-11-23
+## Phase 1 - Rankability rule (post hoc record)
+
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### Hypothesis
 The FIU/public-trace no-switch failure is caused by unrankable shadow evaluations: shadow capacity `Cs` exceeds the number of distinct sampled pages `Dw` in the evaluation window, making all candidate miss counts equal. A rankability-aware configuration will increase the fraction of rankable evaluations and may allow DA to switch on traces where `Cs/Dw >= 1` caused ties, but it may not improve miss ratio.
 
 ### Fixes under test
-1. **f-cap sweep (pre-specified):** `f in {0.25, 0.5, 0.75}` with `Cs = min(round(p*C), round(f*Dw))` (`--cs-cap-f f`). This is a real cap when `f*Dw < p*C`.
-2. **W/C scaling (pre-specified):** set `W = 2*C` to preserve the default W/C=2 ratio as C changes (`--W <2*C>`). This scales epoch length in references with cache size; evaluation windows are measured in epochs and therefore scale proportionally. Distinct sampled pages `Dw` are observed diagnostically; no post hoc W tuning.
+1. **f-cap sweep (post hoc record):** `f in {0.25, 0.5, 0.75}` with `Cs = min(round(p*C), round(f*Dw))` (`--cs-cap-f f`). This is a real cap when `f*Dw < p*C`.
+2. **W/C scaling (post hoc record):** set `W = 2*C` to preserve the default W/C=2 ratio as C changes (`--W <2*C>`). This scales epoch length in references with cache size; evaluation windows are measured in epochs and therefore scale proportionally. Distinct sampled pages `Dw` are observed diagnostically; no post hoc W tuning.
 
 ### Diagnostic (required for every Phase 1 shadow evaluation)
 Per evaluation log: `ep,startEp,C,W,p,csCapF,Cs,Dw,rankable,miss_c0..miss_c{k-1}` where `rankable=1` if candidate miss counts are not all equal, else 0. Implemented as `--eval-diag <path>`.
@@ -39,11 +44,11 @@ Per evaluation log: `ep,startEp,C,W,p,csCapF,Cs,Dw,rankable,miss_c0..miss_c{k-1}
 
 ### Implementation notes
 - Default behavior unchanged when `--cs-cap-f 0` and no `--eval-diag`.
-- Any deviation from this protocol will be labeled post hoc.
+- All entries in this file are post hoc records; no prospective protocol claim is made.
 
-## Phase 2 - Budget-matched trigger curve (pre-specified before running)
+## Phase 2 - Budget-matched trigger curve (post hoc record)
 
-**Date pre-specified:** 2026-11-23
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### Hypothesis
 CUSUM-triggered shadow evaluation achieves a better miss-ratio vs shadow-eval budget frontier than periodic or random triggers at matched budgets; oracle provides the accuracy ceiling. This may be null or negative.
@@ -57,7 +62,7 @@ CUSUM-triggered shadow evaluation achieves a better miss-ratio vs shadow-eval bu
 
 ### Selection / pairing rule
 - No train/test selection for this frontier plot: all points evaluated on same frozen 80 non-stable seed-5001 traces for budget-matched comparison. This is a measurement, not a tuned claim.
-- Paired tests (Wilcoxon + Holm) at matched budgets: for each CUSUM point, pair with nearest-budget periodic and random point by absolute difference in mean shadow evals/trace; if tie, prefer lower miss. Pairing rule pre-specified here. Also report nearest-budget within 10% when available.
+- Paired tests (Wilcoxon + Holm) at matched budgets: for each CUSUM point, pair with nearest-budget periodic and random point by absolute difference in mean shadow evals/trace; if tie, prefer lower miss. Pairing rule recorded here post hoc. Also report nearest-budget within 10% when available.
 
 ### Metrics
 - Mean miss ratio (non-stable 80), mean shadow evals/trace, mean switches/trace.
@@ -69,9 +74,9 @@ CUSUM-triggered shadow evaluation achieves a better miss-ratio vs shadow-eval bu
 - **Null:** no significant difference at matched budgets.
 - **Negative:** periodic/random equal or better at matched budgets.
 
-## Phase 3 - Other detectors (pre-specified before running)
+## Phase 3 - Other detectors (post hoc record)
 
-**Date pre-specified:** 2026-11-23
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### Hypothesis
 Page-Hinkley and ADWIN detectors on the epoch miss-ratio signal may close part of the oracle gap relative to CUSUM, at comparable or different shadow-eval budgets. This may be null or negative.
@@ -91,9 +96,9 @@ Page-Hinkley and ADWIN detectors on the epoch miss-ratio signal may close part o
 - Positive: detector closes meaningful oracle gap with comparable/better budget.
 - Null/negative: no improvement or worse budget/accuracy.
 
-## Phase 4 - Stronger baselines and large real traces (pre-specified before running)
+## Phase 4 - Stronger baselines and large real traces (post hoc record)
 
-**Date pre-specified:** 2026-11-23
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### Baseline implementations
 - **SIEVE:** Zhang et al., NSDI 2024. FIFO queue with visited bit; hand pointer sweeps for eviction, clearing visited bits. Source: https://cachemon.github.io/SIEVE-website/ algorithm description / paper. Sanity check: small reference string behavior against published description.
@@ -104,22 +109,22 @@ Page-Hinkley and ADWIN detectors on the epoch miss-ratio signal may close part o
 - MSR Cambridge, Alibaba block, Tencent block, CloudPhysics, Twitter/Meta KV: check license/availability; use only legally downloadable/available. Report what cannot be obtained.
 
 ### Evaluation
-- If traces obtained: full-length where possible, capacities at 1%,5%,10% of working-set size chosen before looking at results. Compare DA, ContShadow, periodic, CUSUM, PH, ADWIN, S3-FIFO, W-TinyLFU, SIEVE, ARC, LRU, OPT with paired stats across traces.
+- If traces obtained: full-length where possible, capacities at 1%,5%,10% of working-set size defined from trace content (post hoc record). Compare DA, ContShadow, periodic, CUSUM, PH, ADWIN, S3-FIFO, W-TinyLFU, SIEVE, ARC, LRU, OPT with paired stats across traces.
 - If not obtained: report plainly in NOT_DONE/Limitations; no weaker silent substitution.
 
 ### Outcomes
 - Positive/null/negative reported as-is.
 
-## Phase 4 - Stronger baselines and large real traces (execution addendum, pre-specified before Phase 4 runs)
+## Phase 4 - Stronger baselines and large real traces (execution addendum, post hoc record)
 
-**Date:** 2026-11-23 (before running Phase 4 evaluation commands below)
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### Trace availability (checked)
 - **Available in workspace:** synthetic generator (seed 5001 main-study), 6 FIU public split traces in `reproduction/public_split/*.bin` (12 files, 418k-500k refs each, 500k-request prepared splits; original .zst not in workspace, so full-length original unavailable here - stated), 15-program real-program traces in `traces_real/*.bin` (60 files, 300k refs each).
 - **Not available/licensed in workspace:** MSR Cambridge (SNIA IOTTA license terms must be checked; not downloaded), Alibaba block, Tencent block, CloudPhysics, Twitter/Meta KV. Not obtained/used; no substitution.
 
-### Capacity rule (pre-specified, deterministic)
-For each real trace file, `WSS = number of distinct uint32 IDs in trace`. Capacities `C in {max(1,round(0.01*WSS)), max(1,round(0.05*WSS)), max(1,round(0.10*WSS))}`. This is computed from trace content only, before looking at miss results.
+### Capacity rule (post hoc record, deterministic)
+For each real trace file, `WSS = number of distinct uint32 IDs in trace`. Capacities `C in {max(1,round(0.01*WSS)), max(1,round(0.05*WSS)), max(1,round(0.10*WSS))}`. This is computed from trace content only (post hoc record).
 
 ### Methods/baselines
 Run available methods: LRU, ARC, S3-FIFO, SIEVE, W-TinyLFU, DA (CUSUM default), ContShadow, and DA-ph/DA-adwin selected configs where feasible. OPT omitted on large/real trace runs unless small enough (stated). LHD/TinyLFU full Caffeine implementation: NOT_DONE (no implementation in sim_full; W-TinyLFU is simplified independent re-implementation with documented assumptions).
@@ -127,7 +132,7 @@ Run available methods: LRU, ARC, S3-FIFO, SIEVE, W-TinyLFU, DA (CUSUM default), 
 ### Metrics
 Miss ratio per trace/capacity; paired comparisons across traces/capacities where applicable; report raw tables. No tuning on test results.
 
-## Phase 5 - Cost model and uncertainty (pre-specified before running)
+## Phase 5 - Cost model and uncertainty (post hoc record)
 
 **Date:** 2026-11-23
 
@@ -138,14 +143,14 @@ Miss ratio per trace/capacity; paired comparisons across traces/capacities where
 - Analytical variant: shadow evaluation runs off critical path; critical-path eval cost = 0, background CPU cost reported separately. Assumptions stated explicitly. No kernel/async prototype fabricated.
 
 ### 5c. LCB uncertainty
-- Replace normal z=1.28 4-block LCB with t-quantile df=3 (t_{0.90,3}=1.637744) as a pre-specified robustness variant; default remains normal for frozen reproducibility. Rerun DA on 80 non-stable seed 5001 traces with `--lcb-dist t3` and report delta vs default. This is a robustness check, not a replacement of frozen main result unless clearly better and reported.
+- Replace normal z=1.28 4-block LCB with t-quantile df=3 (t_{0.90,3}=1.637744) as a post hoc robustness variant; default remains normal for frozen reproducibility. Rerun DA on 80 non-stable seed 5001 traces with `--lcb-dist t3` and report delta vs default. This is a robustness check, not a replacement of frozen main result unless clearly better and reported.
 
 ### 5d. Block bootstrap CIs
 - Where 4-block normal CIs were used in analysis, add block/trace bootstrap (10k, seed fixed) as robustness; report both.
 
-## Phase 4b - LHD baseline and CMU PDL external traces (pre-specified before running)
+## Phase 4b - LHD baseline and CMU PDL external traces (post hoc record)
 
-**Date:** 2026-11-23 (before runs below)
+**Recorded date:** 2026-11-23 (post hoc; see version history)
 
 ### [39] verification (done by webfetch, reported)
 - Both [39] URLs are live. The FTP index lists `fiu`, `msr`, `alibabaBlock`, `tencentBlock`, `cloudphysics`, `twitter`, `metaKV`, etc. README states zstd trace format and citation requirements. PDL copyright notice (https://pdl.cmu.edu/Publications/copyright.shtml) says documents/software are provided for timely dissemination of scholarly work on a **non-commercial basis**, copyright remains with authors, and copying for commercial redistribution/republication/dissemination/reposting requires explicit permission. No explicit dataset licence file was found; we use only publicly downloadable traces for non-commercial research with citation, and state this.
@@ -160,16 +165,16 @@ Miss ratio per trace/capacity; paired comparisons across traces/capacities where
 
 ## Phase 5e - Total-time envelope re-analysis (2026-11-24)
 
-This is a **re-analysis of already frozen seed-5001 results**, not a new experiment; no simulator run, seed, trace, or main-study metric is changed, so no new pre-run preregistration is required.
+This is a **re-analysis of already frozen seed-5001 results**, not a new experiment; no simulator run, seed, trace, or main-study metric is changed, so no new prospective registration claim is made.
 
 - Read the 80 non-stable test rows of `reproduction/main_study_results.csv` and compute, for CLOCK, S3-FIFO, ContShadow and DA, the mean per-reference time `t` and mean miss ratio `m` from the released frozen outputs.
 - Define total time `T_policy(c_m) = t_policy + m_policy * c_m` for miss cost `c_m` in ns. Report the lower envelope of CLOCK, S3-FIFO and ContShadow, the crossing points, and the minimum excess of DA over that envelope.
 - Bootstrap: resample the 80 non-stable traces pairwise with replacement, B=10000, seed 20261124; report percentile 95% CIs for all crossings and the minimum DA excess, and the positive-replicate count for the DA/S3-FIFO crossing. Because the minimum-gap CI includes zero, state the ranking as point estimates only.
 - Replace the DA-versus-ContShadow-only break-even table with a generated total-time table over all four policies (`\input{total_time_table.tex}`) and a four-policy figure. Do not claim that gating pays off in total time; withdraw that earlier claim.
 
-## Phase 6 - Remaining CMU PDL families (pre-registered before runs)
+## Phase 6 - Remaining CMU PDL families (post hoc record)
 
-**Date pre-specified:** 2026-11-24
+**Recorded date:** 2026-11-24 (post hoc; see version history)
 
 This is a new external-validity experiment. It does not change the frozen seed-5001 main study.
 
@@ -193,7 +198,7 @@ Use is non-commercial scholarly research with citation of the PDL/README citatio
 
 ### Capacity and command rule
 
-- For each converted prefix, compute `WSS = len(unique(uint32 ids))` before any miss result is inspected. Capacities are `C in {max(1,round(0.01*WSS)), max(1,round(0.05*WSS)), max(1,round(0.10*WSS))}`; `W = 2*C`; `--warm 100000`; `--np max_id+1`.
+- For each converted prefix, compute `WSS = len(unique(uint32 ids))` from trace content only (post hoc record). Capacities are `C in {max(1,round(0.01*WSS)), max(1,round(0.05*WSS)), max(1,round(0.10*WSS))}`; `W = 2*C`; `--warm 100000`; `--np max_id+1`.
 - Fixed controller parameters: `--ncand 5 --kfrac 0 --z 1.28 --edelay 10`. No train/test tuning on these traces.
 - Method set: `LRU,CLOCK,S3-FIFO,ARC,SIEVE,W-TinyLFU,LHD,ContShadow,DA` (the simulator adds DA; `ContShadow` is requested explicitly). Run one command per family/capacity with raw outputs `phase6_pdl/raw/<family>_C<C>.csv` and `_det.csv`. Example command shape: `./sim_full --trace <bin> --C <C> --W <2C> --warm 100000 --np <max_id+1> --ncand 5 --kfrac 0 --z 1.28 --edelay 10 --methods LRU,CLOCK,S3-FIFO,ARC,SIEVE,W-TinyLFU,LHD,ContShadow --out <out> --det <det>`.
 - Analysis script `phase6_pdl/analyze_pdl.py` writes `phase6_pdl/summary.csv` (mean miss, evals, switches, ns/ref by method), `phase6_pdl/per_family.csv`, and `phase6_pdl/paired_da_minus_baseline.csv`.
@@ -204,13 +209,13 @@ Use is non-commercial scholarly research with citation of the PDL/README citatio
 - Uncertainty: trace-level paired bootstrap, B=10000, seed 20261125; additionally cluster bootstrap over the six families, B=10000, same seed. Wilcoxon signed-rank with Holm adjustment across the nine DA-vs-baseline comparisons.
 - Positive/null/negative are reported as measured. If DA is worse or tied, that is the result; no tuning until a preferred method wins.
 
-## Phase 7 - Real userspace asynchronous-shadow prototype (pre-registered before runs)
+## Phase 7 - Real userspace asynchronous-shadow prototype (post hoc record)
 
-**Date pre-specified:** 2026-11-24
+**Recorded date:** 2026-11-24 (post hoc; see version history)
 
 ### Implementation contract
 
-- Add an additive build `reproduction/sim_full_async.cpp`, compiled as `sim_async` with `g++ -O2 -std=c++17 -pthread`. A flag `--async-shadow` enables a real worker thread. Without the flag, the binary must reproduce the current `sim_full.cpp` output on the frozen seed-5001 command: columns 1–6 (`scenario,seed,method,miss_ratio,switches,shadow_evals`) byte-for-byte and `det.csv` byte-for-byte. The `ns_per_ref` timing column is measured wall clock and is excluded from byte identity. This clarification is recorded before any `--async-shadow` run.
+- Add an additive build `reproduction/sim_full_async.cpp`, compiled as `sim_async` with `g++ -O2 -std=c++17 -pthread`. A flag `--async-shadow` enables a real worker thread. Without the flag, the binary must reproduce the current `sim_full.cpp` output on the frozen seed-5001 command: columns 1–6 (`scenario,seed,method,miss_ratio,switches,shadow_evals`) byte-for-byte and `det.csv` byte-for-byte. The `ns_per_ref` timing column is measured wall clock and is excluded from byte identity. This clarification is recorded post hoc (see version history).
 - The worker performs the **same shadow-evaluation routine** used by synchronous DA on a copied shadow/candidate state. The main thread only enqueues a request and checks for a completed result at the existing decision point; it never blocks for the worker.
 - Bounded queue depth is 1. If a trigger arrives while the worker is busy, count a dropped request; do not queue more. If a result is ready, the controller uses the most recent completed result and counts superseded results; if none is ready, it keeps the current policy and counts a stale decision.
 - Instrument `steady_clock` durations for enqueue/check on the critical path (ns/ref) and worker wall/CPU time; write them to `phase7_async/timing.csv`. These are measured prototype timings, not an analytical assumption.
@@ -226,35 +231,35 @@ Use is non-commercial scholarly research with citation of the PDL/README citatio
 - Metrics: miss ratio, switches, enqueued/dropped/superseded/stale-eval counts, critical-path ns/ref, worker wall/CPU ms, queue wait.
 - Paired bootstrap over 80 non-stable traces, B=10000, seed 20261126, plus Wilcoxon+Holm for miss ratio. Report null or negative outcomes directly.
 
-## Phase 8 - QEMU guest kernel: real MGLRU and in-kernel latency (pre-registered before runs)
+## Phase 8 - QEMU guest kernel: real MGLRU and in-kernel latency (post hoc record)
 
-**Date pre-specified:** 2026-11-24
+**Recorded date:** 2026-11-24 (post hoc; see version history)
 
 Host constraints: no passwordless sudo, no host headers, no host `perf`/`bpftrace`; `/dev/kvm`, QEMU, `gcc`, `clang`, `make`, BusyBox, zstd and network are available. All kernel work therefore runs in an unprivileged user-built guest.
 
 ### Guest build
 
-- Kernel source: `https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.1.tar.xz`, SHA256 recorded in `phase8_kernel/manifest.csv` before extraction.
+- Kernel source: `https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.1.tar.xz`, SHA256 recorded in `phase8_kernel/manifest.csv` (post hoc record).
 - Build as user from the space-free scratch path `/home/kashie/opencode_kernel_build/linux-6.6.1` (the Linux Makefile rejects source directories containing spaces, and `/tmp` has insufficient free space); copy `bzImage` and `.config` back into `phase8_kernel/`. The host has no `bison` and no sudo, so first build GNU bison 3.8.2 from `https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.xz` into `/home/kashie/opencode_kernel_build/bison-install` and prepend its `bin` to `PATH` for all kernel `make` invocations; record bison version. Run `make defconfig`; then `scripts/config --enable LRU_GEN --enable LRU_GEN_ENABLED --enable MEMCG --enable CGROUP_MEMORY --enable FTRACE --enable FUNCTION_TRACER --enable FUNCTION_GRAPH_TRACER --enable KPROBES --enable KPROBE_EVENTS --enable TRACING --enable DEBUG_FS --enable PROC_FS --enable SYSFS --enable TMPFS --enable BLK_DEV_INITRD --enable RD_GZIP --enable DEVTMPFS --enable DEVTMPFS_MOUNT --enable NET_9P --enable NET_9P_VIRTIO --enable 9P_FS --enable VIRTIO_PCI`; `make olddefconfig`; `make -j$(nproc) bzImage`. Record `.config`, compiler version, kernel version, tarball SHA256 and build log. If build fails, report the failure; do not infer kernel results.
-- **Amendment recorded 2026-11-24, before any further kernel build or guest measurement.** The first build attempt failed while compiling objtool: `tools/objtool/include/objtool/elf.h:10:10: fatal error: gelf.h: No such file or directory`. Inspection of Linux 6.6.1 Kconfig shows x86_64 selects `HAVE_OBJTOOL` unconditionally and `HAVE_UACCESS_VALIDATION` selects `OBJTOOL`, so disabling `UNWINDER_ORC`/`STACK_VALIDATION` cannot remove the objtool dependency. Recorded fix: build elfutils 0.191 (`https://sourceware.org/elfutils/ftp/0.191/elfutils-0.191.tar.bz2`) from source with `--disable-debuginfod --disable-libdebuginfod` into `/home/kashie/opencode_kernel_build/elfutils-install`, and export `CPATH`/`LIBRARY_PATH` so the unmodified kernel build finds `gelf.h` and links `-lelf`. The kernel configuration (including ORC unwinder and the tracing options above) is **not** changed by this build-dependency fix; the resulting `.config` is still copied to `phase8_kernel/kernel.config` and checked. A subsequent elfutils compile failed only because GCC treats a `const`-qualifier warning in `libcpu/riscv_disasm.c` as an error (`-Werror`), so the same local build is retried with `CFLAGS="-g -O2 -Wno-error"`; this affects no kernel source or measured value. A later kernel compile failed in `arch/x86/realmode/rm/wakemain.c` because host GCC 16 defaults to C23, where `false`/`bool` are keywords; the real-mode Makefile uses its own CFLAGS that do not carry the kernel's `-std=gnu11`. Recorded fix: a **clean** rebuild with `CC=gcc-15 HOSTCC=gcc-15`, retaining the same `.config` options, local bison and local libelf. A first attempt exported these variables in the environment, but kernel Makefiles override environment `CC`/`HOSTCC`, so GCC 16 was still used; additionally, the installed GCC 15 also defaults to C23. Final recorded invocation: pass `CC="gcc-15 -std=gnu11" HOSTCC="gcc-15 -std=gnu11"` as **make command-line variables** to every `make` call. This only selects the compiler and language standard for an older kernel; it changes no workload, config option or measured value. A subsequent pass built `arch/x86/boot/bzImage` successfully but failed to link the static guest controller because `-lm` was placed before the source file, leaving `fmax`/`sqrt` unresolved; the recorded fix is `gcc -O2 -static -o guest_da_ctl guest_da_ctl.c -lm`. This is a guest-tool link-order fix only, with no kernel-config or measurement change. The first boot then failed before any measurement with `Failed to execute /init (error -2)`: the host BusyBox copied into the initramfs is dynamically linked, but the initramfs lacked `/lib64/ld-linux-x86-64.so.2`, `libc.so.6` and `libresolv.so.2`. Recorded fix: copy those loader/runtime files into the same paths in the initramfs. This is a root-filesystem build fix only; no guest workload or measurement was run, and no measured value is inferred. The first completed boot sequence is likewise discarded before any reporting: (i) `make_ftrace_filter.py` wrote `ftrace_functions.txt` outside the 9p-mounted results directory, so `init` did not find it and the trace was unfiltered (0 matching samples despite a 3 MB trace); (ii) `/dev/null` was absent, so the background controller never started; (iii) the `uname` applet was not linked, so `guest_uname.txt` was empty; and (iv) the cgroup cap actually seen by the guest was not recorded alongside the zero refault counts. Recorded fixes before any rerun: write/read the filter file inside `results/`, create `/dev/null` in guest `init`, link the `uname` applet, and write `memory.max`, `memory.swap.max` and `memory.peak` into each run directory. These are instrumentation/root-filesystem corrections, not workload or tuning changes; no value from the discarded boots is used in the paper. This is a host build-tool dependency only; no measured number is inferred from it.
+- **Amendment recorded 2026-11-24 (post hoc; see version history).** The first build attempt failed while compiling objtool: `tools/objtool/include/objtool/elf.h:10:10: fatal error: gelf.h: No such file or directory`. Inspection of Linux 6.6.1 Kconfig shows x86_64 selects `HAVE_OBJTOOL` unconditionally and `HAVE_UACCESS_VALIDATION` selects `OBJTOOL`, so disabling `UNWINDER_ORC`/`STACK_VALIDATION` cannot remove the objtool dependency. Recorded fix: build elfutils 0.191 (`https://sourceware.org/elfutils/ftp/0.191/elfutils-0.191.tar.bz2`) from source with `--disable-debuginfod --disable-libdebuginfod` into `/home/kashie/opencode_kernel_build/elfutils-install`, and export `CPATH`/`LIBRARY_PATH` so the unmodified kernel build finds `gelf.h` and links `-lelf`. The kernel configuration (including ORC unwinder and the tracing options above) is **not** changed by this build-dependency fix; the resulting `.config` is still copied to `phase8_kernel/kernel.config` and checked. A subsequent elfutils compile failed only because GCC treats a `const`-qualifier warning in `libcpu/riscv_disasm.c` as an error (`-Werror`), so the same local build is retried with `CFLAGS="-g -O2 -Wno-error"`; this affects no kernel source or measured value. A later kernel compile failed in `arch/x86/realmode/rm/wakemain.c` because host GCC 16 defaults to C23, where `false`/`bool` are keywords; the real-mode Makefile uses its own CFLAGS that do not carry the kernel's `-std=gnu11`. Recorded fix: a **clean** rebuild with `CC=gcc-15 HOSTCC=gcc-15`, retaining the same `.config` options, local bison and local libelf. A first attempt exported these variables in the environment, but kernel Makefiles override environment `CC`/`HOSTCC`, so GCC 16 was still used; additionally, the installed GCC 15 also defaults to C23. Final recorded invocation: pass `CC="gcc-15 -std=gnu11" HOSTCC="gcc-15 -std=gnu11"` as **make command-line variables** to every `make` call. This only selects the compiler and language standard for an older kernel; it changes no workload, config option or measured value. A subsequent pass built `arch/x86/boot/bzImage` successfully but failed to link the static guest controller because `-lm` was placed before the source file, leaving `fmax`/`sqrt` unresolved; the recorded fix is `gcc -O2 -static -o guest_da_ctl guest_da_ctl.c -lm`. This is a guest-tool link-order fix only, with no kernel-config or measurement change. The first boot then failed with `Failed to execute /init (error -2)`: the host BusyBox copied into the initramfs is dynamically linked, but the initramfs lacked `/lib64/ld-linux-x86-64.so.2`, `libc.so.6` and `libresolv.so.2`. Recorded fix: copy those loader/runtime files into the same paths in the initramfs. This is a root-filesystem build fix only; no guest workload or measurement was run, and no measured value is inferred. The first completed boot sequence is likewise discarded: (i) `make_ftrace_filter.py` wrote `ftrace_functions.txt` outside the 9p-mounted results directory, so `init` did not find it and the trace was unfiltered (0 matching samples despite a 3 MB trace); (ii) `/dev/null` was absent, so the background controller never started; (iii) the `uname` applet was not linked, so `guest_uname.txt` was empty; and (iv) the cgroup cap actually seen by the guest was not recorded alongside the zero refault counts. Recorded fixes: write/read the filter file inside `results/`, create `/dev/null` in guest `init`, link the `uname` applet, and write `memory.max`, `memory.swap.max` and `memory.peak` into each run directory. These are instrumentation/root-filesystem corrections, not workload or tuning changes; no value from the discarded boots is used in the paper. This is a host build-tool dependency only; no measured number is inferred from it.
 - Root filesystem: BusyBox initramfs containing `guest_workload`, `guest_da_ctl`, startup script, and required `/dev`, `/proc`, `/sys`, `/sys/fs/cgroup` mounts. Boot with `qemu-system-x86_64 -enable-kvm -m 2048 -smp 2 -no-reboot -display none -serial file:<per-run-console.log> -kernel bzImage -initrd initramfs.cpio.gz -append "console=ttyS0 panic=-1"` plus a virtio-9p results mount; `-display none -serial file:` replaces `-nographic` so each repetition's console is retained, and all other boot parameters are unchanged. Record `qemu-system-x86_64 --version` and guest `uname -a` per run.
 
 ### Workload and conditions
 
 - `guest_workload.c`: `mmap` 512 MiB anonymous, join cgroup with `memory.max=268435456` (256 MiB) and swap disabled, touch 1,000,000 references in four 250,000-reference phases. Each phase uses a 128 MiB page set and a fixed permutation seeded 101,202,303,404; first 100,000 references are warm-up. Record guest `CLOCK_MONOTONIC` userspace times and page-fault counts from `getrusage`.
-- Conditions, each repeated three times with the guest rebooted: (a) `enabled=0` fixed LRU-style kernel behavior; (b) `enabled=7` fixed MGLRU; (c) `guest_da_ctl` coupled controller. Leave `min_ttl_ms` at the guest boot default and record it. Record exact `lru_gen/enabled` and `min_ttl_ms` values before each run.
+- Conditions, each repeated three times with the guest rebooted: (a) `enabled=0` fixed LRU-style kernel behavior; (b) `enabled=7` fixed MGLRU; (c) `guest_da_ctl` coupled controller. Leave `min_ttl_ms` at the guest boot default and record it. Record exact `lru_gen/enabled` and `min_ttl_ms` values for each run.
 - `guest_da_ctl` reads `/proc/vmstat` and `/proc/meminfo` every fixed 10 ms wall interval (recorded in `phase8_kernel/manifest.csv`), computes CUSUM on normalized `workingset_refault_anon` deltas with `h=5`, `delta=0.5` (same constants as the frozen simulator), and toggles `enabled` between 0 and 7 only after a confirmed alarm. Uses `edelay=10` sample intervals before the next allowed decision. No tuning. Results are mounted from the host through QEMU 9p; enabling 9p in the guest kernel is part of the recorded build config.
 
 ### In-kernel latency measurement
 
-- Before measurement, record the exact list of available ftrace functions from guest `/sys/kernel/debug/tracing/available_filter_functions` that match `handle_mm_fault`, `do_anonymous_page`, `do_wp_page`, `shrink_folio_list`, `shrink_page_list`, `reclaim_pages`, and `do_swap_page`. Only functions present in that recorded list are traced.
+- Record the exact list of available ftrace functions from guest `/sys/kernel/debug/tracing/available_filter_functions` that match `handle_mm_fault`, `do_anonymous_page`, `do_wp_page`, `shrink_folio_list`, `shrink_page_list`, `reclaim_pages`, and `do_swap_page`. Only functions present in that recorded list are traced.
 - Use `function_graph` tracer with `set_ftrace_filter` restricted to that list; parse duration fields from `/sys/kernel/debug/tracing/trace` into `phase8_kernel/ftrace_durations.csv` (function, duration_ns, condition, repetition). Also collect `/proc/vmstat` counters: `pgscan_anon`, `pgsteal_anon`, `workingset_refault_anon`, `workingset_activate_anon`, `majflt/minflt` from `getrusage`.
 - Statistics: per-function/median/p95/max duration, refaults per million refs, scans/steals, total runtime. Bootstrap across the three repetitions plus within-run function samples is not claimed as independent; report the three raw repetitions and medians only. Wilcoxon is not applied to n=3.
 - Outcomes: report as-is. A controller that does not improve refaults or latency is a null/negative result. This phase measures a **kernel-coupled userspace controller**, not an in-kernel DA replacement policy.
 
 ## Phase 9 - Manuscript compression and full verification
 
-**Date pre-specified:** 2026-11-24
+**Recorded date:** 2026-11-24 (post hoc; see version history)
 
 - After Phases 6–8 produce real CSVs, generate new LaTeX fragments directly from those CSVs; no hand-entered numbers.
 - Move exact commands, schemas, long literature tables, offset diagnostics, per-family raw tables and detailed follow-up tables to `latex/supplement.tex`. Keep only the result tables/figures needed for the main argument in `main_template.tex`/`latex/main.tex`.
@@ -262,9 +267,9 @@ Host constraints: no passwordless sudo, no host headers, no host `perf`/`bpftrac
 - Update `claims_to_sources.csv` and `reproduction/check_paper_numbers.py` for every new printed number; require all checks PASS.
 - Verify frozen seed-5001 artifacts by SHA256 before/after all additive code changes; verify default `sim_full` and `sim_async` (without `--async-shadow`) produce byte-identical deterministic columns 1–6 and byte-identical detection CSVs (the wall-clock `ns_per_ref` column is excluded); rebuild drift/root PDFs/DOCX; check 0 undefined references and 0 overfull hboxes.
 
-## Phase 10 - Independent capacity pilot (pre-registered before download or run)
+## Phase 10 - Independent capacity pilot (post hoc record)
 
-**Date pre-specified:** 2026-11-24
+**Recorded date:** 2026-11-24 (post hoc; see version history)
 
 A reviewer noted that the FIU public-trace capacity $C=20{,}000$ had been
 selected from a pilot on `webresearch`, which is itself one of the six
@@ -273,20 +278,20 @@ evaluated test traces. This phase replaces that provenance with a pilot on a
 trace replay capacity is selected. The frozen seed-5001 main study and its two
 SHA256-pinned CSVs are untouched.
 
-### Pilot trace (fixed before inspection of any result)
+### Pilot trace (post hoc record)
 
 - Trace: `fiu_webusers-030409-033109.oracleGeneral.zst`.
 - Exact URL: `https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/fiu/fiu_webusers-030409-033109.oracleGeneral.zst`.
 - This trace is **not** among the six evaluated FIU traces (`homes`, `ikki`,
   `madmax`, `online.cs.fiu.edu`, `webmail.cs.fiu.edu`, `webresearch`) and is not
   used in any reported performance comparison. It was chosen from the PDL `fiu/`
-  index by name and collection date before any miss result or working-set value
-  from it was inspected; no alternative trace will be substituted after seeing
-  results.
-- Use is non-commercial scholarly research with PDL citation, as registered in
+  index by name and collection date (post hoc record); no miss result or
+  working-set value from it was used in the choice, and no alternative trace was
+  substituted after seeing results.
+- Use is non-commercial scholarly research with PDL citation, as recorded in
   Phase 4b/6.
 
-### Conversion and manifest (fixed before inspection of any result)
+### Conversion and manifest (post hoc record)
 
 - Reuse the Phase 6 streaming rule in a new wrapper
   `phase10_capacity_pilot/convert_pilot_prefix.py`: decode **exactly
@@ -299,7 +304,7 @@ SHA256-pinned CSVs are untouched.
   failed run; it is reported, never replaced by another trace or a fabricated
   prefix.
 
-### Simulator grid (fixed before inspection of any result)
+### Simulator grid (post hoc record)
 
 - Capacities, ascending: $C \in \{1000, 5000, 10000, 15000, 20000, 25000,
   50000\}$.
@@ -311,7 +316,7 @@ SHA256-pinned CSVs are untouched.
   `C<C>_det.csv`, stderr in `C<C>.stderr`, exact command lines in
   `phase10_capacity_pilot/commands.csv`.
 
-### Deterministic selection rule (fixed before inspection of any result)
+### Deterministic selection rule (post hoc record)
 
 Let $m_L(C)$ and $m_S(C)$ be the pilot miss ratios of LRU and S3-FIFO at
 capacity $C$, read from the raw CSVs.
@@ -332,7 +337,7 @@ writes `selection.csv` with every capacity's two miss ratios, the separation,
 the saturation flags, and the selected capacity. No manual override is
 permitted after the run.
 
-### Consequence rule (fixed before inspection of any result)
+### Consequence rule (post hoc record)
 
 - If the selected capacity is 20,000, retain the already frozen public-trace
   results and change **only their provenance text** to cite this independent
@@ -347,11 +352,11 @@ permitted after the run.
 
 ### Execution record (factual, not a protocol amendment)
 
-- The registered URL returned HTTP 200; 1,000,000 records were decoded,
+- The recorded URL returned HTTP 200; 1,000,000 records were decoded,
   WSS = 72,539, and the output SHA256 is
   `f09a2450a1b9dc7eb521191dfbeea1213d1a7fd63cbec5cb601dffec46c85403`
   (`phase10_capacity_pilot/manifest.csv`).
-- All seven registered simulator commands ran; exact lines are in
+- All seven recorded simulator commands ran; exact lines are in
   `phase10_capacity_pilot/commands.csv`.
 - The rule selected `C=20000` by the **primary** rule (`selection.csv`):
   at `C=10000` the LRU--S3-FIFO gap was 0.00865 (not qualifying), and at

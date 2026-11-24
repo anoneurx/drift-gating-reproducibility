@@ -38,7 +38,7 @@ traces, gating saved 76\% of shadow evaluations versus continuous evaluation
 not significantly different from S3-FIFO (0.468). On six public FIU block
 traces, the frozen controller never switched because of an identified
 capacity-sampling fault; a post hoc repair produced identical public,
-synthetic, and holdout results. Pre-specified follow-ups found a sharp
+synthetic, and holdout results. Post hoc follow-ups found a sharp
 shadow-rankability boundary ($C_s/D_w<1$) but no meaningful FIU repair gain;
 CUSUM dominated periodic/random at matched budgets, while Oracle/ContShadow
 exposed an accuracy ceiling; selected Page-Hinkley and simplified ADWIN
@@ -744,7 +744,7 @@ traces only using the same 48-configuration grid and selection rule with
 ($n_{\mathrm{cand}}{=}5$, $K{=}0$, delay 10). Evaluated once on the 80
 non-stable and 30 stable held-out test traces, the repaired controller
 produced miss ratios, switch counts, and shadow-evaluation counts identical to
-the original pre-specified controller. This post hoc correction therefore did
+the original controller. This post hoc correction therefore did
 not change the synthetic-trace outcome.
 
 \begin{figure}[!t]
@@ -941,7 +941,7 @@ trace were used, except \texttt{madmax}, which contains 918,010 requests; the
 single-thread page-id array requires \texttt{--np 1048576}. The replay
 capacity $C = 20{,}000$ was selected on a \emph{separate} PDL trace,
 \texttt{fiu\_webusers-030409-033109.oracleGeneral.zst}, which is not one of the
-six evaluated traces. The pre-registered grid was $C \in \{1000, 5000, 10000,
+six evaluated traces. The recorded post hoc grid was $C \in \{1000, 5000, 10000,
 15000, 20000, 25000, 50000\}$ with seed 0, methods LRU and S3-FIFO (DA was also
 run for the record). The rule selected the smallest $C$ at which both miss
 ratios were at least 0.01 and LRU exceeded S3-FIFO by at least 0.10: at
@@ -1044,16 +1044,17 @@ These are storage block/cache traces, not virtual-memory page traces, and only
 a prefix of each was replayed; this is an external check and not the primary
 evidence for paging.
 
-\subsection{Pre-specified Follow-up Measurements}
-\label{sec:prespecified}
+\subsection{Post Hoc Follow-up Measurements}
+\label{sec:posthoc_followups}
 
-The following measurements were pre-specified in \texttt{PROTOCOL.md}
-(dated 2026-11-23) before the corresponding runs. They test repairs and
+The following measurements are recorded in \texttt{PROTOCOL.md}
+(first committed to git on 2026-11-24; no independent pre-run timestamp
+exists) and are reported as post hoc. They test repairs and
 alternatives suggested by the negative main result; null and negative
 outcomes are reported.
 
 \begin{table}[!t]
-\caption{Pre-specified follow-ups: outcome and representative numbers. Details
+\caption{Post hoc follow-ups: outcome and representative numbers. Details
 and raw-table pointers are in Section S4 of the supplementary material.}
 \label{tab:prespec}
 \footnotesize
@@ -1197,7 +1198,7 @@ full-capacity evaluation was dropped because full ranking agreement was not
 measured; no claim is made from it.
 Table~\ref{tab:hypotheses} reports the outcomes. No cost budget or agreement
 threshold was specified before the study; post hoc criteria are not treated as
-pre-registered results.
+prospectively registered results.
 
 \begin{table}[!t]
 \caption{Hypothesis Outcomes (Reproducible Main Study)}
@@ -1274,7 +1275,7 @@ limited to the evaluated workload families.
 \emph{Statistical conclusion validity.} The switching rule applies a normal
 quantile ($z = 1.28$) to only four autocorrelated shadow blocks; a
 $t$-quantile with three degrees of freedom is about 1.64, so the nominal 90\%
-bound is optimistic. A pre-specified seed-5001 robustness run with
+bound is optimistic. A post hoc seed-5001 robustness run with
 $t_{0.90,3}$ gave DA miss 0.4586 [0.4282,0.4888] vs default 0.4529
 [0.4224,0.4834]. KS $p$-values on dependent, tied reuse times are not calibrated error rates,
 so the confirmation stage provides a heuristic gate rather than formal error
@@ -1285,8 +1286,7 @@ validated two-stage statistical gate is claimed. Traces within a scenario share 
 so the effective number of independent workloads is smaller than 80, and the
 stated $p$-values and intervals describe variability over generated traces,
 not over real workloads. Wilcoxon tests with ten corrected comparisons have
-limited power for differences of about 0.01 in mean miss ratio. No
-pre-registered cost budget or agreement threshold was specified. Several secondary results (for
+limited power for differences of about 0.01 in mean miss ratio. No cost budget or agreement threshold was specified before the study. Several secondary results (for
 for example the small KS ablation difference) are small or non-significant
 differences and should not be read as evidence of no effect.
 
@@ -1337,8 +1337,8 @@ bootstrap of the synthetic main study has only 35 distinct resamples and is
 reported as a coarse sensitivity check only. The literature review is
 narrative, not systematic, and its limitations in Table~I are partly inferred.
 
-Post hoc measurements (Section~\ref{sec:posthoc}) and pre-specified follow-ups
-(Section~\ref{sec:prespecified}) characterize trigger variants, rankability,
+Post hoc measurements (Section~\ref{sec:posthoc}) and recorded post hoc follow-ups
+(Section~\ref{sec:posthoc_followups}) characterize trigger variants, rankability,
 detector alternatives, stronger baselines, and cost uncertainty. The oracle
 trigger uses synthetic ground-truth boundaries and is not deployable; the FIU
 oracle produced no confirmations because FIU trace files expose no
@@ -1364,7 +1364,7 @@ bound the claims to the evaluated simulator, traces, and calibration.
 
 This paper asks when drift gating pays off in page replacement and answers it
 as a reproducible measurement study. The evidence includes the frozen main
-study, post hoc diagnostics, and pre-specified follow-ups: a CUSUM-triggered
+study, post hoc diagnostics, and post hoc follow-ups: a CUSUM-triggered
 controller with sampled shadow evaluation is compared against continuous
 shadow evaluation, static baselines, trigger alternatives, PH/ADWIN detectors,
 and SIEVE/W-TinyLFU baselines; a cost break-even model is calibrated by a
@@ -1375,7 +1375,7 @@ On 80 non-stable synthetic traces, gating saved 76\% of shadow evaluations
 but had higher miss ratio than continuous evaluation (0.453 vs.\ 0.423) and
 was not significantly different from S3-FIFO (Holm-adjusted $p=0.09$). The FIU
 capacity-sampling fault remained a failed external validation after repair.
-Pre-specified follow-ups showed a sharp rankability boundary without a
+Post hoc follow-ups showed a sharp rankability boundary without a
 meaningful FIU repair gain, CUSUM budget-frontier advantage over
 periodic/random but not over oracle/ContShadow accuracy, and no oracle-gap
 closure by selected PH/ADWIN. On available real traces with SIEVE/W-TinyLFU,

@@ -24,7 +24,7 @@
 - **Change:** Updated `selfaudit.md`, `NOT_DONE.md`; rebuilt `latex/main.pdf` (17 pages, pdflatex twice) and synced `paper_final.tex`.
 
 ## Prior 2026-11-23 A-F pass (retained)
-- Repaired capacity-sampling correction (post hoc, `--cs-cap-f`, f=1.0 pre-specified): identical public/synthetic/holdout outcomes; original primary.
+- Repaired capacity-sampling correction (post hoc, `--cs-cap-f`, f=1.0 recorded post hoc): identical public/synthetic/holdout outcomes; original primary.
 - Detection offsets 333/1501 added; offset table regenerated from raw CSVs.
 - Abstract/Intro/Conclusion/Methods/Results wording normalized; failed external validation and repaired outcome reported.
 - Claim-to-source/check script/self-audit/NOT_DONE created; manuscript forbidden-string grep clean for body.

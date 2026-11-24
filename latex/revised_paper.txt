@@ -21,9 +21,9 @@ miss ratio (0.453 vs. 0.423) and was not significantly different            whic
 from S3-FIFO (0.468). On six public FIU block traces, the                   that the reference behaviour has changed and respond at an
 frozen controller never switched because of an identified capacity-
 sampling fault; a post hoc repair produced identical public,                acceptable cost.
-synthetic, and holdout results. Pre-specified follow-ups found a               The stakes of this choice have grown. Containerized and
-sharp shadow-rankability boundary (Cs /Dw < 1) but no mean-                 multi-tenant servers interleave unrelated workloads on shared
-ingful FIU repair gain; CUSUM dominated periodic/random at                  memory, GPU and accelerator memory is oversubscribed by
+synthetic, and holdout results. Post hoc follow-ups found a sharp              The stakes of this choice have grown. Containerized and
+shadow-rankability boundary (Cs /Dw < 1) but no meaning-                    multi-tenant servers interleave unrelated workloads on shared
+ful FIU repair gain; CUSUM dominated periodic/random at                     memory, GPU and accelerator memory is oversubscribed by
 matched budgets, while Oracle/ContShadow exposed an accuracy                multitasking and large-model serving, and tiered memory
 ceiling; selected Page-Hinkley and simplified ADWIN detectors
 did not close the oracle gap. On available real traces and                  systems make a wrong eviction more expensive because the
@@ -385,10 +385,10 @@ nificantly better than eight of the ten baselines after Holm                best
 
 
 
-                                TABLE II                                                            TABLE III
-P UBLIC FIU B LOCK T RACES : M EANS OVER S IX T RACES (R AW O UTPUT       P RE - SPECIFIED FOLLOW- UPS : OUTCOME AND REPRESENTATIVE
-                 P U B L I C_T R A C E_R E S U L T S.C S V )           NUMBERS . D ETAILS AND RAW- TABLE POINTERS ARE IN S ECTION S4 OF
-                                                                                          THE SUPPLEMENTARY MATERIAL .
+                                TABLE II                                                           TABLE III
+P UBLIC FIU B LOCK T RACES : M EANS OVER S IX T RACES (R AW O UTPUT     P OST HOC FOLLOW- UPS : OUTCOME AND REPRESENTATIVE NUMBERS .
+                 P U B L I C_T R A C E_R E S U L T S.C S V )               D ETAILS AND RAW- TABLE POINTERS ARE IN S ECTION S4 OF THE
+                                                                                          SUPPLEMENTARY MATERIAL .
 
 Method       Mean miss ratio   Mean ns/ref   Mean shadow evals
                                                                       Follow-up       Outcome (key numbers)
@@ -418,31 +418,27 @@ and quality. The cost–quality figure is in the supplement.
                                                                                   CLOCK         0.4973            0.00            9.5
                                                                                   LRU           0.4987            0.00           41.0
 G. Post Hoc Measurement Experiments                                               S3-FIFO       0.4683            0.00           43.4
-   The measurements below were run after the                                      DA            0.4742            2.67           94.4
-                                                                                  ContShadow    0.4739           13.11          147.5
+                                                                                  DA            0.4742            2.67           94.4
+   The measurements below were run after the                                      ContShadow    0.4739           13.11          147.5
 frozen     main-study     results    were    obtained.     They
 are reported as post hoc measurements, not as
-primary claims or as selected configurations. Raw
-                                                                      incurred only compulsory misses and tied. The post hoc
-outputs are in reproduction/trigger_real/,
-                                                                      identity cap (f = 1.0) did not restore rankability or change
-reproduction/param_sweep/,                                  and
-                                                                      the zero-switch, no-gain outcome. Per-trace maxima, margins,
-reproduction/rankability_real/;                     commands,
-                                                                      re-selection and repair details are in the supplement.
-seeds, and defaults are recorded in NOT_DONE.md.
-                                                                         These are storage block/cache traces, not virtual-memory
-   Post hoc trigger variants, FIU trigger checks, one-at-a-time
-                                                                      page traces, and only a prefix of each was replayed; this is an
-parameter sweeps and capacity/sampling rankability sweeps
-                                                                      external check and not the primary evidence for paging.
+primary claims or as selected configurations. Raw                     incurred only compulsory misses and tied. The post hoc
+outputs are in reproduction/trigger_real/,                            identity cap (f = 1.0) did not restore rankability or change
+reproduction/param_sweep/,                                  and       the zero-switch, no-gain outcome. Per-trace maxima, margins,
+reproduction/rankability_real/;                     commands,         re-selection and repair details are in the supplement.
+seeds, and defaults are recorded in NOT_DONE.md.                         These are storage block/cache traces, not virtual-memory
+   Post hoc trigger variants, FIU trigger checks, one-at-a-time       page traces, and only a prefix of each was replayed; this is an
+parameter sweeps and capacity/sampling rankability sweeps             external check and not the primary evidence for paging.
 are reported in the supplement; the summary table below
 retains the representative outcomes. These measurements are
-post hoc and are not used as selected configurations or primary       I. Pre-specified Follow-up Measurements
-claims.                                                                 The following measurements were pre-specified in
-                                                                      PROTOCOL.md (dated 2026-11-23) before the corresponding
-H. Public Block-Trace Check                                           runs. They test repairs and alternatives suggested by the
-   Six FIU web/block traces from the CMU PDL collection               negative main result; null and negative outcomes are reported.
+                                                                      I. Post Hoc Follow-up Measurements
+post hoc and are not used as selected configurations or primary
+claims.                                                                 The     following    measurements      are    recorded    in
+                                                                      PROTOCOL.md (first committed to git on 2026-11-24;
+H. Public Block-Trace Check                                           no independent pre-run timestamp exists) and are reported as
+                                                                      post hoc. They test repairs and alternatives suggested by the
+   Six FIU web/block traces from the CMU PDL collection
+                                                                      negative main result; null and negative outcomes are reported.
 [39] were replayed with the frozen controller configuration and
 seed 5001. The public traces are storage block/cache traces
 rather than virtual-memory paging traces; the conversion,             J. Additional measured checks: six PDL families and asyn-
@@ -495,16 +491,16 @@ P HASE 7: REAL ASYNCHRONOUS - SHADOW PROTOTYPE , 80 NON - STABLE
 
 
 K. QEMU guest-kernel observation                                       M. Capacity Sensitivity
-   A pre-registered Linux 6.6.1 QEMU guest replayed                       At C = 500 the controller scored 0.580 against LRU
+   A post hoc Linux 6.6.1 QEMU guest replayed                             At C = 500 the controller scored 0.580 against LRU
 three conditions in three fresh boots each: fixed LRU                  0.693 and S3-FIFO 0.590, but was again behind ContShadow
 (lru_gen/enabled=0x0000), fixed MGLRU (0x0007)                         (0.555); the table is in the supplement.
 and a user-space CUSUM controller coupled to the
 same sysfs knob. Function-graph tracing was restricted                 N. Hypothesis Outcomes
-to five pre-registered fault/reclaim functions present in
+to five recorded fault/reclaim functions present in the
                                                                           We frame three hypotheses. H1: the drift-aware controller
-the guest; 191,370 durations were parsed. Table VI re-
+guest; 191,370 durations were parsed. Table VI reports
                                                                        attains a lower miss ratio than the strongest fixed baseline
-ports the measured fault-path durations and vmstat deltas.
+the measured fault-path durations and vmstat deltas.
                                                                        (S3-FIFO). H2: a two-stage gate (CUSUM trigger plus KS
 The observation is null: all nine runs show 131,138
                                                                        confirmation) improves miss ratio and detection over a single
@@ -512,20 +508,20 @@ minor faults, zero workingset_refault_anon, zero
                                                                        CUSUM trigger with the same sampled shadow evaluation; the
 pgscan_anon/pgsteal_anon deltas, and zero controller
                                                                        frozen run used the design margin K = 0. H3: the controller’s
-toggles. Only handle_mm_fault and do_wp_page pro-
+toggles. Only handle_mm_fault and do_wp_page
                                                                        simulated per-reference cost remains competitive with fixed
-duced samples; no reclaim function was reached. The captured
+produced samples; no reclaim function was reached. The
                                                                        and adaptive baselines. A previously listed hypothesis about
-cgroup memory.max/memory.peak files were empty, so
+captured cgroup memory.max/memory.peak files were
                                                                        sampled shadow evaluation ranking candidates consistently
-memory pressure was not demonstrated. These are real in-
+empty, so memory pressure was not demonstrated. These are
                                                                        with full-capacity evaluation was dropped because full ranking
-kernel fault-path timings under an MGLRU-enabled guest, not
+real in-kernel fault-path timings under an MGLRU-enabled
                                                                        agreement was not measured; no claim is made from it.
-a kernel DA policy or a reclaim-latency result.
+guest, not a kernel DA policy or a reclaim-latency result.
                                                                        Table VIII reports the outcomes. No cost budget or agreement
                                                                        threshold was specified before the study; post hoc criteria are
-                                                                       not treated as pre-registered results.
+                                                                       not treated as prospectively registered results.
 L. Cost Break-Even and Total-Time Envelope                                The design lessons are narrow: shadow evaluation is the
                                                                        component that matters, and gating saves shadow work at
    Using the measured means (DA 0.453 versus ContShadow
@@ -582,13 +578,13 @@ TRACES . PANEL ( A ): BOLD MARKS THE LOWEST TOTAL IN EACH ROW; DA IS NEVER THE L
                                                                                  are released.
       Outcome                     Evidence
                                                                                     On 80 non-stable synthetic traces, gating saved 76% of
-H1    Not supported               DA 0.453 vs S3-FIFO 0.468 (−0.015, ad-         shadow evaluations but had higher miss ratio than continuous
+H1    Not supported               DA 0.453 vs S3-FIFO 0.468 (−0.015, ad-         shadow evaluations but had higher miss ratio than contin-
                                   justed p = 0.09); better than LRU and
-                                  seven other baselines.                         evaluation (0.453 vs. 0.423) and was not significantly different
-H2    Not supported               ContShadow had lower miss ratio; the KS        from S3-FIFO (Holm-adjusted p = 0.09). The FIU capacity-
-                                  stage was active on all 643 alarms but had     sampling fault remained a failed external validation after
+                                  seven other baselines.                         uous evaluation (0.453 vs. 0.423) and was not significantly
+H2    Not supported               ContShadow had lower miss ratio; the KS        different from S3-FIFO (Holm-adjusted p = 0.09). The FIU
+                                  stage was active on all 643 alarms but had     capacity-sampling fault remained a failed external validation
                                   a small miss-ratio effect (0.456 without KS
-                                  vs. 0.453 with KS); detection rate 73.2%.      repair. Pre-specified follow-ups showed a sharp rankability
+                                  vs. 0.453 with KS); detection rate 73.2%.      after repair. Post hoc follow-ups showed a sharp rankability
 H3    Not met                     2.7× LRU per reference; DA is never on         boundary without a meaningful FIU repair gain, CUSUM
                                   the lower total-time envelope (minimum         budget-frontier advantage over periodic/random but not over
                                   excess 3.27 ns/ref at cm ≈ 2.30 µs).
@@ -608,10 +604,10 @@ real-trace follow-ups, are in the supplement.                                   
                                                                                     The exploratory fifteen-program whole-program holdout
                                                                                  found DA 0.3304 against S3-FIFO 0.3291 and LRU 0.3540,
                         VIII. C ONCLUSION                                        with no Holm-significant comparison (smallest adjusted p =
-  This paper asks when drift gating pays off in page replace-                    0.096). Detailed methods, kernels, paired intervals and cost
+   This paper asks when drift gating pays off in page replace-                   0.096). Detailed methods, kernels, paired intervals and cost
 ment and answers it as a reproducible measurement study. The                     figures are in the supplement.
-evidence includes the frozen main study, post hoc diagnostics,
-and pre-specified follow-ups: a CUSUM-triggered controller                                                   D ECLARATIONS
+evidence includes the frozen main study, post hoc diagnos-
+tics, and post hoc follow-ups: a CUSUM-triggered controller                                                  D ECLARATIONS
 with sampled shadow evaluation is compared against contin-                         Data and code availability. The simulator, trace
 uous shadow evaluation, static baselines, trigger alternatives,                  generators, seeds, configuration files, raw per-trace output
 PH/ADWIN detectors, and SIEVE/W-TinyLFU baselines; a                             and analysis scripts for the reproducible main study are

@@ -36,7 +36,7 @@ Command: case-insensitive grep for `TBD|XX|insert|session|change log|NOT_DONE|pl
 
 - **Real runs completed:** Phase 1 rankability grid (288 jobs, 64,280 eval diags), Phase 2 budget frontier points/pairings, Phase 3 PH/ADWIN train grid (24) + 2 test evals, Phase 4 SIEVE/W-TinyLFU synthetic + 1944 real-trace/capacity result rows, Phase 5 t3 robustness and break-even/async tables.
 - **Code changes:** sim_full.cpp gained eval-diag, PH/ADWIN triggers, SIEVE/W-TinyLFU baselines, lcb-dist t3; default DA behavior verified identical on miss/switches/shadow_evals/detection (ns_per_ref differs by timing).
-- **Manuscript:** added pre-specified follow-up section, extended cost model, updated abstract/conclusion/limitations/threats; rebuilt main.pdf/paper_final.pdf (17 pages).
+- **Manuscript:** added post hoc follow-up section, extended cost model, updated abstract/conclusion/limitations/threats; rebuilt main.pdf/paper_final.pdf (17 pages).
 - **Checks:** reproduction/check_paper_numbers.py 275/275 PASS.
 - **Remaining blockers:** external traces not available/licensed, LHD not implemented, simplified independent baseline/detector implementations, FIU prepared 500k splits, no kernel/async prototype, [39] unverified, page-count compression needed.
 
@@ -59,9 +59,9 @@ Command: case-insensitive grep for `TBD|XX|insert|session|change log|NOT_DONE|pl
 - **Artifact hygiene:** stale `drift_gating_latex_source/main.txt`, `latex/revised_paper.txt` and `latex/preview/p-*.png` regenerated from the final PDFs, so no old claim survives in a file presented as paper text or a preview.
 - **Checks:** `python3 reproduction/check_paper_numbers.py` 328/328 PASS; `claims_to_sources.csv` 110 rows; no undefined references in either main PDF; 0 overfull hboxes in the final builds.
 
-## Phases 6-9 (2026-11-24): pre-registration before runs
+## Phases 6-9 (2026-11-24): post hoc follow-ups recorded in `PROTOCOL.md`
 
-- All four approved phases were written into `PROTOCOL.md` before any corresponding run. Amendments were also recorded before affected runs: async byte-identity clarification (wall-clock `ns_per_ref` excluded), 10 ms controller interval, QEMU 9p results mount, space-free kernel build path, local bison, local libelf build and `-Wno-error` for an unrelated elfutils warning. Frozen seed-5001 artifacts were not modified.
+- All four phases are recorded post hoc in `PROTOCOL.md` (see version history). Amendments are also recorded there post hoc: async byte-identity clarification (wall-clock `ns_per_ref` excluded), 10 ms controller interval, QEMU 9p results mount, space-free kernel build path, local bison, local libelf build and `-Wno-error` for an unrelated elfutils warning. Frozen seed-5001 artifacts were not modified.
 - **Phase 6:** six CMU PDL families, 1M records each, streamed with SHA256 manifest; 18 real simulator points. DA is worse than S3-FIFO on these points (+0.0059, Holm p=0.0192) and is reported that way. No tuning after seeing results.
 - **Phase 7:** additive `sim_async` build with a real worker thread; default deterministic columns and detection CSV verified byte-identical to current `sim_full`. Three real async repetitions are worse than synchronous DA (+0.1082/+0.1147/+0.1070); reported as a negative result. No analytic-model number is presented as a prototype measurement.
 - **Checker:** extended with Phase 6/7 values read directly from generated CSVs; `python3 reproduction/check_paper_numbers.py` now 342/342 PASS. `claims_to_sources.csv` has trace rows for every new printed number.
@@ -82,7 +82,7 @@ Command: case-insensitive grep for `TBD|XX|insert|session|change log|NOT_DONE|pl
   and the two generated LaTeX fragments. Five discarded build/boot attempts
   and one defective complete sequence are recorded in `PROTOCOL.md` and
   `NOT_DONE.md`; none of their values appears in the paper.
-- **Build fixes were recorded before affected runs:** space-free source path,
+- **Build fixes are recorded post hoc (see version history):** space-free source path,
   local bison/libelf, make command-line `CC="gcc-15 -std=gnu11"`, `-lm` link
   order, initramfs dynamic loader, `/dev/null`, `uname`, filter file inside the
   9p mount and cgroup metadata capture.

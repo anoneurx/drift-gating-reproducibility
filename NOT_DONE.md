@@ -8,7 +8,7 @@ Items not achievable with real data in this workspace run are listed here and ar
 - **In-kernel page-fault or reclaim latency.** Not measured. Cost calibration uses a user-space minor-fault microbenchmark (`prototype_fault_latency.cpp`).
 
 ## Repaired capacity-sampling correction (Task B)
-- **Public traces:** Re-selection on 500,000-reference training prefixes with the pre-specified repair (`Cs=min(round(p*C), round(f*D_w)), f=1.0`, `--cs-cap-f 1.0`) produced the same selected configuration and identical held-out miss ratio/switches as the original controller. Command/seed/output recorded below; no improvement observed.
+- **Public traces:** Re-selection on 500,000-reference training prefixes with the recorded post hoc repair (`Cs=min(round(p*C), round(f*D_w)), f=1.0`, `--cs-cap-f 1.0`) produced the same selected configuration and identical held-out miss ratio/switches as the original controller. Command/seed/output recorded below; no improvement observed.
 - **80 fresh synthetic traces / 30 stable traces:** Repaired re-selection on training traces (seed 100) selected the same configuration; evaluation once on held-out seed 5001 traces produced identical miss ratios, switches, and shadow evaluations to the original controller.
 - **15-program whole-program holdout:** Repaired evaluation with the same holdout protocol produced identical mean miss ratios to the original controller.
 
@@ -25,11 +25,11 @@ Items not achievable with real data in this workspace run are listed here and ar
 - CUSUM parameter sensitivity sweep (real, post hoc, one-at-a-time from default config, seed 5001, ncand 5, kfrac 0, z 1.28, edelay 10, da-only, 80 non-stable + 30 stable synthetic traces): `python3 run_param_sweep.py` (cwd `reproduction/`) -> `reproduction/param_sweep/*.csv`, `reproduction/param_sweep/summary.csv`.
 - FIU rankability/capacity-p sweep (real, post hoc, default seed 5001, same FIU base args as above, da-only): `python3 run_rankability_fiu.py` (cwd `reproduction/`) -> `reproduction/rankability_real/fiu_C*_p*.csv`, `reproduction/rankability_real/fiu_sweep.csv`.
 - Synthetic rankability/capacity-p sweep (real, post hoc, seed 5001, ncand 5, kfrac 0, z 1.28, edelay 10, da-only): `python3 run_rankability_synth.py` (cwd `reproduction/`) -> `reproduction/rankability_real/synth_C*_p*.csv`, `reproduction/rankability_real/synth_sweep.csv`.
-- Independent capacity pilot (registered in `PROTOCOL.md` Phase 10 before download/conversion): `python3 phase10_capacity_pilot/convert_pilot_prefix.py` then `python3 phase10_capacity_pilot/run_pilot.py` then `python3 phase10_capacity_pilot/select_capacity.py` (cwd `reproduction/`). Exact seven simulator commands in `reproduction/phase10_capacity_pilot/commands.csv`; raw `C*.csv`/`C*_det.csv`, manifest with WSS 72539 and SHA256, and `selection.csv` in the same directory. Selected C=20000; no existing result changed.
+- Independent capacity pilot (recorded in `PROTOCOL.md` Phase 10; see version history, no independent pre-run timestamp): `python3 phase10_capacity_pilot/convert_pilot_prefix.py` then `python3 phase10_capacity_pilot/run_pilot.py` then `python3 phase10_capacity_pilot/select_capacity.py` (cwd `reproduction/`). Exact seven simulator commands in `reproduction/phase10_capacity_pilot/commands.csv`; raw `C*.csv`/`C*_det.csv`, manifest with WSS 72539 and SHA256, and `selection.csv` in the same directory. Selected C=20000; no existing result changed.
 
 ## Capacity provenance repair (Phase 10)
 
-- The earlier C=20000 choice was based on a pilot over `webresearch`, one of the six evaluated traces. The independent `webusers` pilot now re-selects C=20000 with a pre-registered rule (smallest C with both miss ratios at least 0.01 and LRU--S3-FIFO gap at least 0.10). The superseded `public_pilot_C*.csv` files are retained but are no longer used as the selection source; only provenance paragraphs in the two supplement trees and the reproduction ledger changed.
+- The earlier C=20000 choice was based on a pilot over `webresearch`, one of the six evaluated traces. The independent `webusers` pilot now re-selects C=20000 with a recorded post hoc rule (smallest C with both miss ratios at least 0.01 and LRU--S3-FIFO gap at least 0.10). The superseded `public_pilot_C*.csv` files are retained but are no longer used as the selection source; only provenance paragraphs in the two supplement trees and the reproduction ledger changed.
 
 ## Not attempted / not claimable (no mock/assumed data)
 - ~~MSR / Alibaba / Tencent / CloudPhysics traces: not present/licensed/verified.~~ **Superseded on 2026-11-24:** all six remaining PDL families were streamed as bounded 1M-reference prefixes and run (Phase 6, see below).
@@ -39,7 +39,7 @@ Items not achievable with real data in this workspace run are listed here and ar
 - **Kernel-faithful MGLRU / in-kernel replacement policy:** still not built and outside the approved kernel scope; the approved scope is a guest-kernel MGLRU observation, real in-kernel fault/reclaim latency, and a userspace coupled controller.
 - **Reference [39] URL/licence:** URLs and non-commercial scholarly-use terms were verified; no explicit dataset licence file was found and no new dataset licence claim is made.
 
-## Phase 1-5 pre-specified follow-ups (2026-11-23)
+## Phase 1-5 post hoc follow-ups (2026-11-23)
 
 ### Completed (real, from released code/CSVs)
 - Phase 1: `--eval-diag` and rankability grid run (`reproduction/run_phase1_rankability.py`, `phase1_rankability/all_summary.csv`, 64,280 eval diags). Sharp boundary: Cs/Dw>=1 -> 0/1514 rankable. Train-only f/W selection gave no meaningful FIU repair gain (null/negative).
@@ -74,16 +74,16 @@ Items not achievable with real data in this workspace run are listed here and ar
 - SIEVE/W-TinyLFU/ADWIN/PH/LHD remain simplified independent implementations.
 - Main paper 15 pages + 5-page supplement at that point: above the original 10-12 page target. Phase 9 compression by moving detail to the supplement is in progress; no result content is deleted.
 
-## Phases 6-9 (pre-registered 2026-11-24 in `PROTOCOL.md`)
+## Phases 6-9 (post hoc, recorded 2026-11-24 in `PROTOCOL.md`; see version history)
 
-### Completed (real runs, recorded before execution in `PROTOCOL.md`)
+### Completed (real runs, recorded post hoc in `PROTOCOL.md`; see version history)
 - **Phase 6 PDL external traces:** exact 1,000,000-record prefixes from MSR `msr_hm_0`, Alibaba `io_traces.ns42`, Tencent `tencentBlock.ns1089`, CloudPhysics `w64`, Twitter `sample10/cluster10` and MetaKV `202206_kv_traces_all`; URLs, HTTP status, bytes consumed, WSS, max ids and SHA256 in `reproduction/phase6_pdl/manifest.csv`. 18 family x capacity simulator runs (`summary.csv`, `per_family.csv`, `paired_da_minus_baseline.csv`, `commands.csv`, raw CSVs). Means: S3-FIFO 0.4683, ContShadow 0.4739, DA 0.4742, CLOCK 0.4973, LRU 0.4987; DA--S3-FIFO +0.0059 (Holm p=0.0192), i.e. DA worse on these prefixes.
 - **Phase 7 async prototype:** `reproduction/sim_full_async.cpp` compiled as `sim_async` with `-pthread`; default deterministic columns 1--6 and detection CSV byte-identical to current `sim_full` (protocol amendment excludes wall-clock `ns_per_ref`). Three real `--async-shadow` repetitions with fixed parameters: `reproduction/phase7_async/async_results*.csv`, `timing.csv`, `summary.csv`, `paired.csv`, `timing_summary.csv`. Means 0.5611/0.5676/0.5599; paired async-minus-sync +0.1082/+0.1147/+0.1070. Negative result; no tuning.
 - **Numeric checker:** `reproduction/check_paper_numbers.py` 342/342 PASS after adding Phase 6/7 checks.
 
 ### Phase 8 QEMU guest kernel (completed after recorded build/boot fixes)
-- Built Linux 6.6.1 from the space-free path `/home/kashie/opencode_kernel_build`. Build-tool fixes were recorded in `PROTOCOL.md` before affected runs: moved out of a path with spaces; built GNU bison 3.8.2 locally (no sudo); built elfutils 0.191 libelf locally because objtool needs `gelf.h`; passed `CC="gcc-15 -std=gnu11"` and `HOSTCC="gcc-15 -std=gnu11"` as make command-line variables because kernel Makefiles ignore environment `CC` and GCC 15 defaults to C23; fixed `-lm` link order in the guest controller.
-- The first boot sequence failed before `/init` (`/dev/null` and the dynamic loader/libc were absent). A second complete boot sequence was discarded before reporting: the ftrace filter file was outside the 9p-mounted results directory, `/dev/null` was missing so the controller never started, `uname` was not linked, and cgroup metadata was not captured. All fixes were recorded in `PROTOCOL.md` before the final rerun. No number from a discarded boot is used.
+- Built Linux 6.6.1 from the space-free path `/home/kashie/opencode_kernel_build`. Build-tool fixes are recorded post hoc in `PROTOCOL.md` (see version history): moved out of a path with spaces; built GNU bison 3.8.2 locally (no sudo); built elfutils 0.191 libelf locally because objtool needs `gelf.h`; passed `CC="gcc-15 -std=gnu11"` and `HOSTCC="gcc-15 -std=gnu11"` as make command-line variables because kernel Makefiles ignore environment `CC` and GCC 15 defaults to C23; fixed `-lm` link order in the guest controller.
+- The first boot sequence failed before `/init` (`/dev/null` and the dynamic loader/libc were absent). A second complete boot sequence was discarded before reporting: the ftrace filter file was outside the 9p-mounted results directory, `/dev/null` was missing so the controller never started, `uname` was not linked, and cgroup metadata was not captured. All fixes are recorded post hoc in `PROTOCOL.md` (see version history). No number from a discarded boot is used.
 - Final artifacts: `reproduction/phase8_kernel/kernel_summary.csv` (nine real boots), `ftrace_summary.csv` (18 function groups), `ftrace_durations.csv` (191,370 raw samples), raw traces/console/vmstat/controller logs under `results/`, and `manifest.csv` with kernel SHA256, compiler versions and controller constants.
 - **Result is null:** all nine runs have 131,138 minor faults, zero major faults, zero `workingset_refault_anon`, zero `pgscan_anon`/`pgsteal_anon` deltas and zero controller toggles. Only `handle_mm_fault` and `do_wp_page` produced samples; no reclaim function was reached. `memory.max`/`memory.peak` capture files were empty, so memory pressure was not demonstrated. `handle_mm_fault` median/p95 ranged 641/1532 ns to 761/1593 ns. These are real in-kernel fault-path timings, not a reclaim-latency or kernel-DA result.
 

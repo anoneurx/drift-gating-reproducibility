@@ -40,7 +40,7 @@ traces, gating saved 76\% of shadow evaluations versus continuous evaluation
 not significantly different from S3-FIFO (0.468). On six public FIU block
 traces, the frozen controller never switched because of an identified
 capacity-sampling fault; a post hoc repair produced identical public,
-synthetic, and holdout results. Pre-specified follow-ups found a sharp
+synthetic, and holdout results. Post hoc follow-ups found a sharp
 shadow-rankability boundary ($C_s/D_w<1$) but no meaningful FIU repair gain;
 CUSUM dominated periodic/random at matched budgets, while Oracle/ContShadow
 exposed an accuracy ceiling; selected Page-Hinkley and simplified ADWIN
@@ -674,16 +674,17 @@ These are storage block/cache traces, not virtual-memory page traces, and only
 a prefix of each was replayed; this is an external check and not the primary
 evidence for paging.
 
-\subsection{Pre-specified Follow-up Measurements}
-\label{sec:prespecified}
+\subsection{Post Hoc Follow-up Measurements}
+\label{sec:posthoc_followups}
 
-The following measurements were pre-specified in \texttt{PROTOCOL.md}
-(dated 2026-11-23) before the corresponding runs. They test repairs and
+The following measurements are recorded in \texttt{PROTOCOL.md}
+(first committed to git on 2026-11-24; no independent pre-run timestamp
+exists) and are reported as post hoc. They test repairs and
 alternatives suggested by the negative main result; null and negative
 outcomes are reported.
 
 \begin{table}[!t]
-\caption{Pre-specified follow-ups: outcome and representative numbers. Details
+\caption{Post hoc follow-ups: outcome and representative numbers. Details
 and raw-table pointers are in Section S4 of the supplementary material.}
 \label{tab:prespec}
 \footnotesize
@@ -708,7 +709,7 @@ We replayed six 1M-reference prefixes from the CMU PDL collection at 18 family$\
 A real user-space asynchronous shadow worker on the 80 non-stable traces gave mean miss ratios 0.5611, 0.5676 and 0.5599 in three repetitions, with paired async$-$sync differences $+0.1082$, $+0.1147$ and $+0.1070$ (Table~\ref{tab:async_main}). Across 240 timing rows there were 15,066 stale decisions, 1,192 applied results and 0 dropped. This is a \textbf{negative result}: asynchronous execution is clearly worse than synchronous DA in these measurements.
 \input{phase7_async_main_table.tex}
 \subsection{QEMU guest-kernel observation}
-A pre-registered Linux 6.6.1 QEMU guest replayed three conditions in three fresh boots each: fixed LRU (\texttt{lru\_gen/enabled=0x0000}), fixed MGLRU (\texttt{0x0007}) and a user-space CUSUM controller coupled to the same sysfs knob. Function-graph tracing was restricted to five pre-registered fault/reclaim functions present in the guest; 191,370 durations were parsed. Table~\ref{tab:kernel_main} reports the measured fault-path durations and vmstat deltas. The observation is null: all nine runs show 131,138 minor faults, zero \texttt{workingset\_refault\_anon}, zero \texttt{pgscan\_anon}/\texttt{pgsteal\_anon} deltas, and zero controller toggles. Only \texttt{handle\_mm\_fault} and \texttt{do\_wp\_page} produced samples; no reclaim function was reached. The captured cgroup \texttt{memory.max}/\texttt{memory.peak} files were empty, so memory pressure was not demonstrated. These are real in-kernel fault-path timings under an MGLRU-enabled guest, not a kernel DA policy or a reclaim-latency result.
+A post hoc Linux 6.6.1 QEMU guest replayed three conditions in three fresh boots each: fixed LRU (\texttt{lru\_gen/enabled=0x0000}), fixed MGLRU (\texttt{0x0007}) and a user-space CUSUM controller coupled to the same sysfs knob. Function-graph tracing was restricted to five recorded fault/reclaim functions present in the guest; 191,370 durations were parsed. Table~\ref{tab:kernel_main} reports the measured fault-path durations and vmstat deltas. The observation is null: all nine runs show 131,138 minor faults, zero \texttt{workingset\_refault\_anon}, zero \texttt{pgscan\_anon}/\texttt{pgsteal\_anon} deltas, and zero controller toggles. Only \texttt{handle\_mm\_fault} and \texttt{do\_wp\_page} produced samples; no reclaim function was reached. The captured cgroup \texttt{memory.max}/\texttt{memory.peak} files were empty, so memory pressure was not demonstrated. These are real in-kernel fault-path timings under an MGLRU-enabled guest, not a kernel DA policy or a reclaim-latency result.
 \input{phase8_kernel_main_table.tex}
 
 \subsection{Cost Break-Even and Total-Time Envelope}
@@ -759,7 +760,7 @@ full-capacity evaluation was dropped because full ranking agreement was not
 measured; no claim is made from it.
 Table~\ref{tab:hypotheses} reports the outcomes. No cost budget or agreement
 threshold was specified before the study; post hoc criteria are not treated as
-pre-registered results.
+prospectively registered results.
 
 \begin{table}[!t]
 \caption{Hypothesis Outcomes (Reproducible Main Study)}
@@ -807,7 +808,7 @@ abstraction and the reviewed real-trace follow-ups, are in the supplement.
 
 This paper asks when drift gating pays off in page replacement and answers it
 as a reproducible measurement study. The evidence includes the frozen main
-study, post hoc diagnostics, and pre-specified follow-ups: a CUSUM-triggered
+study, post hoc diagnostics, and post hoc follow-ups: a CUSUM-triggered
 controller with sampled shadow evaluation is compared against continuous
 shadow evaluation, static baselines, trigger alternatives, PH/ADWIN detectors,
 and SIEVE/W-TinyLFU baselines; a cost break-even model is calibrated by a
@@ -818,7 +819,7 @@ On 80 non-stable synthetic traces, gating saved 76\% of shadow evaluations
 but had higher miss ratio than continuous evaluation (0.453 vs.\ 0.423) and
 was not significantly different from S3-FIFO (Holm-adjusted $p=0.09$). The FIU
 capacity-sampling fault remained a failed external validation after repair.
-Pre-specified follow-ups showed a sharp rankability boundary without a
+Post hoc follow-ups showed a sharp rankability boundary without a
 meaningful FIU repair gain, CUSUM budget-frontier advantage over
 periodic/random but not over oracle/ContShadow accuracy, and no oracle-gap
 closure by selected PH/ADWIN. On available real traces with SIEVE/W-TinyLFU,
