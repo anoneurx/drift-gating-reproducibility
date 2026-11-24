@@ -36,8 +36,9 @@ its numbers are not used in any claim.
 | `phase5/bootstrap_total_time.py` | Trace-level paired bootstrap (seed 20261124, B=10000) of crossings and the DA minimum excess; writes `phase5/total_time_bootstrap.csv`. |
 | `phase5/total_time_bootstrap.csv` | Bootstrap CIs: CLOCK/S3 [0.171,0.274] us, S3/CS [1.660,3.678] us, DA/CS [1.449,4.105] us, DA/S3 [1.086,22.05] us, DA minimum excess [-28.6,40.2] ns. |
 | `bench_eval_timing.csv` | Direct shadow-evaluation timing: mean 2.46 ms, median 2.33 ms per evaluation (timing-only build). |
-| `check_paper_numbers.py` | Cross-checks every number printed in `latex/main.tex`, both supplement trees and the generated phase fragments against raw outputs. Run `python3 check_paper_numbers.py`: 499/499 checks pass; any mismatch prints FAIL and exits 1. |
-| `make_docx_from_pdf.py` | Renders a compiled PDF into a Word copy with one full-page image per page; used for `drift_gating_latex_source/main.docx`. |
+| `check_paper_numbers.py` | Cross-checks every number printed in `latex/main.tex`, both supplement trees and the generated phase fragments against raw outputs. Run `python3 check_paper_numbers.py`: 509/509 checks pass; any mismatch prints FAIL and exits 1. |
+| `make_docx_from_pdf.py` | Renders a compiled PDF into a Word copy with one full-page image per page; used for `drift_gating_latex_source/main.docx`. Not suitable for text edits. |
+| `Drift_Aware_Page_Replacement_UPDATED_EDITABLE.docx` | Layout-preserving, editable Word conversion of the consolidated 24-page PDF (main + supplement). Created with `pdf2docx`; text is editable rather than page images. Minor PDF-to-Word conversion artifacts are possible. |
 | `diag_component_totals.csv` | Raw component activation totals from the diagnostic main-study run (purge/cost/dwell/KS/alarms/evals). |
 | `convert_public_traces.py` | Converts public CMU PDL FIU block traces (packed 24-byte records) to page-id traces for `sim_full`. |
 | `public_trace_results.csv`, `public_trace_detection.csv` | Raw frozen public-trace run. DA/ContShadow/LRU miss 0.6753, DA zero switches; DA Pareto-dominated by S3-FIFO (0.5772 miss, 31.7 vs 82.5 ns/ref). |
