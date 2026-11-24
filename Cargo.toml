@@ -1,0 +1,16 @@
+[package]
+name = "blackwall-drift"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Rust core port of the drift-gating page-replacement simulator"
+authors = ["Muhammad Qasim", "Hunain Tahir", "Hussain Ahmad", "Mohsin Ghaffar Ghouri"]
+
+[[bin]]
+name = "sim"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

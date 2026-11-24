@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: Cite this software if you use the deterministic Rust drift-gating simulator.
+title: "blackwall-drift: deterministic Rust core port of the Black Wall drift-gating simulator"
+type: software
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/anoneurx/drift-gating-reproducibility.git"
+authors:
+  - family-names: Tahir
+    given-names: Hunain
+  - family-names: Qasim
+    given-names: Muhammad
+  - family-names: Ahmad
+    given-names: Hussain
+  - family-names: Ghouri
+    given-names: Mohsin Ghaffar
+abstract: >-
+  Dependency-free Rust implementation of the core deterministic drift-gating
+  page-replacement simulator, validated against the frozen seed-5001 study.
