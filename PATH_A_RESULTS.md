@@ -55,7 +55,7 @@ This is the important ceiling result: even an oracle that may switch for free cl
 
 The primary run supports **Path A**: at 50,000-reference windows, the charged oracle never delivered a worthwhile gain at the family-capacity level. The sensitivity run finds one fragile exception at 100,000-reference windows. The honest combined claim is:
 
-> On 78 local real/public traces at three WSS-relative capacities, a hindsight per-window policy oracle with a full-cache-refill switch cost delivered no worthwhile gain in 117/117 family-capacity groups at 50,000-reference windows. At 100,000-reference windows, 1/117 groups cleared the bar, all from one FIU family and only two traces. This is a gate for more evidence, not a Path B result.
+> On 78 local real/public traces at three WSS-relative capacities, a hindsight per-window policy oracle with a full-cache-refill switch cost delivered no worthwhile gain in 117/117 family-capacity groups at 50,000-reference windows. At 100,000-reference windows, 1/117 groups cleared the bar, from one FIU family and one trace. This is a gate for more evidence, not a Path B result.
 
 This does **not** prove that switching can never help. The scope limits below matter.
 
@@ -65,11 +65,11 @@ The pre-specified sensitivity run completed with `FAILURES: 0`:
 
 - 468 summary rows, 4,680 policy rows, 663 window rows.
 - Charged-cost decision: **1/117** family-capacity groups met the bar.
-- The single group is `fiu_online.cs.fiu.edu`, `C=15539`, with mean charged gain **0.04449** and 2 oracle switches.
+- The single group is `fiu_online.cs.fiu.edu`, `C=15539`, with mean charged gain **0.04449** and 2 oracle switches. It contains one trace: `fiu_online.cs.fiu.edu_test`.
 - The zero-cost bound also met the bar in that same single group.
 - No other family or capacity cleared the bar.
 
-This mechanically opens the pre-specified `PATH_B_GATE`, but the gate is fragile: it is one FIU family, two traces (train/test), one capacity, and it is absent in the primary 50,000-reference run. It is not sufficient evidence for a kernel implementation or an end-to-end systems claim. The correct next move is to test whether the gain reproduces on more traces from that family and on unseen families before considering Path B.
+This mechanically opens the pre-specified `PATH_B_GATE`, but the gate is fragile: it is one FIU family, one trace, one capacity, and it is absent in the primary 50,000-reference run. It is not sufficient evidence for a kernel implementation or an end-to-end systems claim. The correct next move is to test whether the gain reproduces on more traces from that family and on unseen families before considering Path B.
 
 ## Scope limits
 
