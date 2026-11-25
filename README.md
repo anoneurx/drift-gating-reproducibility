@@ -45,6 +45,7 @@ python3 reproduction/pathA_oracle/check_pathA_oracle.py \
 python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_extension
 python3 reproduction/pathA_oracle/analyze_pathA_extension.py
+python3 reproduction/pathA_oracle/verify_pathA_evidence.py
 ```
 
 The raw FIU `.zst` files are not published here. The extension preparation
@@ -105,7 +106,7 @@ The 100k-window sensitivity run opened one single-trace gate, but the
 pre-specified replication extension in `PATH_A_EXTENSION_PROTOCOL.md` did not
 reproduce it across distinct FIU-online traces or unseen families. The reported
 decision is `PATH_A_STANDS` in `PATH_A_EXTENSION_RESULTS.md`; Path B remains
-closed.
+closed. A read-only audit of all reported values is in `PATH_A_VERIFICATION.md`.
 
 ## License
 

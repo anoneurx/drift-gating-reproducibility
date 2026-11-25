@@ -21,6 +21,7 @@ The later trace-replication extension is fixed separately in
 | `prepare_pathA_extension.py` | Converts the pre-specified extra public FIU traces and writes a hash manifest. |
 | `run_pathA_extension.py` | Runs the same oracle on the extension manifest. |
 | `analyze_pathA_extension.py` | Applies the pre-specified extension decision rule. |
+| `verify_pathA_evidence.py` | Read-only verifier for all Path A counts, decisions, protocol timestamps, and public sync. |
 | `results/summary.csv` | One charged and one zero-cost oracle row per trace/capacity/window. |
 | `results/policy.csv` | Total misses for every candidate static policy. |
 | `results/windows.csv` | Per-window oracle choice, switch flag, and per-window best policy. |
