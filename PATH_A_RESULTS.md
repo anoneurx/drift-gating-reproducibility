@@ -82,6 +82,8 @@ The pre-specified extension in `PATH_A_EXTENSION_PROTOCOL.md` added ten addition
 
 The single-trace sensitivity gate therefore does not survive the replication test. No primary result was modified.
 
+A read-only verification of every reported number and its public copy is recorded in `PATH_A_VERIFICATION.md`.
+
 ## Scope limits
 
 - 78 traces, not the several hundred in the full Path A plan.
