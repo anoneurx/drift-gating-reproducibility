@@ -1,0 +1,7 @@
+scenario,initial_pick,initial_tot_active,max_Sp,max_Sn,alarms_confirmed,first_eval_tot0,first_eval_tot1,first_eval_tot2,first_eval_tot3,first_eval_tot4
+real-fiu_homes-110108-112108.oracleGeneral,0,1276,9.28,33.30,11,1276,1276,1276,1276,1276
+real-fiu_ikki-110108-112108.oracleGeneral,0,1824,7.95,12.53,12,1824,1824,1824,1824,1824
+real-fiu_madmax-110108-112108.oracleGeneral,0,1623,9.58,8.77,11,1623,1623,1623,1623,1623
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral,0,1123,20.30,12.78,14,1123,1123,1123,1123,1123
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral,0,618,13.71,25.05,15,618,618,618,618,618
+real-fiu_webresearch-030409-033109.oracleGeneral,0,1120,17.71,6.08,15,1120,1120,1120,1120,1120

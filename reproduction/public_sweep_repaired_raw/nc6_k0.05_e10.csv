@@ -1,0 +1,7 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_homes-110108-112108.oracleGeneral.train,0,DA,0.38308,0,5,160.1
+real-fiu_ikki-110108-112108.oracleGeneral.train,1,DA,0.74952,0,6,175.0
+real-fiu_madmax-110108-112108.oracleGeneral.train,2,DA,0.86801,0,6,152.8
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.train,3,DA,0.73613,0,9,198.3
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,4,DA,0.68571,0,8,171.0
+real-fiu_webresearch-030409-033109.oracleGeneral.train,5,DA,0.65914,0,7,143.9

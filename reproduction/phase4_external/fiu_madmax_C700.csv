@@ -1,0 +1,9 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_madmax,0,LRU,0.85882,0,0,27.9
+real-fiu_madmax,0,ARC,0.84881,0,0,41.8
+real-fiu_madmax,0,S3-FIFO,0.84876,0,0,41.5
+real-fiu_madmax,0,SIEVE,0.86144,0,0,24.2
+real-fiu_madmax,0,W-TinyLFU,0.85060,0,0,164.4
+real-fiu_madmax,0,LHD,0.98377,0,0,59.2
+real-fiu_madmax,0,DA,0.85367,2,7,155.5
+real-fiu_madmax,0,ContShadow,0.85325,4,45,155.0

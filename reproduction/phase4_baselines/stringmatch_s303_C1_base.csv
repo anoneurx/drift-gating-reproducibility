@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-stringmatch_s303,0,LRU,0.39152,0,0,31.6
+real-stringmatch_s303,0,ARC,0.39152,0,0,42.4
+real-stringmatch_s303,0,S3-FIFO,0.00066,0,0,4.1
+real-stringmatch_s303,0,SIEVE,0.39152,0,0,14.1
+real-stringmatch_s303,0,W-TinyLFU,0.39152,0,0,414.9
+real-stringmatch_s303,0,DA,0.39152,0,1,34.1
+real-stringmatch_s303,0,ContShadow,0.39152,0,11,44.5

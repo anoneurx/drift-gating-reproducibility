@@ -1,0 +1,3 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-matvec,0,LHD,0.98800,0,0,52.1
+real-matvec,0,DA,0.99024,1,2,38.9

@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,LRU,0.74174,0,0,36.7
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,ARC,0.72793,0,0,44.9
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,S3-FIFO,0.73062,0,0,54.8
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,SIEVE,0.72847,0,0,21.8
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,W-TinyLFU,0.72924,0,0,137.6
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,DA,0.74174,0,8,81.2
+real-fiu_ikki-110108-112108.oracleGeneral.test,0,ContShadow,0.74174,0,25,184.9

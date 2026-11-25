@@ -1,0 +1,2 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_ikki-110108-112108.oracleGeneral.train,0,DA-adwin,0.75494,0,2,60.7

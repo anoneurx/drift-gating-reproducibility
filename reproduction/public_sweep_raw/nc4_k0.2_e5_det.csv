@@ -1,0 +1,7 @@
+scenario,seed,method,n_bounds,detected,delays,spurious,confirms,false_after_100k
+real-fiu_homes-110108-112108.oracleGeneral.train,0,DA,0,0,,5,5,0
+real-fiu_ikki-110108-112108.oracleGeneral.train,1,DA,0,0,,7,7,0
+real-fiu_madmax-110108-112108.oracleGeneral.train,2,DA,0,0,,7,7,0
+real-fiu_online.cs.fiu.edu-110108-113008.oracleGeneral.train,3,DA,0,0,,9,9,0
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,4,DA,0,0,,7,7,0
+real-fiu_webresearch-030409-033109.oracleGeneral.train,5,DA,0,0,,8,8,0

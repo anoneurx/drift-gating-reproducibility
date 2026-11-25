@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-hashmap_s202,0,LRU,0.88002,0,0,38.0
+real-hashmap_s202,0,ARC,0.88148,0,0,61.6
+real-hashmap_s202,0,S3-FIFO,0.87785,0,0,47.7
+real-hashmap_s202,0,SIEVE,0.88063,0,0,19.3
+real-hashmap_s202,0,W-TinyLFU,0.88047,0,0,149.0
+real-hashmap_s202,0,DA,0.87773,2,2,105.3
+real-hashmap_s202,0,ContShadow,0.87745,5,16,110.8

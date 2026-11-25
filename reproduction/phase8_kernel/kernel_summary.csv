@@ -1,0 +1,10 @@
+condition,rep,elapsed_ns,access_ns_sum,minflt,majflt,refault_delta,pgscan_delta,pgsteal_delta,toggles,lru_before,lru_after,min_ttl_ms,cgroup_memory_max,cgroup_memory_peak,guest_uname
+fixed_lru,1,682747004.0,471113980.0,131138.0,0.0,0,0,0,0,0x0007,0x0000,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+fixed_lru,2,700553550.0,478612225.0,131138.0,0.0,0,0,0,0,0x0007,0x0000,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+fixed_lru,3,747513658.0,507407488.0,131138.0,0.0,0,0,0,0,0x0007,0x0000,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+fixed_mglru,1,686929345.0,460551843.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+fixed_mglru,2,696409319.0,474364083.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+fixed_mglru,3,738890642.0,500296937.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+coupled,1,755672505.0,508371132.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+coupled,2,725252858.0,491931483.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux
+coupled,3,708448401.0,483867966.0,131138.0,0.0,0,0,0,0,0x0007,0x0007,0,,,Linux (none) 6.6.1 #4 SMP PREEMPT_DYNAMIC Tue Nov 24 16:39:57 CET 2026 x86_64 GNU/Linux

@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,LRU,0.76627,0,0,21.0
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,ARC,0.66632,0,0,38.3
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,S3-FIFO,0.66543,0,0,34.4
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,SIEVE,0.68232,0,0,16.9
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,W-TinyLFU,0.67206,0,0,139.6
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,DA,0.66545,1,8,83.4
+real-fiu_webresearch-030409-033109.oracleGeneral.train,0,ContShadow,0.66545,1,25,126.0

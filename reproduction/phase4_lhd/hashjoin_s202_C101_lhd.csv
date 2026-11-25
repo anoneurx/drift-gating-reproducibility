@@ -1,0 +1,3 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-hashjoin_s202,0,LHD,0.91270,0,0,99.7
+real-hashjoin_s202,0,DA,0.89073,1,1,158.2

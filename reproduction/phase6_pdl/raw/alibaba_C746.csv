@@ -1,0 +1,10 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-alibaba,0,LRU,0.66201,0,0,33.6
+real-alibaba,0,CLOCK,0.65855,0,0,11.1
+real-alibaba,0,ARC,0.63408,0,0,48.7
+real-alibaba,0,S3-FIFO,0.62661,0,0,46.6
+real-alibaba,0,SIEVE,0.64806,0,0,19.5
+real-alibaba,0,W-TinyLFU,0.64035,0,0,142.9
+real-alibaba,0,LHD,0.95258,0,0,73.3
+real-alibaba,0,DA,0.62601,1,5,69.3
+real-alibaba,0,ContShadow,0.62686,3,66,143.8

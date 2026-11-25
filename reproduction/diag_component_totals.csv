@@ -1,0 +1,10 @@
+field,total
+alarms,643
+cost_active,0
+dwell_blocked,0
+eval_time_ns,1231550723
+evals,570
+ks_active,643
+ks_rejected,173
+purge_active,47
+purge_dropped,39405

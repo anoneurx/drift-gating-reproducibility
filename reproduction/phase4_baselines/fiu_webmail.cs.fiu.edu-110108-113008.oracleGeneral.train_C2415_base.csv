@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,LRU,0.71409,0,0,20.5
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,ARC,0.70724,0,0,39.2
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,S3-FIFO,0.70398,0,0,35.2
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,SIEVE,0.70660,0,0,18.3
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,W-TinyLFU,0.70700,0,0,146.5
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,DA,0.71242,1,7,237.8
+real-fiu_webmail.cs.fiu.edu-110108-113008.oracleGeneral.train,0,ContShadow,0.71027,2,25,188.3

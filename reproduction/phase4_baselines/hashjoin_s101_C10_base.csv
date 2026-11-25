@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-hashjoin_s101,0,LRU,0.98984,0,0,29.8
+real-hashjoin_s101,0,ARC,0.98816,0,0,48.5
+real-hashjoin_s101,0,S3-FIFO,0.98873,0,0,50.0
+real-hashjoin_s101,0,SIEVE,0.99084,0,0,21.4
+real-hashjoin_s101,0,W-TinyLFU,0.98966,0,0,193.6
+real-hashjoin_s101,0,DA,0.98873,1,1,56.4
+real-hashjoin_s101,0,ContShadow,0.98858,7,16,91.4

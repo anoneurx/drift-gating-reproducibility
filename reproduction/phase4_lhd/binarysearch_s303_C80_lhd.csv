@@ -1,0 +1,3 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-binarysearch_s303,0,LHD,0.62614,0,0,57.3
+real-binarysearch_s303,0,DA,0.32004,1,2,43.3

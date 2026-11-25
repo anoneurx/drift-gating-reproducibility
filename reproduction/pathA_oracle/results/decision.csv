@@ -1,0 +1,2 @@
+n_groups,n_groups_threshold_met,n_zero_cost_groups_threshold_met,decision,threshold,fraction_required,bootstrap_seed,bootstrap_B
+117,0,3,PATH_A_DECISIVE_NEGATIVE,0.02,0.6666666666666666,20261125,10000

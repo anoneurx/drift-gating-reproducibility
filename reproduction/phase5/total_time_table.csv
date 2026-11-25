@@ -1,0 +1,10 @@
+scenario,cm_us,CLOCK_ns,S3-FIFO_ns,ContShadow_ns,DA_ns,cheapest,DA_minus_best_ns
+DRAM (illustrative),0.1,64.843,75.369,175.646,112.644,CLOCK,47.801
+CLOCK/S3-FIFO crossing,0.215539,129.477,129.477,224.499,164.970,CLOCK/S3-FIFO,35.493
+Minor-fault calibration (measured),2.2,1239.600,1058.821,1063.593,1063.708,S3-FIFO,4.887
+S3-FIFO/ContShadow crossing,2.304942,1298.305,1107.966,1107.966,1111.235,S3-FIFO/ContShadow,3.269
+Remote/RDMA (illustrative low),5,2805.941,2370.091,2247.524,2331.794,ContShadow,84.270
+Remote/RDMA (illustrative high),10,5602.980,4711.644,4361.685,4596.232,ContShadow,234.547
+NVMe SSD (illustrative low),20,11197.057,9394.750,8590.007,9125.110,ContShadow,535.102
+NVMe SSD (illustrative high),100,55949.677,46859.600,42416.588,45356.130,ContShadow,2939.542
+Swap/page fault (illustrative),1000,559416.652,468339.162,422965.612,452955.105,ContShadow,29989.492

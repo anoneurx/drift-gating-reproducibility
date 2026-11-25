@@ -1,0 +1,8 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-unionfind_s101,0,LRU,0.98968,0,0,24.6
+real-unionfind_s101,0,ARC,0.98974,0,0,45.1
+real-unionfind_s101,0,S3-FIFO,0.98966,0,0,52.8
+real-unionfind_s101,0,SIEVE,0.98988,0,0,22.4
+real-unionfind_s101,0,W-TinyLFU,0.98962,0,0,185.8
+real-unionfind_s101,0,DA,0.98974,1,1,39.3
+real-unionfind_s101,0,ContShadow,0.98981,3,16,88.4

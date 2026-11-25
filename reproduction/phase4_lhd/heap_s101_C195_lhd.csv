@@ -1,0 +1,3 @@
+scenario,seed,method,miss_ratio,switches,shadow_evals,ns_per_ref
+real-heap_s101,0,LHD,0.54956,0,0,65.7
+real-heap_s101,0,DA,0.34417,1,2,50.4

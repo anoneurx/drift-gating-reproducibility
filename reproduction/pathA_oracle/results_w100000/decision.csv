@@ -1,0 +1,2 @@
+n_groups,n_groups_threshold_met,n_zero_cost_groups_threshold_met,decision,threshold,fraction_required,bootstrap_seed,bootstrap_B,threshold_groups
+117,1,1,PATH_B_GATE,0.02,0.6666666666666666,20261125,10000,fiu_online.cs.fiu.edu|C=15539|W=100000
