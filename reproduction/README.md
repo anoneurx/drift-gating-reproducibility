@@ -21,6 +21,7 @@ its numbers are not used in any claim.
 | `phase7_async/` | Three real async-shadow prototype repetitions on 80 non-stable seed-5001 traces; raw CSVs, detection CSVs, timing CSV, summary and paired analysis. |
 | `phase8_kernel/` | QEMU guest kernel build scripts, workload/controller sources, boot runs and parsers. Guest measurements are reported only when raw CSVs exist. |
 | `phase10_capacity_pilot/` | Independent post hoc capacity pilot on the non-evaluation FIU `webusers` trace: 1M-record manifest with SHA256, seven raw capacity CSVs, exact commands and `selection.csv`. Re-selects C=20000; no public performance result changed. |
+| `pathA_oracle/` | Pre-specified Path A ceiling experiment: best single static policy vs a per-window hindsight policy oracle with an explicit switching cost, on all locally available real/public traces. Design fixed in `PATH_A_PROTOCOL.md`. |
 | `generate_phase_tables.py` | Generates Phase 6--8 LaTeX fragments for both paper trees directly from measured CSVs; no hand-entered numbers. |
 | `final_hygiene.py` | Read-only final check of frozen SHA256s, numeric checker, PDF page counts, undefined references, overfull hboxes and placeholder tokens. |
 | `sweep_selection.py` | **Released parameter-selection sweep.** Runs all 48 configurations of candidate-set size x cost margin x evaluation delay on training traces with the released simulator and writes `sweep_results.csv` and `sweep_selected.txt`. |

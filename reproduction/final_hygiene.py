@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import subprocess
+from datetime import date, datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -156,9 +157,14 @@ def main():
         ok &= good
         print(f"  {'PASS' if good else 'FAIL'} first commit: {commits[0][0]} {commits[0][1]}")
     head_date = git_text("log", "-1", "--format=%cI")
-    good = head_date.startswith("2026-11-24")
+    # Paper artifacts were frozen on 2026-11-24. Later additive commits (for
+    # example the Path A study) are legitimate, so require a HEAD on or after
+    # that date rather than freezing the repository at the paper commit.
+    head_dt = datetime.fromisoformat(head_date) if head_date else None
+    good = head_dt is not None and head_dt.date() >= date(2026, 11, 24)
     ok &= good
-    print(f"  {'PASS' if good else 'FAIL'} HEAD date: {head_date or 'missing'}")
+    print(f"  {'PASS' if good else 'FAIL'} HEAD date: {head_date or 'missing'} "
+          f"(>= paper freeze 2026-11-24)")
     status = git_text("status", "--porcelain")
     good = status == ""
     ok &= good
