@@ -27,6 +27,8 @@ Results:
 
 Full logs are outside the repository in `/home/kashie/Tmp/research/pathA_verify/`:
 `research_verify.txt`, `public_sync_verify.txt`, and `final_hygiene.txt`.
+Manuscript rebuild logs are in `/home/kashie/Tmp/research/pdf_update/`, including
+`docx_convert_latest.log`.
 
 ## Verified primary run (`reproduction/pathA_oracle/results/`)
 
@@ -89,6 +91,32 @@ Full logs are outside the repository in `/home/kashie/Tmp/research/pathA_verify/
 - All 16 shared Path A markdown, script, and extension CSV files are byte-identical between the research tree and the public tree.
 - The public repo contains no `.zst`, `.bin`, PDF, or DOCX files.
 - `final_hygiene.py` confirms frozen main-study hashes, `509/509` numeric checks, a 24-page unified PDF, zero undefined references, zero overfull hboxes, and a clean working tree.
+
+## Verified manuscript PDF and editable DOCX update
+
+**Update verification timestamp (UTC):** 2026-11-25T18:00:46Z
+
+The authoritative LaTeX sources were edited additively to report the verified
+extension decision; no Path A CSV, script, protocol, or result memo was changed.
+`drift_gating_latex_source/main.pdf` rebuilt at 11 pages and
+`drift_gating_latex_source/supplement.pdf` rebuilt at 13 pages, then
+`pdfunite` produced `Drift_Aware_Page_Replacement_UPDATED.pdf` at 24 pages.
+
+```sh
+pdftotext Drift_Aware_Page_Replacement_UPDATED.pdf - | grep -nE \
+  'PATH_A_STANDS|0/117|1/117|0\.01355|0\.04449|0\.00595'
+```
+
+Verified PDF text contains `PATH_A_STANDS`, `0/117`, `1/117`, `0.01355`,
+`0.04449`, and `−0.00595` (the PDF text extractor renders the minus as a
+Unicode sign). The unified PDF still passes the post hoc wording check and has
+zero banned affirmative phrases.
+
+The editable Word copy was regenerated from that PDF with pdf2docx 0.5.13,
+installed only under `/home/kashie/Tmp/pdf2docx_env_latest`. Conversion logs
+show all 24 pages parsed and created with no ignored pages. `python-docx`
+verifies editable text rather than page images: 669 paragraphs, 82 tables,
+0 inline shapes, and the same Path A tokens are present in the document text.
 
 ## Scope of this verification
 

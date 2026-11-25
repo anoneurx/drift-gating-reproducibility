@@ -632,6 +632,18 @@ Function-graph tracing was restricted to the five recorded fault and reclaim fun
 
 \input{phase8_kernel_ftrace_table.tex}
 
+\subsection{Hindsight-oracle extension (Path A)}
+
+The oracle study in \code{PATH_A_PROTOCOL.md} (local timestamp
+2026-11-25T09:25:44Z) replayed twenty static policies with a full-cache-refill
+switch cost. At 50{,}000 references, 0/117 charged family-capacity groups met
+the $\ge 0.02$ bar (largest mean gain 0.01355); the 100{,}000 sensitivity run
+gave 1/117 from one trace (gain 0.04449). The ten-record extension in
+\code{PATH_A_EXTENSION_PROTOCOL.md} found one FIU-online replica and no unseen
+family, retained \code{PATH_A_STANDS}, and had mean charged gain $-0.00595$.
+The oracle is a hindsight ceiling, not a deployable controller; Path B remains
+closed.
+
 % =====================================================================
 \section*{Declarations}
 \noindent\textbf{Data and code availability.} The simulator, trace generators, seeds, configuration files, raw per-trace output and analysis scripts are released in the accompanying \code{reproduction/} package. \code{sweep_selection.py} regenerates the selection sweep, \code{run_main_study.sh} every primary table and figure, \code{appendix_intervals.py} the appendix intervals, and \code{cost_model.py} with \code{prototype_fault_latency.cpp} the break-even analysis. The public-trace converter, result and detection CSVs, capacity-pilot CSVs, boundary-offset CSVs, the instrumented programs and the raw output of the real-program evaluation are in the same package; the source traces are available from~\cite{pdl}. The QEMU guest build, workload, controller, raw traces and derived CSVs are in \code{reproduction/phase8_kernel/}; no in-kernel DA replacement prototype was built. All primary runs were conducted between 2026-11-20 and 2026-11-23; the protocol file \code{PROTOCOL.md} is dated 2026-11-23 and predates the final analysis runs.

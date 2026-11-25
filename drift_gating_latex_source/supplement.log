@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  24 NOV 2026 18:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  25 NOV 2026 18:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -634,7 +634,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 101--101
 []|\T1/ptm/m/n/8 (+20) Miniature sim-u-la-tion [[][]29[][]],
  []
 
-<figs/fig_architecture.pdf, id=185, 412.11966pt x 159.13855pt>
+<figs/fig_architecture.pdf, id=189, 412.11966pt x 159.13855pt>
 File: figs/fig_architecture.pdf Graphic file (type pdf)
 <use figs/fig_architecture.pdf>
 Package pdftex.def Info: figs/fig_architecture.pdf  used on input line 146.
@@ -652,18 +652,18 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `cmtt' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-<figs/fig_workflow.pdf, id=251, 207.68591pt x 262.77524pt>
+<figs/fig_workflow.pdf, id=255, 207.68591pt x 262.77524pt>
 File: figs/fig_workflow.pdf Graphic file (type pdf)
 <use figs/fig_workflow.pdf>
 Package pdftex.def Info: figs/fig_workflow.pdf  used on input line 199.
 (pdftex.def)             Requested size: 234.56526pt x 296.80025pt.
  [4 <./figs/fig_workflow.pdf>]
-<figs/fig_overall.pdf, id=269, 258.31256pt x 201.01929pt>
+<figs/fig_overall.pdf, id=273, 258.31256pt x 201.01929pt>
 File: figs/fig_overall.pdf Graphic file (type pdf)
 <use figs/fig_overall.pdf>
 Package pdftex.def Info: figs/fig_overall.pdf  used on input line 240.
 (pdftex.def)             Requested size: 252.2227pt x 196.289pt.
-<figs/fig_scenario_paired.pdf, id=270, 508.20502pt x 192.25827pt>
+<figs/fig_scenario_paired.pdf, id=274, 508.20502pt x 192.25827pt>
 File: figs/fig_scenario_paired.pdf Graphic file (type pdf)
 <use figs/fig_scenario_paired.pdf>
 Package pdftex.def Info: figs/fig_scenario_paired.pdf  used on input line 247.
@@ -705,7 +705,7 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-<figs/fig_tradeoff.pdf, id=295, 242.96616pt x 181.46408pt>
+<figs/fig_tradeoff.pdf, id=299, 242.96616pt x 181.46408pt>
 File: figs/fig_tradeoff.pdf Graphic file (type pdf)
 <use figs/fig_tradeoff.pdf>
 Package pdftex.def Info: figs/fig_tradeoff.pdf  used on input line 335.
@@ -760,42 +760,42 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [10]
 (./phase6_pdl_table.tex) [11] (./phase8_kernel_ftrace_table.tex) [12]
-Underfull \hbox (badness 1874) in paragraph at lines 688--689
+Underfull \hbox (badness 1874) in paragraph at lines 700--701
 []\T1/ptm/m/n/8 (+20) CMU Par-al-lel Data Lab-o-ra-tory, ``Cache evic-tion tac-
 tics: cache-
  []
 
 
-Underfull \hbox (badness 6592) in paragraph at lines 688--689
+Underfull \hbox (badness 6592) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) Datasets trace col-lec-tion,'' on-line data repos-i-tory an
 d for-mat
  []
 
 
-Underfull \hbox (badness 6047) in paragraph at lines 688--689
+Underfull \hbox (badness 6047) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) README, ac-cessed Nov. 24, 2026. The project page links
  []
 
 
-Underfull \hbox (badness 4543) in paragraph at lines 688--689
+Underfull \hbox (badness 4543) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) to the \T1/cmtt/m/n/8 cacheDatasets \T1/ptm/m/n/8 (+20) rep
 os-i-tory; its FIU di-rec-tory con-tains
  []
 
 
-Underfull \hbox (badness 4454) in paragraph at lines 688--689
+Underfull \hbox (badness 4454) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) right no-tice says ma-te-ri-als dis-tributed by the server 
 are pro-
  []
 
 
-Underfull \hbox (badness 2865) in paragraph at lines 688--689
+Underfull \hbox (badness 2865) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) vided on a non-commercial ba-sis. [On-line]. Avail-able: []
 []$https : / /
  []
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 688--689
+Underfull \hbox (badness 1803) in paragraph at lines 700--701
 \T1/ptm/m/n/8 (+20) pdl . cmu . edu / CacheEviction / index . shtml$[][]; [][]$
 https : / / ftp . pdl . cmu . edu / pub /
  []
@@ -806,16 +806,16 @@ LaTeX2e <2026-06-01>
 L3 programming layer <2026-08-10>
  ***********
 Package rerunfilecheck Info: File `supplement.out' has not changed.
-(rerunfilecheck)             Checksum: 5121029A5833B92D1487B493A150C391;5187.
+(rerunfilecheck)             Checksum: 748CBACC3A7DBDEE318D777C4C24333F;5435.
  ) 
 Here is how much of TeX's memory you used:
- 16059 strings out of 469089
- 250794 string characters out of 5459373
+ 16061 strings out of 469089
+ 250824 string characters out of 5459373
  733713 words of memory out of 5000000
- 44316 multiletter control sequences out of 15000+600000
+ 44317 multiletter control sequences out of 15000+600000
  722553 words of font info for 443 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 74i,12n,79p,1674b,611s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,12n,79p,1674b,606s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/kashie/.texlive2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.60
 0pk> </home/kashie/.texlive2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc0800.
 600pk> </home/kashie/.texlive2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt100
@@ -827,10 +827,10 @@ ve/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ti
 mes/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on supplement.pdf (13 pages, 313687 bytes).
+Output written on supplement.pdf (13 pages, 315562 bytes).
 PDF statistics:
- 587 PDF objects out of 1000 (max. 8388607)
- 411 compressed objects within 5 object streams
- 108 named destinations out of 1000 (max. 500000)
- 86730 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 597 PDF objects out of 1000 (max. 8388607)
+ 417 compressed objects within 5 object streams
+ 109 named destinations out of 1000 (max. 500000)
+ 86738 words of extra memory for PDF output out of 89155 (max. 10000000)
 

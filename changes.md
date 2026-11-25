@@ -1,5 +1,25 @@
 # Changes
 
+## 2026-11-25: PDF updated with verified Path A extension result
+
+- **Change:** Added the verified hindsight-oracle Path A result to the
+  authoritative manuscript sources. The main conclusion now reports 0/117
+  charged groups at 50,000 references, 1/117 at 100,000, and the retained
+  `PATH_A_STANDS` decision after ten additional FIU records. The supplement
+  reports the same decision with the verified largest primary mean gain
+  0.01355, sensitivity gain 0.04449, and mean extension charged gain
+  -0.00595.
+- **Change:** Rebuilt `drift_gating_latex_source/main.pdf` (11 pages) and
+  `drift_gating_latex_source/supplement.pdf` (13 pages), then concatenated them
+  into `Drift_Aware_Page_Replacement_UPDATED.pdf` (24 pages). No raw trace or
+  invented number was introduced; every printed value traces to the committed
+  Path A CSVs.
+- **Change:** Kept `main_template.tex`, generated `main.tex`, the `latex/`
+  tree and `paper_final.tex` consistent with the same additive result. Raw
+  Path A CSVs, scripts and decision files were not modified.
+- **Change:** Regenerated the editable Word copy from the updated PDF after
+  the manuscript rebuild.
+
 ## 2026-11-24: Q1 shadow-evaluation cost measured and stale not-run entries fixed
 
 - **Change:** Extended `reproduction/phase7_async/analyze_async.py` to aggregate worker time per completed shadow evaluation. `timing_summary.csv` now records 1,232 completed evaluations, 711.8 ms worker wall, 709.0 ms worker CPU, 577.8 us wall and 575.5 us CPU per evaluation, and a 0.74 us implied miss-cost break-even at `R=783.28`.

@@ -1394,7 +1394,11 @@ the total-time envelope shows DA is never best in these measurements: CLOCK,
 S3-FIFO and ContShadow each occupy part of the lower envelope and DA remains
 at least 3.27\,ns/reference above the best alternative. External FIU originals
 from [39] reproduced the absence of a DA advantage; stronger claims require the
-remaining production traces and kernel-level measurements.
+remaining production traces and kernel-level measurements. A separate
+hindsight-oracle study on 78 real/public traces found no replicated headroom
+over the best static policy: 0/117 charged family-capacity groups at
+50{,}000-reference windows, 1/117 at 100{,}000, and a ten-record extension
+retained \texttt{PATH\_A\_STANDS}.
 
 \section*{Appendix: Exploratory Real-Program Evidence}
 \addcontentsline{toc}{section}{Appendix: Exploratory Real-Program Evidence}

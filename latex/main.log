@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  24 NOV 2026 18:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  25 NOV 2026 18:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -700,128 +700,128 @@ Underfull \hbox (badness 5446) in paragraph at lines 788--794
  []
 
 [8 <./figs/fig8_breakeven.png>] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 845--862
+Underfull \hbox (badness 10000) in paragraph at lines 849--866
 []\T1/ptm/m/it/10 Data and code avail-abil-ity. \T1/ptm/m/n/10 The sim-u-la-tor
 , trace
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 845--862
+Underfull \hbox (badness 10000) in paragraph at lines 849--866
 \T1/ptm/m/n/10 to-gether with \T1/pcr/m/n/10 prototype_fault_latency.cpp
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 845--862
+Underfull \hbox (badness 10000) in paragraph at lines 849--866
 \T1/ptm/m/n/10 re-gen-er-ates the break-even anal-y-sis, and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 845--862
+Underfull \hbox (badness 10000) in paragraph at lines 849--866
 \T1/pcr/m/n/10 phase5/total_time_envelope.py \T1/ptm/m/n/10 re-gen-er-ates
  []
 
 
-Underfull \hbox (badness 1412) in paragraph at lines 845--862
+Underfull \hbox (badness 1412) in paragraph at lines 849--866
 \T1/ptm/m/n/10 de-tec-tion CSVs are in-cluded in the same pack-age; the
  []
 
 
-Underfull \hbox (badness 1629) in paragraph at lines 845--862
+Underfull \hbox (badness 1629) in paragraph at lines 849--866
 \T1/ptm/m/n/10 The QEMU guest-kernel build, work-load and con-troller
  []
 
 
-Underfull \hbox (badness 1810) in paragraph at lines 845--862
+Underfull \hbox (badness 1810) in paragraph at lines 849--866
 \T1/ptm/m/n/10 sources, raw traces and de-rived CSVs are in-cluded in
  []
 
 
-Underfull \hbox (badness 2564) in paragraph at lines 875--880
+Underfull \hbox (badness 2564) in paragraph at lines 879--884
 []\T1/ptm/m/it/10 Use of AI-assisted tools. \T1/ptm/m/n/10 AI-assisted tools, i
 n-clud-ing
  []
 
 
-Underfull \hbox (badness 3343) in paragraph at lines 976--981
+Underfull \hbox (badness 3343) in paragraph at lines 980--985
 \T1/ptm/m/n/8 ing hi-er-ar-chi-cal tem-po-ral mem-ory and sta-tis-ti-cal tests,
 '' \T1/ptm/m/it/8 Int. J.
  []
 
-
-Underfull \hbox (badness 2027) in paragraph at lines 996--1001
+[10]
+Underfull \hbox (badness 2027) in paragraph at lines 1000--1005
 []\T1/ptm/m/n/8 N. Pa-tel and H. Ma-niar, ``Com-par-a-tive eval-u-a-tion of cac
 he re-
  []
 
 
-Underfull \hbox (badness 2799) in paragraph at lines 996--1001
+Underfull \hbox (badness 2799) in paragraph at lines 1000--1005
 \T1/ptm/m/n/8 place-ment al-go-rithms for time-bounded stale-tolerant data work
 -
  []
 
 
-Underfull \hbox (badness 2096) in paragraph at lines 996--1001
+Underfull \hbox (badness 2096) in paragraph at lines 1000--1005
 \T1/ptm/m/n/8 loads,'' \T1/ptm/m/it/8 Int. J. Sci. Res. Tech-nol.\T1/ptm/m/n/8 
 , vol. 3, no. 6, pp. 556--564,
  []
 
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 []\T1/ptm/m/n/8 CMU Par-al-lel Data Lab-o-ra-tory, ``Cache evic-tion tac-tics:
  []
 
 
-Underfull \hbox (badness 2142) in paragraph at lines 1037--1049
+Underfull \hbox (badness 2142) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 README, ac-cessed Nov. 24, 2026. The project page links to
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 the \T1/pcr/m/n/8 cacheDatasets \T1/ptm/m/n/8 repos-i-tory; its F
 IU di-rec-tory con-tains
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 \T1/pcr/m/n/8 fiu_madmax-110108-112108.oracleGeneral.zst\T1/ptm/m/n/8 . The
  []
 
 
-Underfull \hbox (badness 2012) in paragraph at lines 1037--1049
+Underfull \hbox (badness 2012) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 README spec-i-fies zstd-compressed 24-byte re-quest records and
  []
 
 
-Underfull \hbox (badness 1460) in paragraph at lines 1037--1049
+Underfull \hbox (badness 1460) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 ci-ta-tion re-quire-ments, but no dataset-specific li-cence; PDL'
 s site-
  []
 
 
-Underfull \hbox (badness 3428) in paragraph at lines 1037--1049
+Underfull \hbox (badness 3428) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 wide copy-right no-tice says ma-te-ri-als dis-tributed by the ser
 ver
  []
 
 
-Underfull \hbox (badness 5711) in paragraph at lines 1037--1049
+Underfull \hbox (badness 5711) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 are pro-vided on a non-commercial ba-sis. [On-line]. Avail-able:
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 []$\T1/ptm/m/n/8 https : / / pdl . cmu . edu / CacheEviction / index . shtml$[]
 ; []$https : / / ftp . pdl . cmu .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 edu / pub / datasets / twemcacheWorkload / cacheDatasets/$[]; []$
 https : / / ftp . pdl .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1037--1049
+Underfull \hbox (badness 10000) in paragraph at lines 1041--1053
 \T1/ptm/m/n/8 cmu . edu / pub / datasets / twemcacheWorkload / cacheDatasets / 
 README$[];
  []
@@ -843,7 +843,7 @@ Here is how much of TeX's memory you used:
  40787 multiletter control sequences out of 15000+600000
  745675 words of font info for 166 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 74i,10n,79p,1181b,581s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 74i,10n,79p,1181b,579s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texli
@@ -860,7 +860,7 @@ e/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
 /utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (11 pages, 867671 bytes).
+Output written on main.pdf (11 pages, 868042 bytes).
 PDF statistics:
  368 PDF objects out of 1000 (max. 8388607)
  303 compressed objects within 4 object streams
