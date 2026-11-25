@@ -5,6 +5,8 @@ static policy with a hindsight oracle that picks the best policy in every fixed
 window and pays a pre-specified switching cost.
 
 The design is fixed in `../../PATH_A_PROTOCOL.md` before the first full run.
+The later trace-replication extension is fixed separately in
+`../../PATH_A_EXTENSION_PROTOCOL.md`.
 
 ## Contents
 
@@ -16,6 +18,9 @@ The design is fixed in `../../PATH_A_PROTOCOL.md` before the first full run.
 | `analyze_pathA_oracle.py` | Aggregates by family/capacity/window and applies the pre-specified decision rule. |
 | `check_pathA_oracle.py` | Read-only consistency checks on the raw outputs. |
 | `extract_pathA_features.py` | Auxiliary trace features prepared for the held-out-family predictive-rule gate; not used to select the oracle endpoint. |
+| `prepare_pathA_extension.py` | Converts the pre-specified extra public FIU traces and writes a hash manifest. |
+| `run_pathA_extension.py` | Runs the same oracle on the extension manifest. |
+| `analyze_pathA_extension.py` | Applies the pre-specified extension decision rule. |
 | `results/summary.csv` | One charged and one zero-cost oracle row per trace/capacity/window. |
 | `results/policy.csv` | Total misses for every candidate static policy. |
 | `results/windows.csv` | Per-window oracle choice, switch flag, and per-window best policy. |
@@ -48,6 +53,18 @@ python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
 python3 reproduction/pathA_oracle/check_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
+```
+
+Trace-replication extension (pre-specified in `../../PATH_A_EXTENSION_PROTOCOL.md`):
+
+```sh
+python3 reproduction/pathA_oracle/prepare_pathA_extension.py
+python3 reproduction/pathA_oracle/run_pathA_extension.py --workers 6
+python3 reproduction/pathA_oracle/check_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_extension.py
 ```
 
 ## Oracle definition

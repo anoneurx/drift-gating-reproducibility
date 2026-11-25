@@ -87,3 +87,11 @@ held-out-family feature rule and a learned-policy baseline, not a kernel result.
 Report per trace/capacity/window for all new records, family aggregates with
 bootstrap CIs, and a separate extension decision CSV. Keep the primary
 `results/` and `results_w100000/` directories byte-identical.
+
+## Amendment 1 (2026-11-25T16:36:57Z)
+
+Conversion showed that `fiu_madmax-110108-112108.oracleGeneral.zst` contains
+only 918,010 records, so the pre-specified first 2,000,000 refs are unavailable.
+Use all 918,010 refs for `fiu_madmax_2m` and record the actual `ref_stop` in the
+manifest. No other trace is affected. The oracle settings and decision rule are
+unchanged. This amendment was recorded before any extension oracle run.
