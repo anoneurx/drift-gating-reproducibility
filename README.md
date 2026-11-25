@@ -27,14 +27,21 @@ g++ -O2 -std=c++17 -o reproduction/pathA_oracle/oracle_switching \
   reproduction/pathA_oracle/oracle_switching.cpp
 ```
 
-Python checks:
+Path A Python checks and aggregation are runnable from this package:
 
 ```sh
-python3 reproduction/check_paper_numbers.py
-python3 reproduction/final_hygiene.py
 python3 reproduction/pathA_oracle/check_pathA_oracle.py
 python3 reproduction/pathA_oracle/analyze_pathA_oracle.py
+python3 reproduction/pathA_oracle/check_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_w100000
+python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_w100000
 ```
+
+`reproduction/check_paper_numbers.py` and `reproduction/final_hygiene.py` are
+included for parity with the local research tree, but they require the manuscript
+LaTeX/PDF sources and `fault_latency_results.txt`, which are not published here.
+They were run successfully in the local research tree before publication.
 
 ## Frozen validation command
 

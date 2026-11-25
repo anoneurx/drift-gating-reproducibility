@@ -77,7 +77,7 @@ This mechanically opens the pre-specified `PATH_B_GATE`, but the gate is fragile
 - Public FIU/PDL traces are block/object traces converted to page-ID form, not native page-level VM traces.
 - Instrumented-program traces are page-level but locally generated from a limited set of programs and seeds.
 - A recent learned replacement policy is not implemented.
-- The protocol is timestamped locally, not publicly, because the research repo is not pushed.
+- The pre-run timestamp is a local git record that was later mirrored publicly; it is not an independent public registration.
 - The oracle assumes every candidate policy is always warm and maintains its own continuous state. It is an optimistic ceiling, not a deployable controller.
 
 ## Next steps

@@ -4,9 +4,11 @@
 **Local HEAD at timestamp:** `d54b0d959480062d3948a2b9ac70b42341894238`  
 **Status:** fixed before running the new oracle experiment.
 
-> Publication note: the research repository is intentionally local-only under the
-> current no-push instruction. This protocol is therefore timestamped in git
-> locally. It has not been pushed publicly.
+> Timestamp note: this design was fixed and timestamped in the local research
+> repository before the oracle runs (UTC timestamp and HEAD above). The protocol
+> and results were later mirrored to the public `drift-gating-reproducibility`
+> repository. This is a local pre-run record, not an independent public
+> registration.
 
 ## Question
 

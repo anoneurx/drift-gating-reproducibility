@@ -76,7 +76,7 @@ It is a ceiling, not a proposed policy.
   and bounded public PDL prefixes. They are not full public traces from many
   families.
 - A recent learned policy is not implemented; this is reported, not hidden.
-- The protocol is timestamped locally in `PATH_A_PROTOCOL.md` because the
-  research repository is not pushed under the current instruction.
+- The pre-run timestamp in `PATH_A_PROTOCOL.md` is a local git record later
+  mirrored publicly, not an independent public registration.
 
 No frozen artifact is modified by this experiment.
