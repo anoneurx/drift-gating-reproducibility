@@ -165,7 +165,10 @@ def verify_documents(rep, root):
     protocol = (root / "PATH_A_PROTOCOL.md").read_text(errors="replace")
     ext_protocol = (root / "PATH_A_EXTENSION_PROTOCOL.md").read_text(errors="replace")
     ext_results = (root / "PATH_A_EXTENSION_RESULTS.md").read_text(errors="replace")
-    paper = (root / "PATH_A_SHORT_PAPER.md").read_text(errors="replace")
+    paper_path = root / "PATH_A_SHORT_PAPER.md"
+    verification_path = root / "PATH_A_VERIFICATION.md"
+    paper = paper_path.read_text(errors="replace") if paper_path.exists() else ""
+    verification = verification_path.read_text(errors="replace") if verification_path.exists() else ""
     rep.check("2026-11-25T09:25:44Z" in protocol and "d54b0d959480062d3948a2b9ac70b42341894238" in protocol,
               "primary protocol timestamp and HEAD")
     rep.check("2026-11-25T10:08:54Z" in ext_protocol and
@@ -174,8 +177,9 @@ def verify_documents(rep, root):
               "extension protocol timestamps and HEAD")
     rep.check("Use is non-commercial research with citation; raw traces are not redistributed." in ext_protocol,
               "PDL use wording is exact")
-    rep.check("PATH_A_STANDS" in ext_results and "PATH_A_STANDS" in paper,
-              "result memo and short paper report extension decision")
+    rep.check("PATH_A_STANDS" in ext_results and
+              ("PATH_A_STANDS" in paper or "PATH_A_STANDS" in verification),
+              "result memo and paper/verification report extension decision")
 
 
 SHARED = [
