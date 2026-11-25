@@ -71,6 +71,17 @@ The pre-specified sensitivity run completed with `FAILURES: 0`:
 
 This mechanically opens the pre-specified `PATH_B_GATE`, but the gate is fragile: it is one FIU family, one trace, one capacity, and it is absent in the primary 50,000-reference run. It is not sufficient evidence for a kernel implementation or an end-to-end systems claim. The correct next move is to test whether the gain reproduces on more traces from that family and on unseen families before considering Path B.
 
+## Extension replication test
+
+The pre-specified extension in `PATH_A_EXTENSION_PROTOCOL.md` added ten additional FIU records and tested the gate on more of the FIU-online trace and two unseen families. The result is recorded in `PATH_A_EXTENSION_RESULTS.md`:
+
+- decision: **`PATH_A_STANDS`**;
+- FIU-online replicas required 2 distinct traces, found 1;
+- unseen-family groups required 1, found 0;
+- the charged gain was found again only on a later segment of the same online trace (`fiu_online_seg1p5m_2m`, gain `0.04656` at `C=8116`, `W=100000`).
+
+The single-trace sensitivity gate therefore does not survive the replication test. No primary result was modified.
+
 ## Scope limits
 
 - 78 traces, not the several hundred in the full Path A plan.
@@ -82,8 +93,8 @@ This mechanically opens the pre-specified `PATH_B_GATE`, but the gate is fragile
 
 ## Next steps
 
-1. Draft the short Path A paper around the combined claim above.
-2. Add more traces, especially more `online.cs.fiu.edu` traces and unseen families, to test the single sensitivity gate.
-3. Test a trace-feature rule on held-out families only if that gate survives.
-4. Add a recent learned policy baseline before any Q1 generality claim.
-5. Keep Path B closed until the gate is reproducible across families and a held-out-family rule predicts the gain.
+1. Keep the short Path A paper aligned with the extension result.
+2. Add a recent learned policy baseline before any Q1 generality claim.
+3. Cross-check against libCacheSim.
+4. Keep the held-out-family feature rule closed: the sensitivity gate did not survive replication.
+5. Keep Path B closed; reopening it requires new independent evidence, not this sensitivity gate.

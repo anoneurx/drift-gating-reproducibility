@@ -58,7 +58,8 @@ python3 reproduction/pathA_oracle/check_pathA_oracle.py \
 Trace-replication extension (pre-specified in `../../PATH_A_EXTENSION_PROTOCOL.md`):
 
 ```sh
-python3 reproduction/pathA_oracle/prepare_pathA_extension.py
+python3 reproduction/pathA_oracle/prepare_pathA_extension.py \
+  --src /path/to/fiu/zst --bin /path/to/extension/bin
 python3 reproduction/pathA_oracle/run_pathA_extension.py --workers 6
 python3 reproduction/pathA_oracle/check_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_extension

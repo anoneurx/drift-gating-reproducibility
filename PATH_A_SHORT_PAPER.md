@@ -13,11 +13,12 @@ the worthwhile-gain bar of a 0.02 absolute miss-ratio reduction on at least
 two thirds of traces; the largest family-mean charged gain was 0.01355. Even a
 zero-switch-cost oracle cleared the bar in only 3/117 groups, all from one FIU
 family. A 100,000-reference sensitivity run opened 1/117 groups, but that group
-contains a single trace and a single capacity, with gain 0.04449. These results
+contains a single trace and a single capacity, with gain 0.04449. A pre-specified
+extension with ten additional FIU records did not reproduce that gate: only one
+distinct FIU-online trace cleared the charged threshold at 100,000 references,
+and no unseen family did, so the decision was `PATH_A_STANDS`. These results
 support a narrow Path A conclusion: on the available traces, switching has
-little demonstrated headroom over the best static policy. Path B is not
-justified until the single sensitivity gate reproduces on more traces and
-unseen families.
+little demonstrated headroom over the best static policy. Path B remains closed.
 
 ## 1. Question
 
@@ -52,6 +53,10 @@ time:
 Total: **78 traces across 27 families**. The FIU `webusers` capacity-pilot trace
 was excluded because capacity had been selected on it. Public FIU/PDL traces are
 block/object traces converted to page-ID form, not native VM page traces.
+
+A later additive extension added **ten additional FIU records** from verified CMU PDL
+sources. These are reported separately and are not pooled into the primary
+78-trace counts.
 
 ### 2.2 Capacities and simulation
 
@@ -97,11 +102,28 @@ exact capacity, because capacities differ slightly across traces with different
 WSS. Bootstrap confidence intervals used trace-level resampling with `B=10000`
 and seed `20261125`.
 
+### 2.4 Pre-specified replication extension
+
+The single-trace sensitivity gate was tested by an additive extension fixed in
+`PATH_A_EXTENSION_PROTOCOL.md` at `2026-11-25T10:08:54Z` (local HEAD
+`ffc9f3768ef9a1e066d8077d80f67be26779faa7`) before any new trace was downloaded.
+Amendment 1, recorded at `2026-11-25T16:36:57Z` before the oracle run, used all
+918,010 available records for `fiu_madmax_2m` because that public source contains
+fewer than 2,000,000 records.
+
+The extension reused the settings above and added ten FIU records: longer
+prefixes for eight sources plus two non-overlapping 500,000-reference segments
+from the online trace. The `PATH_B_GATE` would survive only if, at the charged
+100,000-reference oracle, (i) at least two distinct FIU-online-derived traces
+had gain `>= 0.02` at some capacity and (ii) at least one unseen-family record
+met the original worthwhile-gain bar.
+
 ## 3. Results
 
-Both runs passed the raw-output checker with `FAILURES: 0`. The primary run
+All three runs passed the raw-output checker with `FAILURES: 0`. The primary run
 produced 468 summary rows, 4,680 policy rows, and 1,542 window rows; the
-sensitivity run produced the same summary/policy counts and 663 window rows.
+sensitivity run produced the same summary/policy counts and 663 window rows. The
+extension produced 120 summary rows, 1,200 policy rows, and 1,347 window rows.
 
 | Window | Oracle cost | Groups meeting bar | Max family-mean gain | Mean row gain | Best static = S3-FIFO |
 |---:|---|---:|---:|---:|---:|
@@ -141,22 +163,51 @@ gate: one family, one trace, one capacity, and absent in the primary 50,000-run.
 It is evidence for collecting more traces, not evidence for a kernel
 implementation or an end-to-end systems claim.
 
+### 3.3 Replication extension
+
+The extension did not satisfy either replication condition at 100,000
+references. One distinct FIU-online-derived trace met the charged threshold:
+`fiu_online_seg1p5m_2m` at `C=8116`, gain 0.04656, with 3 oracle switches. The
+two charged 50,000-reference gains above 0.02 (`0.02388` at `C=4058` and
+`0.02196` at `C=8116`) came from that same segment. No unseen-family group met
+the bar; at 100,000 references, `fiu_casa` charged gains were `0.00000`,
+`0.00068`, and `-0.00447`, while `fiu_webmail_online_combined` charged gains were
+`0.00000`, `-0.00182`, and `-0.05089`.
+
+| Window | Extension groups meeting bar | Distinct FIU-online replicas | Unseen-family groups |
+|---:|---:|---:|---:|
+| 50,000 | 2/60 | 1 | 0 |
+| 100,000 | 1/60 | 1 | 0 |
+
+Across the 60 charged trace-capacity-window rows, the mean gain was -0.00595;
+the zero-cost upper bound had a mean gain of 0.01085 and cleared the bar in 9/60
+groups at 50,000 references and 4/60 at 100,000. S3-FIFO was the best static
+policy in 30/60 rows, with six distinct policies winning at least one row. Every
+extension family-capacity group contains one trace, so its bootstrap interval is
+degenerate.
+
+The extension decision was `PATH_A_STANDS`: the sensitivity gate is a
+trace-specific artifact, not a family-level or cross-family effect.
+
 ## 4. Interpretation
 
 The primary result is a decisive negative for switching headroom on the
 available evidence. At 50,000-reference windows, even an oracle that knows the
 best policy in every window and starts every policy warm never delivered a
 worthwhile charged gain at the family-capacity level. At 100,000-reference
-windows, the single exception is too narrow to generalize.
+windows, the single exception did not survive the pre-specified replication
+test.
 
 The correct claim is deliberately narrow:
 
-> On 78 local real/public traces at three WSS-relative capacities, a hindsight
-> per-window policy oracle with a full-cache-refill switch cost delivered no
-> worthwhile gain in 117/117 family-capacity groups at 50,000-reference
-> windows. At 100,000-reference windows, 1/117 groups cleared the bar, from one
-> FIU family and one trace. This is a gate for more evidence, not a Path B
-> result.
+> On 78 original local real/public traces at three WSS-relative capacities, a
+> hindsight per-window policy oracle with a full-cache-refill switch cost
+> delivered no worthwhile gain in 117/117 family-capacity groups at 50,000-
+> reference windows. At 100,000-reference windows, 1/117 groups cleared the bar,
+> from one FIU family and one trace. A ten-record FIU extension found the gain
+> again only on a later segment of the same online source and found no
+> unseen-family replication; the decision was `PATH_A_STANDS`. This is a
+> measurement result, not a Path B result.
 
 Because the oracle is warm and clairvoyant, a real controller has less headroom
 than these numbers. Detection delay, misclassification, cold-start costs, and
@@ -174,6 +225,10 @@ does not model every system-level cost.
 - No cross-check against libCacheSim was performed.
 - The 100,000-window gate is a single trace; train/test capacities differ, so
   the two FIU online prefixes do not form a replicated group at `C=15539`.
+- The extension found another charged gain only within the same FIU-online source
+  file; its segments are not independent workloads.
+- Every extension family-capacity group contains one trace, so its bootstrap
+  intervals are degenerate.
 - The pre-run timestamp is local and was mirrored later; it is not a public
   registration.
 
@@ -183,14 +238,19 @@ Artifacts:
 
 - `PATH_A_PROTOCOL.md`: pre-specified design and timestamp.
 - `PATH_A_RESULTS.md`: primary and sensitivity result memo.
+- `PATH_A_EXTENSION_PROTOCOL.md`: pre-specified replication extension and
+  Amendment 1.
+- `PATH_A_EXTENSION_RESULTS.md`: extension result memo.
 - `reproduction/pathA_oracle/oracle_switching.cpp`: C++ oracle harness reusing
   the fixed-policy implementations from `reproduction/sim_full.cpp`.
 - `reproduction/pathA_oracle/run_pathA_oracle.py`: trace discovery, capacity
   computation, and parallel run driver.
 - `reproduction/pathA_oracle/analyze_pathA_oracle.py`: aggregation and gate.
 - `reproduction/pathA_oracle/check_pathA_oracle.py`: read-only consistency check.
-- `reproduction/pathA_oracle/results/` and `results_w100000/`: raw and
-  aggregated CSVs.
+- `reproduction/pathA_oracle/prepare_pathA_extension.py`, `run_pathA_extension.py`,
+  and `analyze_pathA_extension.py`: extension preparation, run, and decision.
+- `reproduction/pathA_oracle/results/`, `results_w100000/`, and
+  `results_extension/`: raw and aggregated CSVs.
 
 Commands:
 
@@ -207,6 +267,15 @@ python3 reproduction/pathA_oracle/check_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
 python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
+
+python3 reproduction/pathA_oracle/prepare_pathA_extension.py \
+  --src /path/to/fiu/zst --bin /path/to/extension/bin
+python3 reproduction/pathA_oracle/run_pathA_extension.py --workers 6
+python3 reproduction/pathA_oracle/check_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_extension.py
 ```
 
 The public code/CSV package is at
@@ -217,7 +286,7 @@ artifacts were not modified by this experiment.
 
 On the available real/public traces, the headroom for policy switching is small.
 The primary oracle result is decisively negative, and the sensitivity exception
-is a single-trace gate rather than a robust effect. We therefore take Path A:
+did not survive a pre-specified replication extension. We therefore take Path A:
 report the measurement study with explicit scope limits. Path B remains closed
-until larger trace coverage, a learned-policy baseline, and held-out-family
-validation show a reproducible worthwhile gain.
+until a learned-policy baseline, a libCacheSim cross-check, and genuinely
+independent held-out-family evidence show a reproducible worthwhile gain.

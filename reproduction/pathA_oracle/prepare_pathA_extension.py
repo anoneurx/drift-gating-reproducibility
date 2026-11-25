@@ -2,11 +2,11 @@
 """Convert the pre-specified Path A extension traces and write their manifest.
 
 This script is additive. It reads only the public .zst files named in
-PATH_A_EXTENSION_PROTOCOL.md, writes converted .bin files under
-/home/kashie/Tmp/research/fiu_ext (outside the repository), and records
-hashes/metadata in results_extension/manifest.csv. Raw traces are not copied
-into the repository.
+PATH_A_EXTENSION_PROTOCOL.md, writes converted .bin files to a caller-supplied
+cache directory outside the repository, and records hashes/metadata in
+results_extension/manifest.csv. Raw traces are not copied into the repository.
 """
+import argparse
 import csv
 import hashlib
 import struct
@@ -16,8 +16,7 @@ import numpy as np
 import zstandard
 
 HERE = Path(__file__).resolve().parent
-SRC = Path("/home/kashie/Tmp/research/fiu_ext/src")
-BIN = Path("/home/kashie/Tmp/research/fiu_ext/bin")
+DEFAULT_CACHE = Path("/home/kashie/Tmp/research/fiu_ext")
 RESULTS = HERE / "results_extension"
 BASE = "https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/fiu"
 REC = struct.Struct("<IQIq")
@@ -93,15 +92,23 @@ def convert(src, dst, limit):
 
 
 def main():
-    BIN.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--src", type=Path, default=DEFAULT_CACHE / "src",
+                    help="directory containing the public .zst source files")
+    ap.add_argument("--bin", type=Path, default=DEFAULT_CACHE / "bin",
+                    help="directory for converted .bin traces (outside the repo)")
+    args = ap.parse_args()
+    src_dir, bin_dir = args.src, args.bin
+
+    bin_dir.mkdir(parents=True, exist_ok=True)
     RESULTS.mkdir(parents=True, exist_ok=True)
     converted = {}
     rows = []
     for key, fname in SOURCES.items():
-        src = SRC / fname
+        src = src_dir / fname
         if not src.exists():
             raise SystemExit(f"missing source: {src}")
-        dst = BIN / (key + "_2m.bin")
+        dst = bin_dir / (key + "_2m.bin")
         n, distinct = convert(src, dst, LIMIT)
         print(f"converted {fname}: {n} refs, {distinct} distinct objects", flush=True)
         converted[key] = (dst, n, distinct, sha256(src))
@@ -114,7 +121,7 @@ def main():
         ids = np.fromfile(dst, dtype="<u4", count=stop_eff)[start:stop_eff]
         if ids.size != stop_eff - start:
             raise SystemExit(f"{label}: expected {stop_eff - start} refs, got {ids.size}")
-        out = BIN / (label + ".bin")
+        out = bin_dir / (label + ".bin")
         ids.tofile(out)
         wss = int(np.unique(ids).size)
         max_id = int(ids.max())
