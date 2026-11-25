@@ -2,3 +2,5 @@
 /results.csv
 /detection.csv
 /reproduction/pathA_oracle/oracle_switching
+__pycache__/
+*.pyc

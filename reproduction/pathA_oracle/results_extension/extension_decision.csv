@@ -1,0 +1,2 @@
+decision,online_replicas_required,online_replicas_found,online_replica_traces,unseen_group_required,unseen_groups_found,unseen_groups,charged_50k_groups_met,charged_100k_groups_met,n_groups
+PATH_A_STANDS,2,1,fiu_online_seg1p5m_2m,1,0,,2,1,60

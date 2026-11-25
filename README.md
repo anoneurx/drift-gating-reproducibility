@@ -36,7 +36,20 @@ python3 reproduction/pathA_oracle/check_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
 python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
   --results-dir reproduction/pathA_oracle/results_w100000
+
+python3 reproduction/pathA_oracle/prepare_pathA_extension.py \
+  --src /path/to/fiu/zst --bin /path/to/extension/bin
+python3 reproduction/pathA_oracle/run_pathA_extension.py --workers 6
+python3 reproduction/pathA_oracle/check_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_oracle.py \
+  --results-dir reproduction/pathA_oracle/results_extension
+python3 reproduction/pathA_oracle/analyze_pathA_extension.py
 ```
+
+The raw FIU `.zst` files are not published here. The extension preparation
+command expects them in a local cache directory and writes converted `.bin`
+files outside the repository.
 
 `reproduction/check_paper_numbers.py` and `reproduction/final_hygiene.py` are
 included for parity with the local research tree, but they require the manuscript
@@ -79,16 +92,20 @@ scenario,seed,method,n_bounds,detected,delays,spurious,confirms,false_after_100k
 The Rust core contains deterministic RNG, synthetic trace generation, LRU,
 S3-FIFO, CUSUM drift gating, KS confirmation, sampled shadow evaluation, and CSV
 output. The `reproduction/` tree contains the C++ simulator variants, driver
-scripts, analysis scripts, frozen raw CSVs, and Path A oracle artifacts.
+scripts, analysis scripts, frozen raw CSVs, and Path A oracle artifacts,
+including the additive `results_extension/` CSVs.
 
 Large binary trace files are not stored here. See `reproduction/README.md` and
 `reproduction/pathA_oracle/README.md` for the expected trace layout and commands.
 No manuscript PDFs are included.
 
 The Path A design and results are recorded in `PATH_A_PROTOCOL.md` and
-`PATH_A_RESULTS.md`: the primary 50k-window run is a decisive negative result;
-the 100k-window sensitivity run opens one fragile single-family gate that needs
-more traces before Path B can be justified.
+`PATH_A_RESULTS.md`: the primary 50k-window run is a decisive negative result.
+The 100k-window sensitivity run opened one single-trace gate, but the
+pre-specified replication extension in `PATH_A_EXTENSION_PROTOCOL.md` did not
+reproduce it across distinct FIU-online traces or unseen families. The reported
+decision is `PATH_A_STANDS` in `PATH_A_EXTENSION_RESULTS.md`; Path B remains
+closed.
 
 ## License
 
