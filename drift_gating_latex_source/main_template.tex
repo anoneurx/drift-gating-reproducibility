@@ -62,7 +62,7 @@ Corresponding author: M.\ Qasim (e-mail: itskashie@anoneurx.com)\par}
 % ABSTRACT
 % =====================================================================
 \noindent{\small\bfseries\itshape Abstract---}{\small\bfseries
-Discrete policy switching is a recurring design pattern in adaptive cache and page replacement: monitor a workload for drift, rank candidate policies in shadow caches, and switch when a candidate outperforms the incumbent. We bound the achievable headroom of discrete switching using an exact Viterbi dynamic-programming (DP) hindsight oracle under an \emph{independent-replay model} across 88 traces (30 workload families), 21 baseline policies, and cache capacities from $1\%$ to $50\%$ of working-set size (WSS). At an assumed full-refill penalty ($c_{\text{switch}}=C$, $W=50{,}000$), \textbf{0 of 90} family--capacity groups ($1\%$--$10\%$ WSS) clear a $0.02$ net miss-ratio reduction (trace-weighted mean $0.0001$, family-macro mean $0.0001$, 4-source mean $0.0001$, max $0.0067$); across $1\%$--$50\%$ WSS, only $2/440$ pairs (both at $25\%$ WSS) clear $0.02$. Under assumed lower migration penalties ($c_{\text{switch}} \le 0.10C$) and fine windows ($W=5{,}000$), $13/264$ pairs ($4.9\%$) clear $0.02$, and $0/264$ clear $0.02$ once $c_{\text{switch}} \ge 0.50C$ across $W \in \{5\text{k},10\text{k},25\text{k},50\text{k}\}$. We also evaluate 17 online switching controllers and 4 shadow ablations; in our archived runs, \code{S3-FIFO} achieved the lowest mean miss ratio ($0.4890$) and outperformed all 17 controllers ($+0.0393$ to $+0.0433$ higher miss ratio; family-level $n=30$ two-sided Holm-adjusted $p \le 1.2\times 10^{-4}$, rank-biserial $r_b \in [+0.90, +0.97]$), though independent cross-validation revealed a capacity-invariant bug in our \code{S3-FIFO} implementation ($|S|+|M| > C$ under ghost hits), whereas \code{LRU}, \code{FIFO}, \code{ARC}, and \code{SIEVE} matched reference implementations bit-for-bit. Cold-window shadow evaluation mis-ranks the top-1 policy in $32\%$ of evaluation windows, and an exploratory leak-free leave-one-family-out ranker achieves $\text{AUC}=0.895$ ($\text{PR-AUC}=0.471$) but $0.493$ balanced accuracy ($F_1=0.000$) on $13/88$ positives.\par}
+Discrete policy switching is a recurring design pattern in adaptive cache and page replacement: monitor a workload for drift, rank candidate policies in shadow caches, and switch when a candidate outperforms the incumbent. We bound the achievable headroom of discrete switching using an exact Viterbi dynamic-programming (DP) hindsight oracle under an \emph{independent-replay model} across 88 traces (30 workload families), 21 baseline policies, and cache capacities from $1\%$ to $50\%$ of working-set size (WSS). At an assumed full-refill penalty ($c_{\text{switch}}=C$, $W=50{,}000$), \textbf{0 of 90} family--capacity groups ($1\%$--$10\%$ WSS) clear a $0.02$ net miss-ratio reduction (trace-weighted mean $0.0000$, family-macro mean $0.0000$, 4-source mean $0.0000$, max $0.0021$); across all $440$ pairs ($1\%$--$50\%$ WSS), \textbf{0 of 440} clear $0.02$. Under assumed lower migration penalties ($c_{\text{switch}} \le 0.10C$) and fine windows ($W=5{,}000$), $13/264$ pairs ($4.9\%$) clear $0.02$, and $0/264$ clear $0.02$ once $c_{\text{switch}} \ge 0.50C$ across $W \in \{5\text{k},10\text{k},25\text{k},50\text{k}\}$. We also evaluate 17 online switching controllers and 4 shadow ablations after fixing a capacity-overrun bug ($|S|+|M|>C$ under ghost hits) discovered via independent cross-validation in our initial \code{S3-FIFO} implementation; \code{LRU}, \code{FIFO}, \code{ARC}, and \code{SIEVE} matched reference implementations bit-for-bit. Across $1\%$--$10\%$ WSS, static \code{CAR} ($0.5151$) and \code{S3-FIFO} ($0.5167$) achieve the lowest global mean miss ratios, and all 17 online controllers incur $+0.0109$ to $+0.0165$ higher mean miss ratio than \code{S3-FIFO} (family-level $n=30$ Holm-adjusted $p=1.000$, $r_b \in [+0.11, +0.39]$). Cold-window shadow evaluation mis-ranks the top-1 policy in $54.9\%$ of evaluation windows, and an exploratory leak-free leave-one-family-out ranker achieves $\text{AUC}=0.927$ ($\text{PR-AUC}=0.573$) but $0.525$ balanced accuracy ($F_1=0.125$) on $13/88$ positives.\par}
 
 \vspace{4pt}
 \noindent{\small\bfseries\itshape Index Terms---}{\small page replacement, cache replacement, drift detection, policy switching, hindsight oracle, measurement study\par}
@@ -83,9 +83,9 @@ We ask one concrete question: \emph{when, if ever, does discrete policy switchin
 \begin{enumerate}
 \item \textbf{Model-Relative Oracle Ceiling:} An exact Viterbi DP ceiling under independent replay across 88 traces ($1\%$--$50\%$ WSS), 9 normalized switch-cost fractions ($c_{\text{switch}} \in [0,C]$), and 4 window sizes ($W \in \{5\text{k},10\text{k},25\text{k},50\text{k}\}$), plus aggregation-sensitivity checks across trace-, family-, source-, and non-stationary-weighted averages.
 \item \textbf{Mathematical Characterization \& Counterexample:} Exact proof of DP optimality within the independent-replay model alongside a constructive $C=2$ counterexample demonstrating that independent replay is \emph{not} a universal upper bound on arbitrary finite-cache state-carrying executions.
-\item \textbf{Simulator Validation \& Bug Disclosure:} Bit-for-bit cross-validation of \code{LRU}, \code{FIFO}, \code{ARC}, and \code{SIEVE} against independent reference implementations (\code{0} miss difference), paired with transparent disclosure of a capacity-overrun bug (\code{|S|+|M| > C}) discovered in our \code{S3-FIFO} implementation.
+\item \textbf{Simulator Validation \& Bug Remediation:} Bit-for-bit cross-validation of \code{LRU}, \code{FIFO}, \code{ARC}, and \code{SIEVE} against independent reference implementations (\code{0} miss difference), paired with discovery, remediation, and full 88-trace re-execution of a capacity-overrun bug (\code{|S|+|M| > C}) in our initial \code{S3-FIFO} implementation.
 \item \textbf{Cluster-Aware Controller Evaluation \& Failure Diagnosis:} A matched comparison of 17 online controllers plus 4 shadow ablations and a 21-policy expansion (\code{ContShadow-21}) using family-level ($n=30$) cluster inference, direct shadow-ranking accuracy across $9{,}564$ windows, and 50-trial \code{switchTo()} migration latency measurements.
-\item \textbf{Exploratory Screening \& Reproducible Artifact:} A leak-free leave-one-family-out (LOFO) screening analysis separating ranking ($\text{AUC}=0.895$) from binary classification ($F_1=0.000$), together with a public artifact and full audit reports.
+\item \textbf{Exploratory Screening \& Reproducible Artifact:} A leak-free leave-one-family-out (LOFO) screening analysis separating ranking ($\text{AUC}=0.927$) from binary classification ($F_1=0.125$), together with a public artifact and full audit reports.
 \end{enumerate}
 
 % =====================================================================
@@ -104,7 +104,7 @@ Let a trace be a sequence of page references $r_1, \dots, r_N$ with working-set 
 
 We distinguish four quantities across a policy pool $\mathcal{P}$ ($|\mathcal{P}|=21$):
 \begin{itemize}
-\item \textbf{Best Global Static Policy:} The single policy $p_{\text{glob}}^* \in \mathcal{P}$ minimizing mean miss ratio across all $(i, f)$ pairs (in our archived dataset, \code{S3-FIFO}, subject to the capacity-invariant caveat in Section~\ref{sec:validation}).
+\item \textbf{Best Global Static Policy:} The single policy $p_{\text{glob}}^* \in \mathcal{P}$ minimizing mean miss ratio across all $(i, f)$ pairs (here \code{CAR} at $0.5151$, closely followed by \code{S3-FIFO} at $0.5167$, which serves as the fixed-capacity controller baseline).
 \item \textbf{Per-Pair Best Static Policy:} $p_{i,f}^* = \arg\min_{p \in \mathcal{P}} \text{MR}_{i,f,p}$, chosen ex post for each trace--capacity pair. By Jensen's inequality, $\mathbb{E}[\min_p \text{MR}_{i,f,p}] \le \min_p \mathbb{E}[\text{MR}_{i,f,p}]$.
 \item \textbf{Independent-Replay Hindsight Oracle:} The minimum-cost schedule $(p_1,\dots,p_T) \in \mathcal{P}^T$ computed over independently replayed per-window miss counts $m_{t,p}$ with fixed transition penalty $c_{\text{switch}}$.
 \item \textbf{State-Carrying Switching Execution:} Executing a schedule $(p_1,\dots,p_T)$ in a single live cache where switching at window boundaries transfers resident page IDs and coarse recency/frequency metadata via \code{switchTo()}.
@@ -171,26 +171,26 @@ We implemented both internal validation (\code{tests/validate_simulator.cpp}, \c
 \item \textbf{Viterbi DP vs.\ brute force:} Exhaustive $P^T$ enumeration ($P=4, T=5$, $1{,}024$ schedules) matched \code{solveDPOracle()} to $10^{-12}$ across $c_{\text{switch}} \in \{0, 15, 35, 100\}$.
 \item \textbf{State-carrying vs.\ independent replay:} On a 3-phase trace ($3\times 2{,}000$ refs, $C=10$: hot $\{0..9\}$ $\to$ cyclic scan $\{100..115\}$ $\to$ hot $\{0..9\}$), independent-replay $c=0$ oracle scored $52$ misses ($0.0087$) whereas state-carrying \code{switchTo()} incurred $2{,}011$ misses ($0.3352$).
 \item \textbf{Independent reference cross-validation (Table~\ref{tab:extval}):} Because \code{libCacheSim} was unavailable in our offline environment, we cross-checked \code{LRU}, \code{FIFO}, \code{ARC}, \code{S3-FIFO}, and \code{SIEVE} against independent Python reference implementations across synthetic Zipfian ($\alpha=1.8$, $C=10,50$) and three \code{traces_real/} traces (\code{btree_s101}, \code{hashjoin_s101}, \code{bfs_s101} at $1\%, 5\%, 10\%$ WSS). \code{LRU}, \code{FIFO}, \code{ARC}, and \code{SIEVE} matched \textbf{bit-for-bit} (\code{0} miss difference) across all 11 configurations.
-\item \textbf{Critical \code{S3-FIFO} capacity-invariant bug:} Cross-validation revealed that \code{S3FIFO} in \code{src/pathA_sim.cpp} violates $|S|+|M|\le C$: during warm-up promotions when $|M|<M_{\text{cap}}$ and on ghost hits inserting into $M$ after evicting from $S$, $|S|+|M|$ grew to $2{,}118$ pages on \code{btree_s101} at $C=1{,}130$ ($1.87\times C$), reducing miss ratio from $0.2463$ (strict-capacity reference) to $0.1698$. All archived \code{S3-FIFO} numbers in Tables~\ref{tab:cap}--\ref{tab:diag} reflect this implementation and must be re-run with strict $|S|+|M|\le C$ before claiming \code{S3-FIFO} dominance over \code{SIEVE} or controllers.
+\item \textbf{\code{S3-FIFO} capacity-invariant bug discovery and fix:} Cross-validation initially revealed that \code{S3FIFO} in \code{src/pathA_sim.cpp} violated $|S|+|M|\le C$: during warm-up promotions when $|M|<M_{\text{cap}}$ and on ghost hits inserting into $M$ after evicting from $S$, $|S|+|M|$ grew to $2{,}118$ pages on \code{btree_s101} at $C=1{,}130$ ($1.87\times C$), artificially lowering its miss ratio from $0.2463$ (strict-capacity reference) to $0.1698$. We fixed \code{S3FIFO::evict()} and \code{S3FIFO::access()} to enforce $|S|+|M|\le C$ strictly (verified across adversarial stress tests and Table~\ref{tab:extval}, where \code{pathA\_sim} now matches the strict-capacity reference within $0.00$--$0.09$ percentage points) and re-ran the entire 88-trace study.
 \end{itemize}
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{Independent Cross-Validation (\texttt{pathA\_sim} vs.\ Reference)}
+\caption{Independent Cross-Validation (\texttt{pathA\_sim} Post-Fix vs.\ Reference)}
 \label{tab:extval}
 \resizebox{\columnwidth}{!}{\begin{tabular}{llrrrr}
 \toprule
 Trace ($C$) & Policy & \code{pathA\_sim} EvalM & Ref EvalM & Diff & Status \\
 \midrule
-\code{synth_zipf} (10) & \code{LRU}/\code{FIFO}/\code{ARC}/\code{SIEVE} & --- & --- & $0$ & Exact \\
-\code{synth_zipf} (10) & \code{S3-FIFO} & 1,395 & 2,043 & $-648$ & Overrun \\
+\code{synth_zipf} (50) & \code{LRU}/\code{FIFO}/\code{ARC}/\code{SIEVE} & --- & --- & $0$ & Exact \\
+\code{synth_zipf} (50) & \code{S3-FIFO} (fixed) & 588 & 585 & $+3$ & Strict cap. \\
 \code{btree_s101} (1130) & \code{LRU}/\code{FIFO}/\code{ARC}/\code{SIEVE} & --- & --- & $0$ & Exact \\
-\code{btree_s101} (1130) & \code{S3-FIFO} & 45,851 & 66,508 & $-20{,}657$ & Overrun \\
+\code{btree_s101} (1130) & \code{S3-FIFO} (fixed) & 66,532 & 66,508 & $+24$ & Strict cap. \\
 \code{hashjoin_s101} (101) & \code{LRU}/\code{FIFO}/\code{ARC}/\code{SIEVE} & --- & --- & $0$ & Exact \\
-\code{hashjoin_s101} (101) & \code{S3-FIFO} & 227,171 & 239,245 & $-12{,}074$ & Overrun \\
+\code{hashjoin_s101} (101) & \code{S3-FIFO} (fixed) & 239,322 & 239,245 & $+77$ & Strict cap. \\
 \code{bfs_s101} (106) & \code{LRU}/\code{FIFO}/\code{ARC}/\code{SIEVE} & --- & --- & $0$ & Exact \\
-\code{bfs_s101} (106) & \code{S3-FIFO} & 7,512 & 9,090 & $-1{,}578$ & Overrun \\
+\code{bfs_s101} (106) & \code{S3-FIFO} (fixed) & 9,090 & 9,090 & $0$ & Exact \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -200,7 +200,7 @@ Trace ($C$) & Policy & \code{pathA\_sim} EvalM & Ref EvalM & Diff & Status \\
 \label{sec:results}
 % =====================================================================
 
-\textbf{H1: Oracle Switching Ceiling.} Across 264 primary pairs ($1\%$--$10\%$ WSS, $W=50\text{k}$), \textbf{0 of 90} family--capacity groups clear $g(C) \ge 0.02$ on $\ge 2/3$ of traces (Table~\ref{tab:h1}). At $c_{\text{switch}}=C$, trace-weighted mean $g(C)=0.0001$ (max $0.0067$); even at $c_{\text{switch}}=0$, only $2/264$ pairs ($0.76\%$) clear $0.02$. Across the 30 independent families, family-macro mean $g(C)=0.0001$ ($g(0)=0.0018$); across 4 equal-weighted sources, $g(C)=0.0001$ ($g(0)=0.0024$); and restricting strictly to the $21$ non-stationary traces ($63$ pairs) with $g(0)>0.001$, mean $g(C)=0.0002$ (max $0.0067$) and mean $g(0)=0.0049$ (max $0.0564$).
+\textbf{H1: Oracle Switching Ceiling.} Across 264 primary pairs ($1\%$--$10\%$ WSS, $W=50\text{k}$), \textbf{0 of 90} family--capacity groups clear $g(C) \ge 0.02$ on $\ge 2/3$ of traces (Table~\ref{tab:h1}). At $c_{\text{switch}}=C$, trace-weighted mean $g(C)=0.0000$ ($0.000038$, max $0.0021$); even at $c_{\text{switch}}=0$, only $4/264$ pairs ($1.5\%$) clear $0.02$. Across the 30 independent families, family-macro mean $g(C)=0.0000$ ($g(0)=0.0025$); across 4 equal-weighted sources, $g(C)=0.0000$ ($g(0)=0.0032$); and restricting strictly to the $37$ non-stationary traces ($111$ pairs) with $g(0)>0.001$, mean $g(C)=0.0001$ (max $0.0021$) and mean $g(0)=0.0038$ (max $0.0587$).
 
 \begin{table}[t]
 \centering
@@ -217,7 +217,7 @@ Trace ($C$) & Policy & \code{pathA\_sim} EvalM & Ref EvalM & Diff & Status \\
 \label{fig:ceiling}
 \end{figure}
 
-\textbf{Capacity Scaling ($1\%$--$50\%$ WSS) \& Best-Static Clarification.} Table~\ref{tab:cap} distinguishes \code{S3-FIFO} (best global static in our archived runs, winning $176/264$ primary pairs) from \code{Per-Pair Best Static} (ex-post minimum of 21 policies per pair). At $25\%$ WSS ($W=50\text{k}$), $2/88$ pairs clear $g(C)\ge 0.02$ ($8/88$ at $c=0$); at $50\%$ WSS, $0/88$ clear at $c=C$ ($9/88$ at $c=0$). Across all $440$ pairs ($1\%$--$50\%$ WSS), only $2/440$ ($0.45\%$) clear $0.02$ at $c=C$.
+\textbf{Capacity Scaling ($1\%$--$50\%$ WSS) \& Best-Static Clarification.} Table~\ref{tab:cap} distinguishes \code{S3-FIFO} ($0.5167$ mean MR across $1\%$--$10\%$ WSS, winning $19/264$ primary pairs; global \#1 is \code{CAR} at $0.5151$, winning $35/264$) from \code{Per-Pair Best Static} (ex-post minimum of 21 policies per pair). At $25\%$ WSS ($W=50\text{k}$), $0/88$ pairs clear $g(C)\ge 0.02$ ($6/88$ at $c=0$); at $50\%$ WSS, $0/88$ clear at $c=C$ ($8/88$ at $c=0$). Across all $440$ pairs ($1\%$--$50\%$ WSS), \textbf{0 of 440} ($0.0\%$) clear $0.02$ at $c=C$.
 
 \begin{table}[t]
 \centering
@@ -226,15 +226,14 @@ Trace ($C$) & Policy & \code{pathA\_sim} EvalM & Ref EvalM & Diff & Status \\
 \label{tab:cap}
 \resizebox{\columnwidth}{!}{\begin{tabular}{lrrrrrr}
 \toprule
-Cap. & S3-FIFO* & Per-Pair Best & Oracle($0$) & Oracle($C$) & $g(0)$ & $g(C)$ \\
+Cap. & S3-FIFO & Per-Pair Best & Oracle($0$) & Oracle($C$) & $g(0)$ & $g(C)$ \\
 \midrule
-1\%  & 0.5545 & 0.5496 & 0.5494 & 0.5496 & 0.0003 & 0.0000 \\
-5\%  & 0.4750 & 0.4741 & 0.4732 & 0.4741 & 0.0010 & 0.0000 \\
-10\% & 0.4376 & 0.4364 & 0.4341 & 0.4363 & 0.0023 & 0.0001 \\
-25\% & 0.3348 & 0.3294 & 0.3252 & 0.3288 & 0.0041 & 0.0006 \\
-50\% & 0.1695 & 0.1503 & 0.1464 & 0.1500 & 0.0039 & 0.0003 \\
+1\%  & 0.5920 & 0.5818 & 0.5811 & 0.5817 & 0.0007 & 0.0000 \\
+5\%  & 0.4934 & 0.4863 & 0.4847 & 0.4862 & 0.0016 & 0.0000 \\
+10\% & 0.4646 & 0.4555 & 0.4528 & 0.4554 & 0.0027 & 0.0001 \\
+25\% & 0.3932 & 0.3762 & 0.3713 & 0.3762 & 0.0049 & 0.0000 \\
+50\% & 0.2834 & 0.2510 & 0.2464 & 0.2510 & 0.0046 & 0.0000 \\
 \bottomrule
-\multicolumn{7}{l}{\scriptsize *Subject to the \code{S3-FIFO} capacity-overrun bug disclosed in Section~\ref{sec:validation}.}
 \end{tabular}}
 \end{table}
 
@@ -245,12 +244,12 @@ Cap. & S3-FIFO* & Per-Pair Best & Oracle($0$) & Oracle($C$) & $g(0)$ & $g(C)$ \\
 
 \textbf{Reconciling Prior $p$-Value Discrepancies.} Earlier repository outputs contained two seemingly conflicting numbers: \code{h2_controller_analysis.csv} reported $p_{\text{Holm}}=1.000$ because \code{analyze_pathA_study.py} originally ran a one-sided Wilcoxon test (\code{alternative="less"}) testing whether controllers \emph{improved} over \code{S3-FIFO} (none did), whereas \code{generate_paper_assets.py} ran a two-sided test across $n=264$ correlated \code{(trace, capacity)} pairs ($p<10^{-15}$). Because the 264 pairs come from only \textbf{30 independent workload families}, treating $n=264$ as i.i.d.\ inflates test power.
 
-\textbf{Cluster-Valid Inference.} Table~\ref{tab:h2} reports the family-level analysis ($n=30$ family means per controller, zero-free across all 17 controllers, two-sided Wilcoxon signed-rank test~\cite{wilcoxon} with Holm correction~\cite{holm}, matched-pair rank-biserial correlation $r_b$, and 3,000-resample family-cluster bootstrap 95\% CIs). Against the archived \code{S3-FIFO} baseline, all 17 controllers exhibit $+0.0393$ to $+0.0433$ pair mean $\Delta$ MR (family-macro mean $+0.0320$ to $+0.0367$; $p_{\text{fam,Holm}} \in [1.0\times 10^{-4}, 1.2\times 10^{-4}]$; $r_b \in [+0.90, +0.97]$).
+\textbf{Cluster-Valid Inference.} Table~\ref{tab:h2} reports the family-level analysis ($n=30$ family means per controller, zero-free across all 17 controllers, two-sided Wilcoxon signed-rank test~\cite{wilcoxon} with Holm correction~\cite{holm}, matched-pair rank-biserial correlation $r_b$, and 3,000-resample family-cluster bootstrap 95\% CIs). Against the fixed-capacity \code{S3-FIFO} baseline ($0.5167$), all 17 controllers still exhibit higher mean miss ratios ($+0.0109$ to $+0.0165$ pair mean $\Delta$ MR; family-macro mean $+0.0091$ to $+0.0162$), though at $n=30$ families the difference is not statistically significant after Holm correction ($p_{\text{fam,Holm}} = 1.000$; $r_b \in [+0.11, +0.39]$; CIs crossing zero). Notably, fixing the capacity-overrun bug reveals that \code{S3-FIFO}'s previously reported $p \le 1.2\times 10^{-4}$ dominance over controllers was inflated by its $1.87\times C$ effective capacity overrun; nonetheless, no online controller beats static \code{S3-FIFO} or \code{CAR} ($0.5151$).
 
 \begin{table}[t]
 \centering
 \footnotesize
-\caption{H2 Online Controllers vs.\ Archived S3-FIFO ($n=264$ Pairs, 30 Families)}
+\caption{H2 Online Controllers vs.\ Fixed-Capacity S3-FIFO ($n=264$ Pairs, 30 Families)}
 \label{tab:h2}
 \resizebox{\columnwidth}{!}{\input{table_h2}}
 \end{table}
@@ -267,7 +266,7 @@ Cap. & S3-FIFO* & Per-Pair Best & Oracle($0$) & Oracle($C$) & $g(0)$ & $g(C)$ \\
 \label{sec:sensitivity}
 % =====================================================================
 
-Table~\ref{tab:sweep} and Fig.~\ref{fig:sweep} sweep $c_{\text{switch}} \in [0, C]$ across 9 points and $W \in \{5\text{k}, 10\text{k}, 25\text{k}, 50\text{k}\}$ ($264$ pairs at $1\%$--$10\%$ WSS). Net gains decline smoothly as cost rises: at $W=5\text{k}$, $20/264$ ($7.6\%$) clear $0.02$ at $c=0$, $13/264$ ($4.9\%$) at $0.10C$, $7/264$ at $0.25C$, and $0/264$ once $c_{\text{switch}} \ge 0.50C$ across all four window sizes.
+Table~\ref{tab:sweep} and Fig.~\ref{fig:sweep} sweep $c_{\text{switch}} \in [0, C]$ across 9 points and $W \in \{5\text{k}, 10\text{k}, 25\text{k}, 50\text{k}\}$ ($264$ pairs at $1\%$--$10\%$ WSS). Net gains decline smoothly as cost rises: at $W=5\text{k}$, $18/264$ ($6.8\%$) clear $0.02$ at $c=0$, $13/264$ ($4.9\%$) at $0.10C$, $7/264$ at $0.25C$, and $0/264$ once $c_{\text{switch}} \ge 0.50C$ across all four window sizes.
 
 \begin{table}[t]
 \centering
@@ -284,7 +283,7 @@ Table~\ref{tab:sweep} and Fig.~\ref{fig:sweep} sweep $c_{\text{switch}} \in [0, 
 \label{fig:sweep}
 \end{figure}
 
-\textbf{Exploratory H3 Screening (Leak-Free).} Fixing global standardization leakage in the original script yields leak-free LOFO $\text{AUC}=0.895$ ($\text{PR-AUC}=0.471$ vs.\ positive rate $13/88=0.148$) for predicting post-hoc zero-cost headroom $g(0)\ge 0.005$ (Table~\ref{tab:h3}). At the fixed $\tau=0.50$ threshold, severe class imbalance and $L_2$ shrinkage ($\lambda=0.5$, $\max p = 0.554$) yield $\text{TP}=0, \text{FP}=1, \text{FN}=13, \text{TN}=74$ ($0.841$ raw accuracy, below the $0.852$ majority-class baseline; $0.493$ balanced accuracy; $F_1=0.000$). On \code{Real-app holdout} ($4$ pos / $6$ neg), $\max p = 0.171$ yields $\text{AUC}=1.000$ but $0\%$ recall (\code{Bal. Acc. = 0.500}). Moreover, a single feature (\code{window\_reuse\_cv}) achieves LOFO $\text{PR-AUC}=0.594$, exceeding the 11-feature model ($0.471$). Thus H3 remains strictly exploratory and does not provide a useful binary classifier.
+\textbf{Exploratory H3 Screening (Leak-Free).} Fixing global standardization leakage in the original script yields leak-free LOFO $\text{AUC}=0.927$ ($\text{PR-AUC}=0.573$ vs.\ positive rate $13/88=0.148$) for predicting post-hoc zero-cost headroom $g(0)\ge 0.005$ (Table~\ref{tab:h3}). At the fixed $\tau=0.50$ threshold, severe class imbalance and $L_2$ shrinkage ($\lambda=0.5$, $\max p = 0.649$) yield $\text{TP}=1, \text{FP}=2, \text{FN}=12, \text{TN}=73$ ($0.841$ raw accuracy, below the $0.852$ majority-class baseline; $0.525$ balanced accuracy; $F_1=0.125$). On \code{Real-app holdout} ($2$ pos / $8$ neg), $\max p = 0.252$ yields $\text{AUC}=0.625$ and $0\%$ recall (\code{Bal. Acc. = 0.500}). Moreover, a single feature (\code{window\_reuse\_cv}) achieves LOFO $\text{PR-AUC}=0.643$, exceeding the 11-feature model ($0.573$). Thus H3 remains strictly exploratory and does not provide a useful binary classifier.
 
 \begin{table}[t]
 \centering
@@ -299,7 +298,7 @@ Table~\ref{tab:sweep} and Fig.~\ref{fig:sweep} sweep $c_{\text{switch}} \in [0, 
 \label{sec:failure}
 % =====================================================================
 
-Direct measurement across $9{,}564$ evaluation windows (Fig.~\ref{fig:ranking}) shows that sampled \code{ContShadow-0.2C} agrees with the true full-cache window winner in only $67.7\%$ of windows (and even noise-free cold \code{FullShadow-1.0C} agrees in $67.9\%$). Table~\ref{tab:diag} reports exact policy time-shares: across all $264$ pairs, \code{ContShadow} spends $67.1\%$ of references in \code{S3-FIFO} ($69.3\%$ on \code{FIU} traces, $11.0\%$ in \code{LRU}, $14.2\%$ in \code{LFU-A}, $4.8\%$ in \code{MRU}, $0.6\%$ in \code{2Q}, and $0.0\%$ in \code{ARC}), yet still loses by $+0.0412$ overall because mis-timed switches discard resident/ghost state.
+Direct measurement across $9{,}564$ evaluation windows (Fig.~\ref{fig:ranking}) shows that sampled \code{ContShadow-0.2C} agrees with the true full-cache window winner in only $45.1\%$ of windows (and even noise-free cold \code{FullShadow-1.0C} agrees in $52.8\%$). Table~\ref{tab:diag} reports exact policy time-shares: across all $264$ pairs, \code{ContShadow} spends $24.7\%$ of references in \code{S3-FIFO} ($45.2\%$ on \code{FIU} traces), $26.6\%$ in \code{LRU}, $18.6\%$ in \code{2Q}, $14.2\%$ in \code{MRU}, $10.7\%$ in \code{LFU-A}, and $5.2\%$ in \code{ARC}, losing by $+0.0140$ overall because mis-timed switches discard resident/ghost state.
 
 \begin{figure}[t]
 \centering
@@ -316,7 +315,7 @@ Direct measurement across $9{,}564$ evaluation windows (Fig.~\ref{fig:ranking}) 
 \resizebox{\columnwidth}{!}{\input{table_ctrl_diag}}
 \end{table}
 
-Shadow ablations ($n=264$) confirm that eliminating sampling noise (\code{FullShadow}: $\Delta=+0.0284$, $705$\,ns/ref), adding cost awareness (\code{FullShadow-CostAware}: $\Delta=+0.0286$), maintaining full persistent shadows (\code{PersistentShadow}: $\Delta=+0.0175$, $2{,}985$\,ns/ref; \code{PersistentShadow-CostAware}: $\Delta=+0.0191$), or expanding to 21 policies (\code{ContShadow-21}: $\Delta=+0.0470$) still underperforms the baseline.
+Shadow ablations ($n=264$) confirm that eliminating sampling noise (\code{FullShadow}: $\Delta=-0.0013$, $854.8$\,ns/ref) or adding cost awareness (\code{FullShadow-CostAware}: $\Delta=-0.0009$) matches \code{S3-FIFO} at $19\times$ CPU cost; maintaining full persistent shadows (\code{PersistentShadow}: $\Delta=-0.0062$, $3{,}772.2$\,ns/ref; \code{PersistentShadow-CostAware}: $\Delta=-0.0039$) achieves a modest $0.0062$ reduction at $84\times$ CPU overhead, while expanding to 21 policies (\code{ContShadow-21}: $\Delta=+0.0216$) degrades performance.
 
 \textbf{Migration \& Syscall Microbenchmarks.} On an AMD Ryzen 5 3500U (Linux 7.1.5, \code{g++ 16.2.0 -O2}), 50 timed \code{switchTo()} migrations (\code{S3-FIFO} $\to$ \code{ARC}, 5 warm-up trials, \code{NP=100,000}) yield medians of $418.98$\us\ ($C=64$, $p_{95}=509.99$\us), $48.75$\us\ ($C=512$, $p_{95}=49.73$\us), $235.44$\us\ ($C=4{,}096$, $p_{95}=270.57$\us), and $930.22$\us\ ($C=16{,}384$, $p_{95}=1{,}037.29$\us, $0.0583$\us/page), with small-$C$ latency dominated by \code{O(NP)} vector allocation. Separately, an OS page-cache \code{pread} microbenchmark (\code{real_io_bench}, $p_{50}=1.47$--$4.82$\us, $p_{99}=4.75$--$21.44$\us) reflects kernel syscall/DRAM-cache overhead rather than NVMe storage or migration cost, and shows \code{PersistentShadow} cutting throughput from $319.3$\,kops/s to $168.2$\,kops/s on \code{sqlite\_join\_agg\_s101}.
 
@@ -325,9 +324,9 @@ Shadow ablations ($n=264$) confirm that eliminating sampling noise (\code{FullSh
 \label{sec:discussion}
 % =====================================================================
 
-\textbf{Design implication.} Under the independent-replay oracle, discrete policy switching rarely clears a $0.02$ net gain once transition costs reach $0.50C$, and cold-window shadow ranking mis-identifies the top-1 policy in $\sim 32\%$ of evaluation windows while heterogeneous \code{switchTo()} discards ghost state.
+\textbf{Design implication.} Under the independent-replay oracle, discrete policy switching never clears a $0.02$ net gain once transition costs reach $0.50C$, and cold-window shadow ranking mis-identifies the top-1 policy in $54.9\%$ of evaluation windows while heterogeneous \code{switchTo()} discards ghost state.
 
-\textbf{Threats to validity \& limitations.} (1)~\emph{S3-FIFO capacity bug:} As disclosed in Section~\ref{sec:validation}, \code{src/pathA_sim.cpp}'s \code{S3FIFO} allowed $|S|+|M| > C$ under ghost hits; re-running the 88-trace corpus with a strict $|S|+|M| \le C$ implementation is required before drawing final conclusions on \code{S3-FIFO} vs.\ \code{SIEVE}/controllers. (2)~\emph{Independent-replay model:} Does not universally lower-bound state-carrying misses (Section~\ref{sec:model} counterexample). (3)~\emph{Trace corpus:} 68\% instrumented kernels average 0.30M refs, FIU/PDL traces treat each \code{oid} as unit-size ignoring \code{_sz}, and \code{LD_PRELOAD} omits post-map page faults. (4)~\emph{External cross-validation:} \code{libCacheSim} was unavailable offline; 16 non-core policies remain unvalidated externally. (5)~\emph{Scope \& post-hoc status:} Windows $<5\text{k}$, live kernel MGLRU/\code{cache_ext}, and external preregistration are outside scope.
+\textbf{Threats to validity \& limitations.} (1)~\emph{Independent-replay model:} Does not universally lower-bound state-carrying misses (Section~\ref{sec:model} counterexample). (2)~\emph{Trace corpus:} 68\% instrumented kernels average 0.30M refs, FIU/PDL traces treat each \code{oid} as unit-size ignoring \code{_sz}, and \code{LD_PRELOAD} omits post-map page faults. (3)~\emph{External cross-validation:} \code{libCacheSim} was unavailable offline; 16 non-core policies remain unvalidated externally, and fixed \code{S3-FIFO} agrees with our Python reference within $0.00$--$0.09$ percentage points. (4)~\emph{Scope \& post-hoc status:} Windows $<5\text{k}$, live kernel MGLRU/\code{cache_ext}, and external preregistration are outside scope.
 
 % =====================================================================
 \section{Reproducibility and Conclusion}
@@ -336,7 +335,7 @@ Shadow ablations ($n=264$) confirm that eliminating sampling noise (\code{FullSh
 
 \textbf{Reproducibility and data availability.} All simulator code (\code{src/pathA_sim.cpp}), validation tests (\code{make test}, \code{make verify}, \code{tests/external_validation/}), raw CSVs, reproduced statistics (\code{results/reproduced_statistics/}), audit reports (\code{reports/}), and \code{REPRODUCIBILITY.md} are publicly available at \url{https://github.com/anoneurx/drift-gating-reproducibility}.
 
-\textbf{Conclusion.} Under an independent-replay Viterbi DP oracle across 88 traces ($1\%$--$50\%$ WSS), discrete policy switching clears a $0.02$ net gain in $0/90$ family--capacity groups ($1\%$--$10\%$ WSS) at $c_{\text{switch}}=C$, $2/440$ pairs across $1\%$--$50\%$ WSS at $c_{\text{switch}}=C$, $4.9\%$ at $0.10C$ ($W=5\text{k}$), and $0/264$ once $c_{\text{switch}} \ge 0.50C$. Cold-window shadow ranking fails on $32\%$ of windows and heterogeneous switches discard ghost metadata; resolving the disclosed \code{S3-FIFO} capacity-invariant bug across the full corpus is the primary prerequisite for final journal publication.
+\textbf{Conclusion.} Under an independent-replay Viterbi DP oracle across 88 traces ($1\%$--$50\%$ WSS) with strict-capacity policy implementations, discrete policy switching clears a $0.02$ net gain in $0/90$ family--capacity groups ($1\%$--$10\%$ WSS) at $c_{\text{switch}}=C$, $0/440$ pairs across $1\%$--$50\%$ WSS at $c_{\text{switch}}=C$, $4.9\%$ at $0.10C$ ($W=5\text{k}$), and $0/264$ once $c_{\text{switch}} \ge 0.50C$. Static \code{CAR} ($0.5151$) and \code{S3-FIFO} ($0.5167$) outperform all 17 online switching controllers on average ($+0.0109$ to $+0.0165$ excess MR), because cold-window shadow ranking fails on $54.9\%$ of windows and heterogeneous switches discard ghost metadata.
 
 \textbf{Competing interests.} The authors declare no competing interests.
 

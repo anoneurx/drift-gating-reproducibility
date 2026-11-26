@@ -67,35 +67,35 @@ sr   = load_csv("shadow_ranking.csv")
 # Verify metrics
 # ---------------------------------------------------------------------------
 
-# 1. Pairs meeting 2% gain at c=C, W=50k → 2 expected (includes 25/50% WSS)
+# 1. Pairs meeting 2% gain at c=C, W=50k → 0 expected (after S3-FIFO capacity fix)
 if fs is not None:
     fullc = fs[(fs['cost_frac'] == 1.0) & (fs['window'] == 50000)]
     meet  = int((fullc['net_gain_vs_best'] >= 0.02).sum())
-    check("meet_fullc_W50k (c=C, W=50k, threshold 2%)", meet, 2, 2, " pairs")
+    check("meet_fullc_W50k (c=C, W=50k, threshold 2%)", meet, 0, 1, " pairs")
 
-# 2. Pairs meeting 2% gain at c≥0.5C, W=50k → 4 expected
+# 2. Pairs meeting 2% gain at c≥0.5C, W=50k → 0 expected
 if fs is not None:
     halfc = fs[(fs['cost_frac'] >= 0.50) & (fs['window'] == 50000)]
     meet  = int((halfc['net_gain_vs_best'] >= 0.02).sum())
-    check("meet_halfc_W50k (c>=0.5C, W=50k, threshold 2%)", meet, 4, 2, " pairs")
+    check("meet_halfc_W50k (c>=0.5C, W=50k, threshold 2%)", meet, 0, 1, " pairs")
 
-# 3. Pairs at c=0, W=50k → 19 expected (includes 25/50% WSS reviewer additions)
+# 3. Pairs at c=0, W=50k → 18 expected (includes 25/50% WSS reviewer additions)
 if fs is not None:
     c0_50k = fs[(fs['cost_frac'] == 0.0) & (fs['window'] == 50000)]
     meet   = int((c0_50k['net_gain_vs_best'] >= 0.02).sum())
-    check("meet_c0_W50k (c=0, W=50k, threshold 2%)", meet, 19, 2, " pairs")
+    check("meet_c0_W50k (c=0, W=50k, threshold 2%)", meet, 18, 2, " pairs")
 
-# 4. Pairs at c=0, W=5k → 20 expected
+# 4. Pairs at c=0, W=5k → 18 expected
 if fs is not None:
     c0_5k = fs[(fs['cost_frac'] == 0.0) & (fs['window'] == 5000)]
     meet  = int((c0_5k['net_gain_vs_best'] >= 0.02).sum())
-    check("meet_c0_W5k (c=0, W=5k, threshold 2%)", meet, 20, 2, " pairs")
+    check("meet_c0_W5k (c=0, W=5k, threshold 2%)", meet, 18, 2, " pairs")
 
-# 5. S3-FIFO mean miss ratio
+# 5. S3-FIFO mean miss ratio (fixed strict-capacity implementation)
 if os_ is not None:
     base = os_[(os_['window'] == 50000) & (os_['switch_cost'] == 0.0)]
     s3mr = base['s3fifo_miss_ratio'].mean()
-    check("s3fifo_mean_mr (W=50k baseline)", s3mr, 0.4890, 0.001)
+    check("s3fifo_mean_mr (W=50k baseline)", s3mr, 0.5167, 0.001)
 
 # 6. Number of pairs in oracle study
 if os_ is not None:
@@ -118,16 +118,13 @@ if sr is not None:
     cont = sr[sr['mode'] == 'ContShadow-0.2C']
     if len(cont):
         top1 = cont['top1_agree'].sum() / cont['evals'].sum()
-        check("ContShadow-0.2C top1_agree (shadow ranking)", top1, 0.6767, 0.01)
+        check("ContShadow-0.2C top1_agree (shadow ranking)", top1, 0.4509, 0.01)
 
 # 10. ContShadow mean delta vs S3-FIFO
-if h2 is not None:
-    row = h2[h2['controller'] == 'ContShadow']
-    if len(row):
-        delta = float(row['mean_delta_vs_s3fifo'].iloc[0])
-        # h2 stores delta as positive when controller is better; here it's negative (controller loses)
-        # actual value is 0.0412 (controller's MR is 0.0412 higher than S3-FIFO)
-        check("ContShadow mean_delta_vs_s3fifo", abs(delta), 0.0412, 0.005)
+if ctrl is not None:
+    c_mr = ctrl[ctrl['controller'] == 'ContShadow']['miss_ratio'].mean()
+    s_mr = ctrl[ctrl['controller'] == 'S3-FIFO']['miss_ratio'].mean()
+    check("ContShadow mean_delta_vs_s3fifo", abs(c_mr - s_mr), 0.0140, 0.002)
 
 # ---------------------------------------------------------------------------
 # Summary

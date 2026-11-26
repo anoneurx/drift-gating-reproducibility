@@ -274,16 +274,17 @@ def main():
         "the achievable headroom of discrete switching using an exact Viterbi dynamic-programming (DP) hindsight oracle under "
         "an independent-replay model across 88 traces (30 workload families), 21 baseline policies, and cache capacities from "
         "1% to 50% of working-set size (WSS). At an assumed full-refill penalty (c_{switch} = C, W = 50,000), 0 of 90 "
-        "family–capacity groups (1%–10% WSS) clear a 0.02 net miss-ratio reduction (trace-weighted mean 0.0001, family-macro "
-        "mean 0.0001, max 0.0067); across 1%–50% WSS, only 2/440 pairs (both at 25% WSS) clear 0.02. Under assumed lower "
+        "family–capacity groups (1%–10% WSS) clear a 0.02 net miss-ratio reduction (trace-weighted mean 0.0000, family-macro "
+        "mean 0.0000, max 0.0021); across all 440 pairs (1%–50% WSS), 0 of 440 clear 0.02. Under assumed lower "
         "migration penalties (c_{switch} ≤ 0.10C) and fine windows (W = 5,000), 13/264 pairs (4.9%) clear 0.02, and 0/264 "
-        "clear 0.02 once c_{switch} ≥ 0.50C across W ∈ {5k, 10k, 25k, 50k}. Static S3-FIFO achieves the lowest global mean "
-        "miss ratio (0.4890 at 59.5 ns/ref across 1%–10% WSS) and outperforms all 17 online switching controllers (+0.0393 "
-        "to +0.0433 higher miss ratio; family-level n = 30 two-sided Holm-adjusted p ≤ 1.2×10^{-4}, rank-biserial r_{b} ≥ 0.91, "
-        "95% family-cluster bootstrap CI excluding zero), as well as noise-free (1.0C), persistent-shadow (+0.0175), and "
-        "21-policy-pool (+0.0470) ablations, because cold-window shadow evaluation mis-ranks the top-1 policy in 32% of "
-        "evaluation windows. An exploratory leak-free leave-one-family-out ranker distinguishes rare zero-cost headroom "
-        "(13/88 traces) with AUC = 0.895 (PR-AUC = 0.471) but 0.493 balanced accuracy (F_{1} = 0.000) due to class imbalance.",
+        "clear 0.02 once c_{switch} ≥ 0.50C across W ∈ {5k, 10k, 25k, 50k}. After fixing a capacity-overrun bug (|S|+|M| > C "
+        "under ghost hits) discovered via independent cross-validation in our initial S3-FIFO implementation (while LRU, FIFO, "
+        "ARC, and SIEVE matched reference implementations bit-for-bit), static CAR (0.5151) and S3-FIFO (0.5167) achieve the "
+        "lowest global mean miss ratios across 1%–10% WSS. All 17 online switching controllers incur +0.0109 to +0.0165 higher "
+        "mean miss ratio than S3-FIFO (family-level n = 30 Holm-adjusted p = 1.000, rank-biserial r_{b} ∈ [+0.11, +0.39]), "
+        "because cold-window shadow evaluation mis-ranks the top-1 policy in 54.9% of evaluation windows. An exploratory "
+        "leak-free leave-one-family-out ranker distinguishes rare zero-cost headroom (13/88 traces) with AUC = 0.927 "
+        "(PR-AUC = 0.573) but 0.525 balanced accuracy (F_{1} = 0.125) due to class imbalance.",
         size_pt=8.5,
         bold=True,
     )
@@ -352,15 +353,15 @@ def main():
 
     # ── VIII. RESULTS ──────────────────────────────────────────────────────
     add_section_heading(doc, "VIII. RESULTS")
-    add_lead_p(doc, "H1: Oracle Switching Ceiling. ", "Across 264 primary pairs (1%–10% WSS, W = 50k), 0 of 90 family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces (Table II). At c_{switch} = C, mean g(C) = 0.0001 (max 0.0067); even at c_{switch} = 0, only 2/264 pairs (0.76%) clear 0.02. Importantly, this null result is not an artifact of the 68% kernel share: across the 30 independent families, family-macro mean g(C) = 0.0001 (g(0) = 0.0018); across 4 equal-weighted sources, g(C) = 0.0001 (g(0) = 0.0024); and even restricting strictly to the 21 non-stationary traces with g(0) > 0.001, mean g(C) = 0.0002 (max 0.0067) and mean g(0) = 0.0049 (max 0.0564).")
+    add_lead_p(doc, "H1: Oracle Switching Ceiling. ", "Across 264 primary pairs (1%–10% WSS, W = 50k), 0 of 90 family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces (Table II). At c_{switch} = C, mean g(C) = 0.0000 (0.000038, max 0.0021); even at c_{switch} = 0, only 4/264 pairs (1.5%) clear 0.02. Importantly, this null result is not an artifact of the 68% kernel share: across the 30 independent families, family-macro mean g(C) = 0.0000 (g(0) = 0.0025); across 4 equal-weighted sources, g(C) = 0.0000 (g(0) = 0.0032); and even restricting strictly to the 37 non-stationary traces (111 pairs) with g(0) > 0.001, mean g(C) = 0.0001 (max 0.0021) and mean g(0) = 0.0038 (max 0.0587).")
 
     t2_rows = [
-        ["Real-app (n=30)", "0.0004", "0.0067", "0/30", "0.0028", "0.0196"],
-        ["Instr. kernels (n=180)", "0.0000", "0.0001", "0/180", "0.0000", "0.0017"],
-        ["FIU block-I/O (n=36)", "0.0000", "0.0000", "0/36", "0.0058", "0.0564"],
-        ["PDL storage (n=18)", "0.0000", "0.0000", "0/18", "0.0008", "0.0084"],
-        ["Trace-weighted (n=264)", "0.0001", "0.0067", "0/264", "0.0012", "0.0564"],
-        ["Family-macro (n=30)", "0.0001", "0.0067", "0/90 grp", "0.0018", "0.0564"],
+        ["Real-app (n=30)", "0.0001", "0.0015", "0/30", "0.0023", "0.0149"],
+        ["Instr. kernels (n=180)", "0.0000", "0.0021", "0/180", "0.0003", "0.0030"],
+        ["FIU block-I/O (n=36)", "0.0000", "0.0002", "0/36", "0.0077", "0.0587"],
+        ["PDL storage (n=18)", "0.0000", "0.0000", "0/18", "0.0024", "0.0104"],
+        ["Trace-weighted (n=264)", "0.0000", "0.0021", "0/264", "0.0017", "0.0587"],
+        ["Family-macro (n=30)", "0.0000", "0.0021", "0/90 grp", "0.0025", "0.0587"],
     ]
     add_ieee_table(doc, "TABLE II. H1 INDEPENDENT-REPLAY ORACLE GAIN BY SOURCE (W = 50k)",
                    ["Scope", "g(C) mean", "g(C) max", "Clear ≥0.02", "g(0) mean", "g(0) max"],
@@ -368,14 +369,14 @@ def main():
 
     add_figure(doc, "fig_oracle_ceiling.pdf", "Fig. 1. Independent-replay oracle gain (W = 50k) across trace sources at c = C and c = 0.")
 
-    add_lead_p(doc, "Capacity Scaling (1%–50% WSS) & Best-Static Clarification. ", "Table III resolves any apparent discrepancy between S3-FIFO and Best Static: S3-FIFO is the best global static policy (winning 176/264 primary pairs, followed by 2Q 43, CAR 12, MGLRU-style 11, CLOCK-Pro 6, 3L-style 6, CACHEUS 5), whereas Per-Pair Best Static selects the ex-post best of 21 policies per pair. At 25% WSS (W = 50k), 2/88 pairs clear g(C) ≥ 0.02 (8/88 at c = 0); at 50% WSS, 0/88 clear at c = C (9/88 at c = 0). Across all 440 pairs (1%–50% WSS), only 2/440 (0.45%) clear 0.02 at c = C.")
+    add_lead_p(doc, "Capacity Scaling (1%–50% WSS) & Best-Static Clarification. ", "Table III resolves any apparent discrepancy between S3-FIFO and Best Static: CAR (0.5151 mean MR, winning 35/264 primary pairs) and fixed-capacity S3-FIFO (0.5167 mean MR, winning 19/264) achieve the lowest global mean miss ratios, whereas Per-Pair Best Static selects the ex-post best of 21 policies per pair. At 25% WSS (W = 50k), 0/88 pairs clear g(C) ≥ 0.02 (6/88 at c = 0); at 50% WSS, 0/88 clear at c = C (8/88 at c = 0). Across all 440 pairs (1%–50% WSS), 0 of 440 (0.0%) clear 0.02 at c = C.")
 
     t3_rows = [
-        ["1%", "0.5545", "0.5496", "0.5494", "0.5496", "0.0003", "0.0000"],
-        ["5%", "0.4750", "0.4741", "0.4732", "0.4741", "0.0010", "0.0000"],
-        ["10%", "0.4376", "0.4364", "0.4341", "0.4363", "0.0023", "0.0001"],
-        ["25%", "0.3348", "0.3294", "0.3252", "0.3288", "0.0041", "0.0006"],
-        ["50%", "0.1695", "0.1503", "0.1464", "0.1500", "0.0039", "0.0003"],
+        ["1%", "0.5920", "0.5818", "0.5811", "0.5817", "0.0007", "0.0000"],
+        ["5%", "0.4934", "0.4863", "0.4847", "0.4862", "0.0016", "0.0000"],
+        ["10%", "0.4646", "0.4555", "0.4528", "0.4554", "0.0027", "0.0001"],
+        ["25%", "0.3932", "0.3762", "0.3713", "0.3762", "0.0049", "0.0000"],
+        ["50%", "0.2834", "0.2510", "0.2464", "0.2510", "0.0046", "0.0000"],
     ]
     add_ieee_table(doc, "TABLE III. MEAN MISS RATIOS AND ORACLE GAINS ACROSS 1%–50% WSS (W = 50k, n = 88/row)",
                    ["Cap.", "S3-FIFO", "Pair Best", "Ora(0)", "Ora(C)", "g(0)", "g(C)"],
@@ -384,18 +385,18 @@ def main():
     # ── IX. STATISTICAL ANALYSIS ───────────────────────────────────────────
     add_section_heading(doc, "IX. STATISTICAL ANALYSIS")
     add_lead_p(doc, "Reconciling Prior p-Value Discrepancies. ", "Earlier repository outputs contained two seemingly conflicting numbers: h2_controller_analysis.csv reported p_{Holm} = 1.000 because analyze_pathA_study.py ran a one-sided Wilcoxon test (alternative='less') testing whether controllers improved over S3-FIFO (none did), whereas generate_paper_assets.py ran a two-sided test across n = 264 correlated (trace, capacity) pairs (p < 10^{-15}). Because the 264 pairs come from only 30 independent workload families, treating n = 264 as i.i.d. inflates test power.")
-    add_lead_p(doc, "Cluster-Valid Inference. ", "Table IV reports the corrected family-level analysis (n = 30 family means per controller, two-sided Wilcoxon signed-rank test [26] with Holm correction [27], matched-pair rank-biserial correlation r_{b}, and 3,000-resample family-cluster bootstrap 95% CIs). Every single one of the 17 controllers loses significantly to archived static S3-FIFO (+0.0393 to +0.0433 pair mean Δ MR; p_{fam,Holm} ∈ [1.0×10^{-4}, 1.2×10^{-4}]; r_{b} ∈ [+0.90, +0.97]), subject to the S3-FIFO capacity-overrun caveat in Section VII.")
+    add_lead_p(doc, "Cluster-Valid Inference. ", "Table IV reports the corrected family-level analysis (n = 30 family means per controller, two-sided Wilcoxon signed-rank test [26] with Holm correction [27], matched-pair rank-biserial correlation r_{b}, and 3,000-resample family-cluster bootstrap 95% CIs). Against fixed-capacity static S3-FIFO (0.5167), all 17 controllers still exhibit higher mean miss ratios (+0.0109 to +0.0165 pair mean Δ MR; p_{fam,Holm} = 1.000; r_{b} ∈ [+0.11, +0.39]).")
 
     t4_rows = [
-        ["CUSUM-high / med / low", "+0.0393 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.95", "Loses"],
-        ["PH-high / med / low", "+0.0410 to +0.0424", "≤ 1.2×10^{-4}", "≥ 0.92", "Loses"],
-        ["ADWIN-high / med / low", "+0.0406 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.90", "Loses"],
-        ["Periodic-10 / 20 / 40", "+0.0394 to +0.0433", "≤ 1.2×10^{-4}", "0.95", "Loses"],
-        ["Random-high / med / low", "+0.0394 to +0.0408", "≤ 1.2×10^{-4}", "≥ 0.95", "Loses"],
-        ["OracleTrig", "+0.0405", "1.2×10^{-4}", "+0.95", "Loses"],
-        ["ContShadow", "+0.0412", "1.2×10^{-4}", "+0.93", "Loses"],
+        ["CUSUM-high / med / low", "+0.0109 to +0.0121", "1.000", "+0.11 to +0.29", "Higher MR"],
+        ["PH-high / med / low", "+0.0137 to +0.0165", "1.000", "+0.32 to +0.39", "Higher MR"],
+        ["ADWIN-high / med / low", "+0.0141 to +0.0154", "1.000", "+0.30 to +0.34", "Higher MR"],
+        ["Periodic-10 / 20 / 40", "+0.0114 to +0.0158", "1.000", "+0.19 to +0.25", "Higher MR"],
+        ["Random-high / med / low", "+0.0128 to +0.0158", "1.000", "+0.24 to +0.38", "Higher MR"],
+        ["OracleTrig", "+0.0128", "1.000", "+0.32", "Higher MR"],
+        ["ContShadow", "+0.0140", "1.000", "+0.19", "Higher MR"],
     ]
-    add_ieee_table(doc, "TABLE IV. H2 ONLINE CONTROLLERS VS. STATIC S3-FIFO (n = 264 PAIRS, 30 FAMILIES)",
+    add_ieee_table(doc, "TABLE IV. H2 ONLINE CONTROLLERS VS. FIXED-CAPACITY S3-FIFO (n = 264 PAIRS, 30 FAMILIES)",
                    ["Controller", "Pair Δ MR", "p_{fam,Holm}", "r_{b}", "Result"],
                    t4_rows, col_widths=[1.15, 0.80, 0.55, 0.38, 0.37])
 
@@ -403,23 +404,23 @@ def main():
 
     # ── X. SENSITIVITY AND FAILURE-MODE ANALYSIS ───────────────────────────
     add_section_heading(doc, "X. SENSITIVITY AND FAILURE-MODE ANALYSIS")
-    add_p(doc, "Sweeping c_{switch} ∈ [0, C] across 9 points and W ∈ {5k, 10k, 25k, 50k} (264 pairs at 1%–10% WSS) shows net gains declining smoothly as cost rises: at W = 5k, 20/264 (7.6%) clear 0.02 at c = 0, 13/264 (4.9%) at 0.10C, 7/264 at 0.25C, and 0/264 once c_{switch} ≥ 0.50C across all four window sizes (Fig. 3).")
+    add_p(doc, "Sweeping c_{switch} ∈ [0, C] across 9 points and W ∈ {5k, 10k, 25k, 50k} (264 pairs at 1%–10% WSS) shows net gains declining smoothly as cost rises: at W = 5k, 18/264 (6.8%) clear 0.02 at c = 0, 13/264 (4.9%) at 0.10C, 7/264 at 0.25C, and 0/264 once c_{switch} ≥ 0.50C across all four window sizes (Fig. 3).")
 
     add_figure(doc, "fig_cost_sweep.pdf", "Fig. 3. Share of 264 pairs clearing ≥ 0.02 net gain across normalized switch-cost fractions.")
 
-    add_lead_p(doc, "Exploratory H3 Screening (Leak-Free). ", "Fixing global standardization leakage in the original script yields leak-free LOFO AUC = 0.895 (95% bootstrap CI [0.825, 0.956]; PR-AUC = 0.471 vs. positive rate 13/88 = 0.148) for predicting post-hoc zero-cost headroom g(0) ≥ 0.005. However, due to class imbalance, the default 0.5 threshold predicts TP = 0, FP = 1, FN = 13, TN = 74, giving 0.841 raw accuracy (below the 0.852 majority-class baseline), 0.493 balanced accuracy, and F_{1} = 0.000. Thus, trace features rank relative drift propensity but do not provide a reliable binary classifier; H3 remains strictly exploratory.")
+    add_lead_p(doc, "Exploratory H3 Screening (Leak-Free). ", "Fixing global standardization leakage in the original script yields leak-free LOFO AUC = 0.927 (PR-AUC = 0.573 vs. positive rate 13/88 = 0.148) for predicting post-hoc zero-cost headroom g(0) ≥ 0.005. However, due to class imbalance, the default 0.5 threshold predicts TP = 1, FP = 2, FN = 12, TN = 73, giving 0.841 raw accuracy (below the 0.852 majority-class baseline), 0.525 balanced accuracy, and F_{1} = 0.125. Thus, trace features rank relative drift propensity but do not provide a reliable binary classifier; H3 remains strictly exploratory.")
 
-    add_lead_p(doc, "Controller Failure Diagnosis. ", "Direct measurement across 9,564 evaluation windows (Fig. 4) shows that sampled ContShadow-0.2C agrees with the true full-cache window winner in only 67.7% of windows (and even noise-free cold FullShadow-1.0C agrees in 67.9%). Across all 264 pairs, ContShadow spends 67.1% of references in S3-FIFO (69.3% on FIU traces, 11.0% in LRU, 14.2% in LFU-A, 4.8% in MRU, 0.6% in 2Q, and 0.0% in ARC), yet still loses by +0.0412 overall. Shadow ablations (n = 264) confirm that eliminating sampling noise (FullShadow: Δ = +0.0284, 705 ns/ref), adding cost awareness (FullShadow-CostAware: Δ = +0.0286), maintaining full persistent shadows (PersistentShadow: Δ = +0.0175, 2,985 ns/ref; PersistentShadow-CostAware: Δ = +0.0191), or expanding to 21 policies (ContShadow-21: Δ = +0.0470) still underperforms the baseline.")
+    add_lead_p(doc, "Controller Failure Diagnosis. ", "Direct measurement across 9,564 evaluation windows (Fig. 4) shows that sampled ContShadow-0.2C agrees with the true full-cache window winner in only 45.1% of windows (and even noise-free cold FullShadow-1.0C agrees in 52.8%). Across all 264 pairs, ContShadow spends 24.7% of references in S3-FIFO (45.2% on FIU traces), 26.6% in LRU, 18.6% in 2Q, 14.2% in MRU, 10.7% in LFU-A, and 5.2% in ARC, losing by +0.0140 overall. Shadow ablations (n = 264) confirm that eliminating sampling noise (FullShadow: Δ = -0.0013, 854.8 ns/ref) or adding cost awareness (FullShadow-CostAware: Δ = -0.0009) matches S3-FIFO at 19× CPU cost; maintaining full persistent shadows (PersistentShadow: Δ = -0.0062, 3,772.2 ns/ref; PersistentShadow-CostAware: Δ = -0.0039) achieves a 0.0062 reduction at 84× CPU overhead, while expanding to 21 policies (ContShadow-21: Δ = +0.0216) degrades performance.")
 
     add_figure(doc, "fig_shadow_ranking.pdf", "Fig. 4. Shadow-cache top-1 ranking accuracy across 9,564 evaluation windows.")
 
-    add_lead_p(doc, "Migration & Syscall Microbenchmarks. ", "Direct C++ measurement of switchTo() metadata migration (S3-FIFO → ARC, n = 30 trials per C) shows 315.6 µs at C = 64 (95% CI [296.9, 334.3] µs), 322.0 µs at C = 512, 166.9 µs at C = 4,096, and 590.3 µs at C = 16,384 (0.036 µs/page). Separately, an OS page-cache pread microbenchmark (real_io_bench, p_{50} = 1.47–4.82 µs, p_{99} = 4.75–21.44 µs) reflects kernel syscall/DRAM-cache overhead rather than NVMe storage or migration cost, and shows PersistentShadow cutting throughput from 319.3 kops/s (S3-FIFO) to 168.2 kops/s on sqlite_join_agg_s101.")
+    add_lead_p(doc, "Migration & Syscall Microbenchmarks. ", "Direct C++ measurement of switchTo() metadata migration (S3-FIFO → ARC, n = 50 trials per C) yields medians of 418.98 µs at C = 64, 48.75 µs at C = 512, 235.44 µs at C = 4,096, and 930.22 µs at C = 16,384 (0.0583 µs/page). Separately, an OS page-cache pread microbenchmark (real_io_bench, p_{50} = 1.47–4.82 µs, p_{99} = 4.75–21.44 µs) reflects kernel syscall/DRAM-cache overhead rather than NVMe storage or migration cost, and shows PersistentShadow cutting throughput from 319.3 kops/s (S3-FIFO) to 168.2 kops/s on sqlite_join_agg_s101.")
 
     # ── XI. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION ────────────────
     add_section_heading(doc, "XI. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION")
-    add_lead_p(doc, "Design implication. ", "Discrete policy switching rarely clears a 0.02 net gain even under an optimistic independent-replay oracle, and all evaluated online controllers lose to static S3-FIFO because cold-window shadow evaluation mis-ranks policies in ~32% of windows while heterogeneous switchTo() discards ghost state. Systems builders gain more from adopting a strong scan-resistant static policy (S3-FIFO or CAR) than from adding drift-triggered switching machinery.")
-    add_lead_p(doc, "Threats to validity & limitations. ", "(1) Independent-replay model: Does not model state-carrying cold cascades; our validation trace confirms state-carrying execution incurs higher misses than c = 0 independent replay. (2) Trace corpus: 68% instrumented kernels average 0.30M refs, FIU traces have ≥ 31% compulsory misses, and LD_PRELOAD omits post-map kernel page faults. (3) External cross-validation: libCacheSim bit-for-bit cross-validation was not run. (4) Scope: Windows < 5k and live kernel implementations (MGLRU / cache_ext) are outside scope. (5) Post-hoc status: Local git timestamping is not external preregistration, and H3's 0.005 threshold was post hoc.")
-    add_lead_p(doc, "Reproducibility and Conclusion. ", "All simulator code (src/pathA_sim.cpp), validation tests (make test, make verify), raw CSVs, supplement, and table/figure scripts are publicly available at https://github.com/anoneurx/drift-gating-reproducibility. Under an independent-replay Viterbi DP oracle across 88 traces (1%–50% WSS), discrete policy switching clears a 0.02 net gain in 0/90 family–capacity groups (1%–10% WSS) at c_{switch} = C, 2/440 pairs across 1%–50% WSS at c_{switch} = C, 4.9% at 0.10C (W = 5k), and 0/264 once c_{switch} ≥ 0.50C. Static S3-FIFO dominates all 17 switching controllers (p_{fam,Holm} ≤ 1.2×10^{-4}), persistent 1.0C ablations, and ContShadow-21 because shadow ranking fails on 32% of windows and heterogeneous switches discard ghost metadata.")
+    add_lead_p(doc, "Design implication. ", "Discrete policy switching never clears a 0.02 net gain once transition costs reach 0.50C under the independent-replay oracle, and all 17 online controllers underperform static CAR (0.5151) and S3-FIFO (0.5167) on average because cold-window shadow evaluation mis-ranks policies in 54.9% of windows while heterogeneous switchTo() discards ghost state. Systems builders gain more from adopting a strong scan-resistant static policy (CAR or S3-FIFO) than from adding drift-triggered switching machinery.")
+    add_lead_p(doc, "Threats to validity & limitations. ", "(1) Independent-replay model: Does not universally lower-bound state-carrying misses (Section IV counterexample). (2) Trace corpus: 68% instrumented kernels average 0.30M refs, FIU traces have ≥ 31% compulsory misses, and LD_PRELOAD omits post-map kernel page faults. (3) External cross-validation: libCacheSim was unavailable offline; 16 non-core policies remain unvalidated externally, and fixed S3-FIFO agrees with our Python reference within 0.00–0.09 percentage points. (4) Scope: Windows < 5k and live kernel implementations (MGLRU / cache_ext) are outside scope. (5) Post-hoc status: Local git timestamping is not external preregistration, and H3's 0.005 threshold was post hoc.")
+    add_lead_p(doc, "Reproducibility and Conclusion. ", "All simulator code (src/pathA_sim.cpp), validation tests (make test, make verify), raw CSVs, reproduced statistics (results/reproduced_statistics/), audit reports (reports/), and REPRODUCIBILITY.md are publicly available at https://github.com/anoneurx/drift-gating-reproducibility. Under an independent-replay Viterbi DP oracle across 88 traces (1%–50% WSS) with strict-capacity policy implementations, discrete policy switching clears a 0.02 net gain in 0/90 family–capacity groups (1%–10% WSS) at c_{switch} = C, 0/440 pairs across 1%–50% WSS at c_{switch} = C, 4.9% at 0.10C (W = 5k), and 0/264 once c_{switch} ≥ 0.50C. Static CAR (0.5151) and S3-FIFO (0.5167) outperform all 17 online switching controllers on average (+0.0109 to +0.0165 excess MR), because shadow ranking fails on 54.9% of windows and heterogeneous switches discard ghost metadata.")
 
     # ── REFERENCES ─────────────────────────────────────────────────────────
     add_section_heading(doc, "REFERENCES")

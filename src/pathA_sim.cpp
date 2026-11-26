@@ -297,21 +297,26 @@ struct S3FIFO : Policy {
         }
     }
     void evict() {
-        if ((int)(s.sz(0) + s.sz(1)) < C) return;
-        if ((int)s.sz(0) >= S || s.sz(1) == 0) {
-            if (s.sz(0) == 0) { evictMain(); return; }
-            u32 t = s.back(0);
-            s.rm(t);
-            if (f[t] > 0 && M > 0) {
-                f[t] = 0;
-                if ((int)s.sz(1) >= M) evictMain();
-                s.pf(1, t);
+        while ((int)(s.sz(0) + s.sz(1)) >= C) {
+            if ((int)s.sz(0) >= S || s.sz(1) == 0) {
+                if (s.sz(0) == 0) { evictMain(); return; }
+                u32 t = s.back(0);
+                s.rm(t);
+                if (f[t] > 0 && M > 0) {
+                    f[t] = 0;
+                    if ((int)s.sz(1) >= M) evictMain();
+                    s.pf(1, t);
+                    // Promotion from S to M: total may not have decreased.
+                    // Loop will re-check and evict again if needed.
+                } else {
+                    s.pf(2, t);
+                    if ((int)s.sz(2) > max(1, M)) s.rm(s.back(2));
+                    return; // Genuine eviction: total decreased by 1.
+                }
             } else {
-                s.pf(2, t);
-                if ((int)s.sz(2) > max(1, M)) s.rm(s.back(2));
+                evictMain();
+                return; // Genuine eviction from M: total decreased by 1.
             }
-        } else {
-            evictMain();
         }
     }
     bool access(u32 x) override {
@@ -321,7 +326,13 @@ struct S3FIFO : Policy {
         if (g) s.rm(x);
         evict();
         f[x] = 0;
-        s.pf(g ? 1 : 0, x);
+        if (g) {
+            // Ghost hit: insert into M; ensure M has room
+            if ((int)s.sz(1) >= M) evictMain();
+            s.pf(1, x);
+        } else {
+            s.pf(0, x);
+        }
         return false;
     }
     vector<u32> resident() override {

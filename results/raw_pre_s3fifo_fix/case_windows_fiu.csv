@@ -1,0 +1,10 @@
+trace,window_idx,s3fifo_mr,best_static_name,best_static_mr,oracle0_policy,oracle0_mr,oracle0_switch,oracleC_policy,oracleC_mr
+fiu_online_test,0,0.875960,S3-FIFO,0.875960,MRU,0.760240,0,S3-FIFO,0.875960
+fiu_online_test,1,0.999820,S3-FIFO,0.999820,MRU,0.999400,0,S3-FIFO,0.999820
+fiu_online_test,2,0.817120,S3-FIFO,0.817120,S3-FIFO,0.817120,1,S3-FIFO,0.817120
+fiu_online_test,3,0.626260,S3-FIFO,0.626260,DIP-set-duel,0.469900,1,S3-FIFO,0.626260
+fiu_online_test,4,0.690740,S3-FIFO,0.690740,MRU,0.579760,1,S3-FIFO,0.690740
+fiu_online_test,5,0.681380,S3-FIFO,0.681380,DIP-set-duel,0.582500,1,S3-FIFO,0.681380
+fiu_online_test,6,0.686280,S3-FIFO,0.686280,MRU,0.683960,1,S3-FIFO,0.686280
+fiu_online_test,7,0.627200,S3-FIFO,0.627200,S3-FIFO,0.627200,1,S3-FIFO,0.627200
+fiu_online_test,8,0.677940,S3-FIFO,0.677940,3L-style,0.655300,1,S3-FIFO,0.677940

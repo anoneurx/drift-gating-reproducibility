@@ -1,0 +1,7 @@
+trace,controller,miss_ratio,kops_per_s,p50_us,p99_us
+sqlite_join_agg_s101,S3-FIFO,0.0345,319.26,1.47,4.75
+sqlite_join_agg_s101,ContShadow,0.0425,309.00,1.47,4.82
+sqlite_join_agg_s101,PersistentShadow,0.0405,168.22,4.68,7.05
+fiu_online_test,S3-FIFO,0.7425,160.77,3.35,19.07
+fiu_online_test,ContShadow,0.7625,161.42,3.35,17.67
+fiu_online_test,PersistentShadow,0.7507,137.51,4.82,21.44
