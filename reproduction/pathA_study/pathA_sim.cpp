@@ -1253,6 +1253,7 @@ struct SwitchingController {
     RNG trigRng;
     int switches = 0, shadowEvals = 0;
     u64 shadowCpuNs = 0;
+    array<u64, 6> activeRefs{};
     const vector<size_t>* oracleSwitchRefs = nullptr;
     size_t nextOracleIdx = 0;
 
@@ -1461,8 +1462,9 @@ struct SwitchingController {
         }
     }
 
-    bool access(u32 p) {
+    bool access(u32 p, bool countEval = false) {
         t++;
+        if (countEval && actId >= 0 && actId < 6) activeRefs[actId]++;
         last[p] = (u32)min<u64>(t, 0xFFFFFFFFu);
         if (cnt[p] < 65535) cnt[p]++;
         if (ageRefs && t % ageRefs == 0) for (int i = 0; i < NP; i++) cnt[i] >>= 1;
@@ -1613,6 +1615,20 @@ int main(int argc, char** argv) {
             }
         }
         {
+            ofstream fsw(outPrefix + "_cost_sweep.csv");
+            fsw << "trace,family,source,cap_frac,C,window,nwin,cost_frac,switch_cost,"
+                   "oracle_miss_ratio,oracle_switches,oracle_objective_ratio,net_gain_vs_best,net_gain_vs_s3fifo\n";
+            for (double cf : {0.0, 0.10, 0.25, 0.50, 1.00}) {
+                double sc = cf * (double)C;
+                DPOracle dpc = solveDPOracle(pruns, sc, window, nWin);
+                fsw << label << ',' << family << ',' << source << ',' << capFrac << ','
+                    << C << ',' << window << ',' << nWin << ',' << fixed << setprecision(2) << cf << ','
+                    << setprecision(1) << sc << ',' << setprecision(9) << dpc.missRatio << ','
+                    << dpc.switches << ',' << dpc.objectiveRatio << ','
+                    << (bestRatio - dpc.objectiveRatio) << ',' << (s3Ratio - dpc.objectiveRatio) << '\n';
+            }
+        }
+        {
             ofstream fp(outPrefix + "_policy.csv");
             fp << "trace,family,source,cap_frac,C,wss,window,policy,total_miss,miss_ratio,ns_per_ref\n";
             for (const auto& pr : pruns) {
@@ -1648,7 +1664,7 @@ int main(int argc, char** argv) {
             size_t miss = 0;
             u64 t0 = cpu_ns();
             for (size_t i = 0; i < evalEnd; i++) {
-                bool hit = ctrl.access(refs[i]);
+                bool hit = ctrl.access(refs[i], i >= warm);
                 if (i >= warm && !hit) miss++;
             }
             u64 elapsed = cpu_ns() - t0;
@@ -1661,6 +1677,33 @@ int main(int argc, char** argv) {
                << evalRefs << ',' << miss << ',' << fixed << setprecision(9) << mr << ','
                << ctrl.switches << ',' << obj << ',' << ctrl.shadowEvals << ','
                << setprecision(3) << nsRef << ',' << ctrl.shadowCpuNs << ',' << usEval << '\n';
+        }
+    }
+
+    if (mode == "diag") {
+        vector<size_t> oracleSwitchRefs;
+        for (size_t w = 1; w < nWin; w++) {
+            if (dpZero.didSwitch[w]) oracleSwitchRefs.push_back(warm + w * window);
+        }
+        ofstream fd(outPrefix + "_ctrl_diag.csv");
+        fd << "trace,family,source,cap_frac,C,window,controller,miss_ratio,s3fifo_miss_ratio,switches,"
+              "lru_frac,lfua_frac,q2_frac,mru_frac,s3fifo_frac,arc_frac\n";
+        for (const auto& cfg : buildControllerSuite()) {
+            if (cfg.name != "ContShadow" && cfg.name != "CUSUM-med" && cfg.name != "OracleTrig") continue;
+            SwitchingController ctrl(C, cfg, &oracleSwitchRefs);
+            size_t miss = 0;
+            for (size_t i = 0; i < evalEnd; i++) {
+                bool hit = ctrl.access(refs[i], i >= warm);
+                if (i >= warm && !hit) miss++;
+            }
+            double mr = (double)miss / (double)evalRefs;
+            fd << label << ',' << family << ',' << source << ',' << capFrac << ','
+               << C << ',' << window << ',' << cfg.name << ',' << fixed << setprecision(9) << mr << ','
+               << s3Ratio << ',' << ctrl.switches;
+            for (int k = 0; k < 6; k++) {
+                fd << ',' << setprecision(4) << ((double)ctrl.activeRefs[k] / (double)evalRefs);
+            }
+            fd << '\n';
         }
     }
     return 0;

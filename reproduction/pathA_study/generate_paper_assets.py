@@ -48,6 +48,8 @@ def main():
     pol = load_csv("oracle_policy.csv")
     ctrl = load_csv("controllers.csv")
     feat = {r["trace"]: r for r in load_csv("features.csv")}
+    csweep = load_csv("cost_sweep.csv")
+    cdiag = load_csv("ctrl_diag.csv")
 
     c_rows = [r for r in ora if float(r["switch_cost"]) > 0]
     z_rows = [r for r in ora if float(r["switch_cost"]) == 0]
@@ -364,6 +366,72 @@ def main():
 
     print("Generated all tables and figures successfully.")
     print(f"LOFO exploratory: acc={lofo_acc:.3f}, auc={lofo_auc:.3f}")
+
+
+    # ── 8. Table: Switch-Cost x Window Sensitivity ─────────────────────────
+    lines = [
+        r"\begin{tabular}{llrrrrr}",
+        r"\toprule",
+        r"$W$ & $c_{\text{switch}}$ & Mean $g$ & $p_{90}$ $g$ & Max $g$ & $\ge 0.02$ & Avg sw. \\",
+        r"\midrule",
+    ]
+    for w in (10000, 25000, 50000):
+        for cf in ("0.00", "0.10", "0.25", "0.50", "1.00"):
+            sub = [r for r in csweep if int(r["window"]) == w and r["cost_frac"] == cf]
+            g = np.array([float(r["net_gain_vs_best"]) for r in sub])
+            sw = np.mean([float(r["oracle_switches"]) for r in sub])
+            clabel = "$0$" if cf == "0.00" else (f"${cf}C$" if cf != "1.00" else "$C$")
+            lines.append(
+                f"{w//1000}k & {clabel} & {g.mean():.4f} & {np.quantile(g,0.9):.4f} & "
+                f"{g.max():.4f} & {int((g>=0.02).sum())}/264 & {sw:.2f} \\\\"
+            )
+        if w != 50000:
+            lines.append(r"\midrule")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    (TEX_DIR / "table_cost_sweep.tex").write_text("\n".join(lines) + "\n")
+
+    # ── 9. Table: Controller Failure-Mode Time-Shares ──────────────────────
+    lines = [
+        r"\begin{tabular}{lrrrrrrr}",
+        r"\toprule",
+        r"Controller / Source & $\Delta$ MR & S3-FIFO & LRU & 2Q & ARC & LFU-A & MRU \\",
+        r"\midrule",
+    ]
+    for cname in ("ContShadow", "CUSUM-med", "OracleTrig"):
+        sub = [r for r in cdiag if r["controller"] == cname]
+        dm = np.mean([float(r["miss_ratio"]) - float(r["s3fifo_miss_ratio"]) for r in sub])
+        sh = [np.mean([float(r[k]) for r in sub]) for k in ("s3fifo_frac","lru_frac","q2_frac","arc_frac","lfua_frac","mru_frac")]
+        lines.append(f"{cname} (all) & {dm:+.4f} & " + " & ".join(f"{x:.3f}" for x in sh) + r" \\")
+    lines.append(r"\midrule")
+    for src, sname in [("real_app_pageref", "Real-app"), ("fiu_public", "FIU"),
+                       ("pdl_public", "PDL"), ("instrumented_program", "Prog.")]:
+        sub = [r for r in cdiag if r["controller"] == "ContShadow" and r["source"] == src]
+        dm = np.mean([float(r["miss_ratio"]) - float(r["s3fifo_miss_ratio"]) for r in sub])
+        sh = [np.mean([float(r[k]) for r in sub]) for k in ("s3fifo_frac","lru_frac","q2_frac","arc_frac","lfua_frac","mru_frac")]
+        lines.append(f"ContShadow ({sname}) & {dm:+.4f} & " + " & ".join(f"{x:.3f}" for x in sh) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    (TEX_DIR / "table_ctrl_diag.tex").write_text("\n".join(lines) + "\n")
+
+    # ── 10. Fig 4: Switch-Cost x Window Sensitivity Curve ──────────────────
+    fig, ax = plt.subplots(figsize=(4.4, 2.4))
+    cfs = [0.00, 0.10, 0.25, 0.50, 1.00]
+    for w, col, mk in [(10000, "#d62728", "o"), (25000, "#1f77b4", "s"), (50000, "#2ca02c", "^")]:
+        pcts = []
+        for cf in cfs:
+            sub = [r for r in csweep if int(r["window"]) == w and abs(float(r["cost_frac"]) - cf) < 1e-4]
+            pcts.append(100.0 * np.mean([float(r["net_gain_vs_best"]) >= 0.02 for r in sub]))
+        ax.plot(cfs, pcts, marker=mk, linewidth=1.6, color=col, label=f"W = {w//1000}k refs")
+    ax.axvline(0.50, color="#555555", linestyle="--", linewidth=1.0, label="0.50C collapse boundary")
+    ax.set_xlabel("Switch penalty fraction (c_switch / C)")
+    ax.set_ylabel("Pairs clearing >= 0.02 (%)")
+    ax.set_xticks(cfs)
+    ax.set_xticklabels(["0", "0.10C", "0.25C", "0.50C", "1.00C"])
+    ax.set_ylim(-0.3, 6.2)
+    ax.legend(fontsize=7, frameon=False, loc="upper right")
+    ax.grid(True, linestyle=":", alpha=0.5)
+    fig.tight_layout()
+    fig.savefig(FIG_DIR / "fig_cost_sweep.pdf")
+    plt.close(fig)
 
 
 if __name__ == "__main__":

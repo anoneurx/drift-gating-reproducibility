@@ -27,6 +27,11 @@
 \citation{lpr}
 \citation{l3cache}
 \citation{mglru}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{Introduction}{section.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Trace Corpus Summary (88 Traces, 30 Families)}}{1}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:sources}{{I}{1}{Trace Corpus Summary (88 Traces, 30 Families)}{table.caption.1}{}}
 \citation{page}
 \citation{adwin}
 \citation{seq}
@@ -40,11 +45,8 @@
 \citation{acme}
 \citation{s3fifo}
 \citation{sieve}
-\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
-\newlabel{sec:intro}{{I}{1}{Introduction}{section.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Trace Corpus Summary (88 Traces, 30 Families)}}{1}{table.caption.1}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:sources}{{I}{1}{Trace Corpus Summary (88 Traces, 30 Families)}{table.caption.1}{}}
+\citation{l3cache}
+\citation{lpr}
 \citation{page}
 \citation{page}
 \citation{adwin}
@@ -54,30 +56,52 @@
 \citation{belady}
 \@writefile{toc}{\contentsline {section}{\numberline {II}Background and Related Work}{2}{section.2}\protected@file@percent }
 \newlabel{sec:related}{{II}{2}{Background and Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {II-A}Adaptive and Learned Replacement}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {II-B}Drift Detection and Shadow Evaluation}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {II-C}Hindsight Oracles}{2}{subsection.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {III}Oracle and Experimental Design}{2}{section.3}\protected@file@percent }
 \newlabel{sec:oracle}{{III}{2}{Oracle and Experimental Design}{section.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {III-A}Simulator and Exact DP Oracle}{2}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {III-B}Switching Controllers}{2}{subsection.3.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Exact DP Oracle Net Gain Over Best Static Policy}}{2}{table.caption.2}\protected@file@percent }
-\newlabel{tab:h1}{{II}{2}{Exact DP Oracle Net Gain Over Best Static Policy}{table.caption.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Mean and maximum net oracle gain across trace sources for $c_{\text  {switch}}=C$ and $c_{\text  {switch}}=0$ ($W=50{,}000$). Even the zero-cost ceiling rarely exceeds the $0.02$ worthwhile-gain threshold.}}{2}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:ceiling}{{1}{2}{Mean and maximum net oracle gain across trace sources for $c_{\text {switch}}=C$ and $c_{\text {switch}}=0$ ($W=50{,}000$). Even the zero-cost ceiling rarely exceeds the $0.02$ worthwhile-gain threshold}{figure.caption.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Results: Exact DP Oracle Ceiling (H1)}{2}{section.4}\protected@file@percent }
-\newlabel{sec:results}{{IV}{2}{Results: Exact DP Oracle Ceiling (H1)}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-A}Simulator and Trace Collection}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-B}Exact Viterbi DP Oracle}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-C}Switching Controllers and Hyperparameters}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Controller Hyperparameters and Evaluation Budgets}}{3}{table.caption.2}\protected@file@percent }
+\newlabel{tab:hyperparams}{{II}{3}{Controller Hyperparameters and Evaluation Budgets}{table.caption.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Exact DP Oracle Net Gain Over Best Static Policy}}{3}{table.caption.3}\protected@file@percent }
+\newlabel{tab:h1}{{III}{3}{Exact DP Oracle Net Gain Over Best Static Policy}{table.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Results: Exact DP Oracle Ceiling (H1)}{3}{section.4}\protected@file@percent }
+\newlabel{sec:results}{{IV}{3}{Results: Exact DP Oracle Ceiling (H1)}{section.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Mean and maximum net oracle gain across trace sources for $c_{\text  {switch}}=C$ and $c_{\text  {switch}}=0$ ($W=50{,}000$). Even the zero-cost ceiling rarely exceeds the $0.02$ worthwhile-gain threshold.}}{3}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:ceiling}{{1}{3}{Mean and maximum net oracle gain across trace sources for $c_{\text {switch}}=C$ and $c_{\text {switch}}=0$ ($W=50{,}000$). Even the zero-cost ceiling rarely exceeds the $0.02$ worthwhile-gain threshold}{figure.caption.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces All 21 Policies Ranked by Mean Miss Ratio (264 Pairs)}}{3}{table.caption.5}\protected@file@percent }
+\newlabel{tab:policies}{{IV}{3}{All 21 Policies Ranked by Mean Miss Ratio (264 Pairs)}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Switch-Cost and Window Sensitivity}{3}{section.5}\protected@file@percent }
+\newlabel{sec:sensitivity}{{V}{3}{Switch-Cost and Window Sensitivity}{section.5}{}}
 \citation{wilcoxon}
 \citation{holm}
-\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Selected Static Policies Across 264 Trace--Capacity Pairs (Full 21-Policy List in Supplement Table~\ref {S-tab:policies})}}{3}{table.caption.4}\protected@file@percent }
-\newlabel{tab:policies}{{III}{3}{Selected Static Policies Across 264 Trace--Capacity Pairs (Full 21-Policy List in Supplement Table~\ref {S-tab:policies})}{table.caption.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Switching Controllers vs.\ Static S3-FIFO ($n=264$ Pairs)}}{3}{table.caption.5}\protected@file@percent }
-\newlabel{tab:h2}{{IV}{3}{Switching Controllers vs.\ Static S3-FIFO ($n=264$ Pairs)}{table.caption.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Results: Switching Controllers vs.\ S3-FIFO (H2)}{3}{section.5}\protected@file@percent }
-\newlabel{sec:controllers}{{V}{3}{Results: Switching Controllers vs.\ S3-FIFO (H2)}{section.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Mean miss ratio vs.\ simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers on both accuracy and CPU overhead.}}{3}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:pareto}{{2}{3}{Mean miss ratio vs.\ simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers on both accuracy and CPU overhead}{figure.caption.6}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Unseen-Family Predictive Rule (LOFO \& Cross-Source)}}{3}{table.caption.7}\protected@file@percent }
-\newlabel{tab:h3}{{V}{3}{Unseen-Family Predictive Rule (LOFO \& Cross-Source)}{table.caption.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Predictive Rule for Unseen Families (H3)}{3}{section.6}\protected@file@percent }
-\newlabel{sec:rule}{{VI}{3}{Predictive Rule for Unseen Families (H3)}{section.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces DP Oracle Sensitivity to Window Size $W$ and Switch Penalty}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:csweep}{{V}{4}{DP Oracle Sensitivity to Window Size $W$ and Switch Penalty}{table.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Percentage of trace--capacity pairs clearing $g \ge 0.02$ as a function of switch penalty fraction $c_{\text  {switch}}/C$ across three window granularities.}}{4}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:csweep}{{2}{4}{Percentage of trace--capacity pairs clearing $g \ge 0.02$ as a function of switch penalty fraction $c_{\text {switch}}/C$ across three window granularities}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Results: Switching Controllers vs.\ S3-FIFO (H2)}{4}{section.6}\protected@file@percent }
+\newlabel{sec:controllers}{{VI}{4}{Results: Switching Controllers vs.\ S3-FIFO (H2)}{section.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Switching Controllers vs.\ Static S3-FIFO ($n=264$ Pairs)}}{4}{table.caption.8}\protected@file@percent }
+\newlabel{tab:h2}{{VI}{4}{Switching Controllers vs.\ Static S3-FIFO ($n=264$ Pairs)}{table.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Mean miss ratio vs.\ simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers on both accuracy and CPU overhead.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:pareto}{{3}{4}{Mean miss ratio vs.\ simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers on both accuracy and CPU overhead}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Controller Failure-Mode Diagnosis}{4}{section.7}\protected@file@percent }
+\newlabel{sec:failure}{{VII}{4}{Controller Failure-Mode Diagnosis}{section.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Active-Policy Time-Share and Miss-Ratio Deficit vs.\ S3-FIFO}}{5}{table.caption.10}\protected@file@percent }
+\newlabel{tab:cdiag}{{VII}{5}{Active-Policy Time-Share and Miss-Ratio Deficit vs.\ S3-FIFO}{table.caption.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Unseen-Family Predictive Rule (LOFO \& Cross-Source)}}{5}{table.caption.11}\protected@file@percent }
+\newlabel{tab:h3}{{VIII}{5}{Unseen-Family Predictive Rule (LOFO \& Cross-Source)}{table.caption.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Predictive Rule for Unseen Families (H3)}{5}{section.8}\protected@file@percent }
+\newlabel{sec:rule}{{VIII}{5}{Predictive Rule for Unseen Families (H3)}{section.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Exploratory LOFO ROC curve predicting zero-cost headroom $\ge 0.005$ on unseen trace families ($\text  {AUC}=0.901$).}}{5}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:roc}{{4}{5}{Exploratory LOFO ROC curve predicting zero-cost headroom $\ge 0.005$ on unseen trace families ($\text {AUC}=0.901$)}{figure.caption.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IX}{\ignorespaces Standardized Logistic Weights (Exploratory H3)}}{5}{table.caption.13}\protected@file@percent }
+\newlabel{tab:feat_weights}{{IX}{5}{Standardized Logistic Weights (Exploratory H3)}{table.caption.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Discussion and Threats to Validity}{5}{section.9}\protected@file@percent }
+\newlabel{sec:threats}{{IX}{5}{Discussion and Threats to Validity}{section.9}{}}
 \bibcite{seq}{1}
 \bibcite{eelru}{2}
 \bibcite{arc}{3}
@@ -97,12 +121,6 @@
 \bibcite{lpr}{17}
 \bibcite{mglru}{18}
 \bibcite{page}{19}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Exploratory LOFO ROC curve predicting zero-cost headroom $\ge 0.005$ on unseen trace families ($\text  {AUC}=0.901$).}}{4}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:roc}{{3}{4}{Exploratory LOFO ROC curve predicting zero-cost headroom $\ge 0.005$ on unseen trace families ($\text {AUC}=0.901$)}{figure.caption.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Discussion and Threats to Validity}{4}{section.7}\protected@file@percent }
-\newlabel{sec:threats}{{VII}{4}{Discussion and Threats to Validity}{section.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{4}{section.8}\protected@file@percent }
-\newlabel{sec:conclusion}{{VIII}{4}{Conclusion}{section.8}{}}
 \bibcite{adwin}{20}
 \bibcite{acme}{21}
 \bibcite{gama}{22}
@@ -111,4 +129,6 @@
 \bibcite{belady}{25}
 \bibcite{wilcoxon}{26}
 \bibcite{holm}{27}
-\gdef \@abspage@last{5}
+\@writefile{toc}{\contentsline {section}{\numberline {X}Conclusion}{6}{section.10}\protected@file@percent }
+\newlabel{sec:conclusion}{{X}{6}{Conclusion}{section.10}{}}
+\gdef \@abspage@last{6}
