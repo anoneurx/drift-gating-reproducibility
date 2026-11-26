@@ -1,0 +1,11 @@
+trace,family,source,path,refs,wss
+git_repo_s101,git,real_app_pageref,reproduction/app_traces/bins/git_repo_s101.bin,1855505,55739
+git_repo_s202,git,real_app_pageref,reproduction/app_traces/bins/git_repo_s202.bin,2290995,55739
+python_etl_s101,python,real_app_pageref,reproduction/app_traces/bins/python_etl_s101.bin,495440,7855
+python_etl_s202,python,real_app_pageref,reproduction/app_traces/bins/python_etl_s202.bin,495440,7855
+sqlite_join_agg_s101,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_join_agg_s101.bin,550000,5568
+sqlite_join_agg_s202,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_join_agg_s202.bin,550000,5770
+sqlite_mixed_rw_s101,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_mixed_rw_s101.bin,305677,4207
+sqlite_mixed_rw_s202,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_mixed_rw_s202.bin,336829,4159
+sqlite_oltp_scan_s101,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_oltp_scan_s101.bin,550000,6092
+sqlite_oltp_scan_s202,sqlite,real_app_pageref,reproduction/app_traces/bins/sqlite_oltp_scan_s202.bin,550000,6092
