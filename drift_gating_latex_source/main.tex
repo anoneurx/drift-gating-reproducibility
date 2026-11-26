@@ -72,7 +72,7 @@ Dynamic policy switching is a recurring design pattern in adaptive page replacem
 \label{sec:intro}
 % =====================================================================
 
-Page replacement determines which memory pages are evicted when physical memory is full. Because real workloads mix phases with distinct access patterns---sequential scans, hot-object reuse, and random I/O---no single static policy is optimal at every instant. This observation has motivated three decades of adaptive replacement research, from SEQ~\cite{seq} and EELRU~\cite{eelru} through ARC~\cite{arc}, LeCaR~\cite{lecar}, CACHEUS~\cite{cacheus}, and recent learned policies~\cite{l3cache}.
+Page replacement determines which memory pages are evicted when physical memory is full. Because real workloads mix phases with distinct access patterns---sequential scans, hot-object reuse, and random I/O---no single static policy is optimal at every instant. This observation has motivated three decades of adaptive replacement research, from SEQ~\cite{seq} and EELRU~\cite{eelru} through ARC~\cite{arc}, LeCaR~\cite{lecar}, CACHEUS~\cite{cacheus}, and recent learned policies~\cite{l3cache,s4fifo}.
 
 A recurring architecture in this literature is \emph{discrete policy switching}: monitor the miss stream for workload drift, evaluate a pool of candidate policies via sampled shadow caches, and switch the active policy when a candidate outperforms the incumbent by a statistical margin. Each switch carries a state-migration or cache-rewarm cost, while the hoped-for benefit is a lower miss ratio in the new regime. Whether that benefit exceeds the cost in realistic workloads---especially against modern scan-resistant static baselines such as S3-FIFO~\cite{s3fifo} and SIEVE~\cite{sieve}---is rarely quantified as a strict upper bound.
 
@@ -80,7 +80,7 @@ We pose one concrete question: \emph{when, if ever, does discrete policy switchi
 
 \textbf{Protocol.} We recorded three hypotheses (H1--H3), endpoints, and the smallest worthwhile gain ($\ge 0.02$ net miss-ratio reduction on at least two-thirds of traces in a family--capacity group) in a local git commit prior to executing the study, without external third-party preregistration; accordingly, we treat the study as post hoc~(Supplement~\ref{S-sec:protocol}).
 
-\textbf{Traces.} We evaluate 88 traces spanning 30 families and four sources (Table~\ref{tab:sources}): (i)~10 real-application page-level traces captured via an \code{LD_PRELOAD} tracer on SQLite workloads, \code{git} repository operations, and a Python ETL pipeline; (ii)~60 instrumented-program page traces across 15 algorithmic kernels; (iii)~12 public FIU block-I/O traces~\cite{pdl}; and (iv)~6 public PDL storage/cache traces~\cite{pdl}. Every trace is evaluated at capacities $1\%$, $5\%$, and $10\%$ of its working-set size (WSS), yielding 264 trace--capacity pairs. Because instrumented kernels represent $68\%$ of raw trace count, we report both aggregate and per-source statistics throughout.
+\textbf{Traces.} We evaluate 88 traces spanning 30 families and four sources (Table~\ref{tab:sources}): (i)~10 real-application page-level traces captured via an \code{LD_PRELOAD} tracer on SQLite workloads, \code{git} repository operations, and a Python ETL pipeline; (ii)~60 instrumented-program page traces across 15 algorithmic kernels; (iii)~12 public FIU block-I/O traces~\cite{pdl}; and (iv)~6 public PDL storage/cache traces~\cite{pdl,msr}. Every trace is evaluated at capacities $1\%$, $5\%$, and $10\%$ of its working-set size (WSS), yielding 264 trace--capacity pairs. Because instrumented kernels represent $68\%$ of raw trace count, we report both aggregate and per-source statistics throughout.
 
 \begin{table}[t]
 \centering
@@ -94,10 +94,10 @@ We pose one concrete question: \emph{when, if ever, does discrete policy switchi
 
 \textbf{Contributions.}
 \begin{enumerate}
-\item An exact Viterbi DP oracle ceiling across 88 traces and three capacities, including a 5-point switch-cost sweep ($c_{\text{switch}} \in \{0, 0.10C, 0.25C, 0.50C, C\}$) and 4 window granularities ($W \in \{10\text{k}, 25\text{k}, 50\text{k}, 100\text{k}\}$), establishing a sharp $0.50C$ collapse boundary (Section~\ref{sec:results}, Section~\ref{sec:sensitivity}).
+\item A formal problem formulation and exact Viterbi DP oracle ceiling across 88 traces and three capacities, including a 5-point switch-cost sweep ($c_{\text{switch}} \in \{0, 0.10C, 0.25C, 0.50C, C\}$) and 4 window granularities ($W \in \{10\text{k}, 25\text{k}, 50\text{k}, 100\text{k}\}$), establishing a sharp $0.50C$ collapse boundary (Sections~\ref{sec:results}--\ref{sec:sensitivity}).
 \item A matched-cost comparison of 17 switching controllers (CUSUM, Page--Hinkley~\cite{page}, ADWIN~\cite{adwin}, periodic, random, oracle-window, and continuous shadow) over a 6-policy candidate pool against static S3-FIFO (Section~\ref{sec:controllers}).
 \item A quantitative failure-mode decomposition showing why all 17 controllers underperform static S3-FIFO by $+0.039$--$+0.043$ miss ratio: sampled shadow caches mis-rank weaker policies ahead of S3-FIFO $32.9\%$--$38.9\%$ of the time (Section~\ref{sec:failure}).
-\item An unseen-family predictive rule evaluated via leave-one-family-out (LOFO) and cross-source holdout (Section~\ref{sec:rule}), plus a complete reproducible artifact package.
+\item An unseen-family predictive rule evaluated via leave-one-family-out (LOFO) and cross-source holdout, paired with trace-level case studies explaining when zero-cost headroom arises (Section~\ref{sec:rule}), plus a complete reproducible artifact package.
 \end{enumerate}
 
 % =====================================================================
@@ -105,18 +105,48 @@ We pose one concrete question: \emph{when, if ever, does discrete policy switchi
 \label{sec:related}
 % =====================================================================
 
-\subsection{Adaptive and Learned Replacement}
-Classical adaptive replacement algorithms---SEQ~\cite{seq}, EELRU~\cite{eelru}, ARC~\cite{arc}, CAR~\cite{car}, and CLOCK-Pro~\cite{clockpro}---adjust eviction priorities internally within a single unified structure (e.g., ghost-list-driven recency/frequency balance) rather than switching among heterogeneous policies. LeCaR~\cite{lecar} and CACHEUS~\cite{cacheus} use online multiplicative-weights learning to blend or choose between recency and frequency experts, while DIP~\cite{dip} uses set-dueling to select insertion policies at hardware cache granularity. Acme~\cite{acme} maintains a shadow cache for an alternative query-caching mode and switches when a statistical test favors it.
+\subsection{Static, Adaptive, and Learned Replacement}
+Classical replacement policies balance recency and frequency within a single fixed data structure. SEQ~\cite{seq} detects sequential scans and evicts scanned pages aggressively, while EELRU~\cite{eelru} uses aggregate miss-rate gradients over an extended eviction queue to adjust early-eviction thresholds. ARC~\cite{arc} and CAR~\cite{car} maintain ghost lists to dynamically size recency and frequency partitions, whereas LIRS~\cite{lirs}, 2Q~\cite{twoq}, and CLOCK-Pro~\cite{clockpro} separate cold one-hit wonders from hot pages using reuse-distance or multi-queue metadata. Recent static designs simplify this trade-off dramatically: W-TinyLFU~\cite{wtinylfu} pairs a tiny window cache with a Count-Min Sketch admission filter, LHD~\cite{lhd} estimates conditional hit density per age bucket, S3-FIFO~\cite{s3fifo} uses three FIFO queues with quick demotion and a ghost queue, and SIEVE~\cite{sieve} achieves scan resistance via lazy promotion with a single moving hand.
 
-More recently, modern static algorithms such as S3-FIFO~\cite{s3fifo} (three static FIFO queues with quick demotion and a ghost filter) and SIEVE~\cite{sieve} (lazy promotion via a single moving hand) achieve strong scan resistance and low CPU overhead without multi-policy switching. Learned eviction policies such as 3L-Cache~\cite{l3cache} and LPR~\cite{lpr} move feature-based scoring off or onto the eviction path. Our study evaluates representative implementations of all of these families side by side.
+A parallel line of work blends or switches between distinct experts. DIP~\cite{dip} uses hardware set-dueling to choose between insertion policies. ACME~\cite{acme02} and LeCaR~\cite{lecar} maintain multiple eviction experts and update weights via online regret minimization; CACHEUS~\cite{cacheus} extends LeCaR with scan-aware experts and adaptive learning rates. In database buffer pools, Acme~\cite{acme} maintains a shadow cache for an alternative query-caching mode and switches when a statistical test favors it.
+
+More recently, machine-learning and hybrid designs have expanded the design space. 3L-Cache~\cite{l3cache} moves lightweight feature-based eviction scoring onto the miss path, LPR~\cite{lpr} uses regret-based switching between LRU and MRU, S4-FIFO~\cite{s4fifo} augments FIFO queues with learned signals while preserving interpretability, EACLOCK~\cite{eaclock} adapts CLOCK hand traversal to workload patterns, and Clock2Q+~\cite{clock2q} refines multi-queue CLOCK replacement for metadata caches. Domain-specific studies also highlight workload sensitivity: Patel and Maniar~\cite{stale} show that policy rankings shift under stale-tolerant workloads, while Liu et al.~\cite{prefix} demonstrate that simple heuristics can outperform complex eviction in LLM prefix caches. At the systems layer, extensible OS and GPU memory managers such as \code{gpu_ext}~\cite{gpuext} and proactive GPU multitasking schedulers~\cite{msched} expose policy hooks via eBPF, making it tempting to plug in dynamic policy-switching controllers. Our study tests whether discrete switching actually offers headroom over strong static policies before investing in kernel switching machinery.
 
 \subsection{Drift Detection and Shadow Evaluation}
-Sequential change-point detectors such as CUSUM~\cite{page}, Page--Hinkley~\cite{page}, and ADWIN~\cite{adwin} were developed for supervised data streams~\cite{gama}, where ground-truth labels exist. In page replacement, there are no external labels: the only observable signal is the hit/miss stream, which depends on the currently active policy. Thus a policy switch itself alters the monitored signal.
+Sequential change-point detectors---CUSUM~\cite{page}, Page--Hinkley~\cite{page}, and ADWIN~\cite{adwin}---were originally developed for supervised data streams~\cite{gama}, where ground-truth labels arrive immediately after each prediction. Recent unsupervised and adaptive-threshold detectors---including prediction-uncertainty drift detection (PUDD)~\cite{pudd}, label-free SPC~\cite{spc}, autonomous threshold selection~\cite{dynthr}, transformer-autoencoder hybrids~\cite{tae}, hierarchical temporal memory tests~\cite{htm}, and ADWIN-U~\cite{adwinu}---address label scarcity in general data streams. In page replacement, however, there are no external labels at all: the only observable signal is the hit/miss stream, which is a direct function of the currently active policy. Consequently, switching policies alters the very distribution the detector monitors.
 
-To estimate candidate policy miss ratios cheaply without running full-size replicas, SHARDS~\cite{shards} and miniature simulations~\cite{mini} use spatially sampled shadow caches. However, if the shadow capacity $\Cs$ approaches or exceeds the distinct pages $\Dw$ observed in a sampled window, every candidate policy fits the working set and cannot be ranked. We enforce $\Cs = \min(\lfloor 0.2C\rfloor, \max(8, \lfloor 0.5\Dw\rfloor))$ so that $\Cs/\Dw < 1$ holds by construction.
+To evaluate candidate policies without running full-size replicas, SHARDS~\cite{shards} and miniature simulations~\cite{mini} execute candidates on spatially sampled address streams with scaled capacities. A fundamental pitfall arises when the shadow capacity $\Cs$ approaches or exceeds the number of distinct pages $\Dw$ observed in a sampled evaluation window: all candidate policies fit the sampled working set and tie, making ranking impossible. Enforcing $\Cs / \Dw < 1$ avoids trivial ties, but as we show in Section~\ref{sec:failure}, small sampled shadow caches introduce severe ranking noise that causes controllers to demote S3-FIFO in favor of weaker policies.
 
 \subsection{Hindsight Oracles}
-Belady's MIN~\cite{belady} establishes the offline lower bound on single-page eviction. By contrast, our per-window Viterbi DP oracle bounds \emph{discrete policy-switching controllers} over a fixed candidate pool, explicitly charging a switching penalty $c_{\text{switch}}$ whenever the selected policy changes between adjacent windows.
+Belady's MIN~\cite{belady} establishes the offline lower bound on single-page eviction by evicting the page with the farthest next reference. MIN is unattainable online and does not bound \emph{policy-switching} controllers that must select among realizable online algorithms. By contrast, our per-window Viterbi DP oracle~\cite{belady} bounds discrete policy-switching schedules over a concrete pool of 21 implementable policies, explicitly charging a switching penalty $c_{\text{switch}}$ whenever the active policy changes between adjacent windows.
+
+% =====================================================================
+\section{Problem Formulation and Hypotheses}
+\label{sec:problem}
+% =====================================================================
+
+Let $\sigma = (x_1, x_2, \ldots, x_n)$ be a sequence of $n$ page references over a universe of distinct pages $\mathcal{U}$, with total working-set size $\mathrm{WSS} = |\mathcal{U}|$. Given a target cache capacity $C = \lfloor \alpha \cdot \mathrm{WSS} \rfloor$ for $\alpha \in \{0.01, 0.05, 0.10\}$, we discard a warm-up prefix of $n_{\text{warm}} = \min(100{,}000, \lfloor 0.1n \rfloor)$ references and partition the remaining stream into $T = \lfloor (n - n_{\text{warm}}) / W \rfloor$ non-overlapping windows of length $W$, yielding $n_{\text{eval}} = T \cdot W$ evaluated references.
+
+Let $\mathcal{P} = \{p_1, \ldots, p_P\}$ be a pool of $P$ realizable replacement policies. When policy $p \in \mathcal{P}$ runs continuously on $\sigma$ at capacity $C$, let $m_{t,p}$ denote the exact number of misses incurred in window $t \in \{1,\ldots,T\}$, and let $M_{\text{best}} = \min_{p \in \mathcal{P}} \sum_{t=1}^{T} m_{t,p}$ be the total misses of the best single static policy on that trace--capacity pair.
+
+A discrete switching schedule $\pi = (\pi_1, \ldots, \pi_T) \in \mathcal{P}^T$ selects one policy per window and incurs a per-switch penalty $c_{\text{switch}} \ge 0$ whenever $\pi_t \neq \pi_{t-1}$. Physically, $c_{\text{switch}} = C$ models a full cache refill upon switching, whereas $c_{\text{switch}} \in (0, C)$ models partial state migration or warm-cache handoff, and $c_{\text{switch}} = 0$ represents an idealized frictionless upper bound. The penalized miss count of schedule $\pi$ is
+\begin{equation}
+  M(\pi; c_{\text{switch}}) = \sum_{t=1}^{T} m_{t,\pi_t} + c_{\text{switch}} \sum_{t=2}^{T} \mathbf{1}[\pi_t \neq \pi_{t-1}].
+\end{equation}
+The \textbf{net oracle gain} over the best static policy is
+\begin{equation}
+  g(c_{\text{switch}}) = \frac{M_{\text{best}} - \min_{\pi \in \mathcal{P}^T} M(\pi; c_{\text{switch}})}{n_{\text{eval}}}.
+\end{equation}
+Notice that $g(c_{\text{switch}}) \ge 0$ holds identically because any constant schedule $\pi_t \equiv p^*$ incurs zero switches.
+
+Online controllers do not observe $m_{t,p}$ for all $p \in \mathcal{P}$ without paying evaluation cost. Instead, a controller monitors the active miss stream using a drift trigger and, when triggered (or periodically), evaluates a candidate pool $\mathcal{P}_{\text{cand}} \subseteq \mathcal{P}$ in sampled shadow caches at sampling rate $p_{\text{samp}} \in (0, 1]$ and scaled capacity $\Cs$. To prevent working-set collapse in the shadow cache, $\Cs$ must satisfy $\Cs / \Dw < 1$, where $\Dw$ is the number of distinct pages observed in the sampled evaluation window.
+
+Based on this formulation, our study tests three hypotheses recorded prior to execution:
+\begin{itemize}
+\item \textbf{H1 (Oracle Ceiling):} At $c_{\text{switch}} = C$ and $W = 50{,}000$, fewer than $10\%$ of family--capacity groups will clear our smallest worthwhile gain threshold ($g(C) \ge 0.02$ on at least two-thirds of traces in the group).
+\item \textbf{H2 (Online Controllers vs.\ Static S3-FIFO):} No online switching controller over $\mathcal{P}_{\text{cand}}$ will achieve a statistically significant miss-ratio reduction over static \code{S3-FIFO} across all 264 trace--capacity pairs (one-sided paired Wilcoxon test with Holm--Bonferroni correction).
+\item \textbf{H3 (Predictive Screening):} Purely observable trace features computed before simulation can predict which unseen trace families exhibit switching headroom under leave-one-family-out (LOFO) cross-validation.
+\end{itemize}
 
 % =====================================================================
 \section{Oracle and Experimental Design}
@@ -124,27 +154,17 @@ Belady's MIN~\cite{belady} establishes the offline lower bound on single-page ev
 % =====================================================================
 
 \subsection{Simulator and Trace Collection}
-Our standalone C++17 simulator \code{pathA_sim} executes all 21 policies under identical trace-driven replay and measures CPU time using \code{CLOCK_PROCESS_CPUTIME_ID}. Real-application page-level traces were captured using an \code{LD_PRELOAD} interposition library (\code{pc_trace.so}) hooking \code{open}, \code{openat64}, \code{read}, \code{write}, \code{pread}, \code{fread}, \code{fopen}, and \code{mmap} across SQLite workloads (OLTP scan, join/aggregation, mixed read-write), \code{git} repository operations, and a Python ETL pipeline. Instrumented kernel traces capture memory page references across 15 algorithms (BFS, binary search, B-tree, hash join, hash map, heap, linked list, matvec, PageRank, radix sort, sort, sparse matvec, stencil, string match, union-find). Public traces comprise 6 FIU block-I/O traces (train/test splits) and 6 PDL storage/cache traces (Alibaba, CloudPhysics, MetaKV, MSR, Tencent, Twitter).
+Our standalone C++17 simulator \code{pathA_sim} executes all 21 policies under identical trace-driven replay and measures CPU time using \code{CLOCK_PROCESS_CPUTIME_ID}. Real-application page-level traces were captured using an \code{LD_PRELOAD} interposition library (\code{pc_trace.so}) hooking \code{open}, \code{openat64}, \code{read}, \code{write}, \code{pread}, \code{fread}, \code{fopen}, and \code{mmap} across SQLite workloads (OLTP scan, join/aggregation, mixed read-write), \code{git} repository operations, and a Python ETL pipeline. Instrumented kernel traces capture memory page references across 15 algorithms (BFS, binary search, B-tree, hash join, hash map, heap, linked list, matvec, PageRank, radix sort, sort, sparse matvec, stencil, string match, union-find). Public traces comprise 12 FIU block-I/O traces (6 workloads with train/test splits) and 6 PDL storage/cache traces (Alibaba, CloudPhysics, MetaKV, MSR~\cite{msr}, Tencent, Twitter)~\cite{pdl}.
 
 \subsection{Exact Viterbi DP Oracle}
-Let a trace of length $n$ begin with a warm-up prefix of $n_{\text{warm}} = \min(100{,}000, \lfloor 0.1n\rfloor)$ references. The remaining references are partitioned into $T = \lfloor (n - n_{\text{warm}}) / W \rfloor$ non-overlapping windows of size $W$, giving $n_{\text{eval}} = T \cdot W$ evaluated references. For each window $t \in \{1,\ldots,T\}$ and policy $p \in \{1,\ldots,P\}$ ($P=21$), we record the exact miss count $m_{t,p}$.
-
-Given switch penalty $c_{\text{switch}} \ge 0$, the exact DP oracle finds the policy sequence $\pi_1,\ldots,\pi_T \in \{1,\ldots,P\}$ minimizing total penalized misses:
+For each trace--capacity pair and window size $W$, we simulate all $P=21$ policies independently to obtain the exact miss matrix $\{m_{t,p}\}_{t=1..T,\, p=1..P}$. Given switch penalty $c_{\text{switch}} \ge 0$, we compute $M_{\text{oracle}}(c_{\text{switch}}) = \min_{\pi} M(\pi; c_{\text{switch}})$ exactly via Viterbi dynamic programming in $O(T P^2)$ time:
 \begin{equation}
-  M_{\text{oracle}}(c_{\text{switch}}) = \min_{\pi_1,\ldots,\pi_T} \left[ \sum_{t=1}^{T} m_{t,\pi_t} + c_{\text{switch}} \sum_{t=2}^{T} \mathbf{1}[\pi_t \neq \pi_{t-1}] \right].
+  \mathrm{dp}[t][p] = m_{t,p} + \min_{q \in \{1,\ldots,P\}} \Big(\mathrm{dp}[t-1][q] + c_{\text{switch}} \mathbf{1}[p \neq q]\Big),
 \end{equation}
-We solve this exactly via Viterbi dynamic programming in $O(T P^2)$ time:
-\[
-  \mathrm{dp}[t][p] = m_{t,p} + \min_{q \in \{1,\ldots,P\}} \Big(\mathrm{dp}[t-1][q] + c_{\text{switch}} \mathbf{1}[p \neq q]\Big).
-\]
-Let $M_{\text{best}} = \min_{p} \sum_{t=1}^{T} m_{t,p}$ be the miss count of the best single static policy on the trace. The \textbf{net oracle gain} is
-\begin{equation}
-  g(c_{\text{switch}}) = \frac{M_{\text{best}} - M_{\text{oracle}}(c_{\text{switch}})}{n_{\text{eval}}}.
-\end{equation}
-By definition, $g(c_{\text{switch}}) \ge 0$ always holds. Following our protocol, a family--capacity group clears the worthwhile-gain threshold if $g(C) \ge 0.02$ on at least $2/3$ of its traces.
+initialized with $\mathrm{dp}[1][p] = m_{1,p}$ for all $p \in \{1,\ldots,P\}$, and backtracking from $\arg\min_p \mathrm{dp}[T][p]$ to recover the optimal switch count and schedule.
 
 \subsection{Switching Controllers and Hyperparameters}
-We evaluate 17 online switching controllers over a **6-policy candidate pool** (\code{LRU}, \code{LFU-A}, \code{2Q}, \code{MRU}, \code{S3-FIFO}, \code{ARC}) against static \code{S3-FIFO} (Table~\ref{tab:hyperparams}). All controllers sample references into a rolling window at rate $p=0.20$ and rank candidates in shadow caches of capacity $\Cs = \min(\lfloor 0.2C\rfloor, \max(8, \lfloor 0.5\Dw\rfloor))$ using a lower-confidence-bound rule ($z=1.28$, $40\%$ shadow warm-up, $4$-block variance estimate, $\text{dwell}=10$ epochs, $\text{cooldown}=4$ epochs, $\text{hysteresis}=30$ epochs, epoch length $2{,}000$ references). Upon switching, resident pages are migrated into the new policy instance ordered by recency/frequency metadata.
+We evaluate 17 online switching controllers over a **6-policy candidate pool** (\code{LRU}, \code{LFU-A}, \code{2Q}, \code{MRU}, \code{S3-FIFO}, \code{ARC}) against static \code{S3-FIFO} (Table~\ref{tab:hyperparams}). All controllers sample references into a rolling window at rate $p_{\text{samp}}=0.20$ and rank candidates in shadow caches of capacity $\Cs = \min(\lfloor 0.2C\rfloor, \max(8, \lfloor 0.5\Dw\rfloor))$ so that $\Cs/\Dw < 1$ holds by construction. Candidate selection uses a lower-confidence-bound (LCB) rule ($z=1.28$, $40\%$ shadow warm-up, $4$-block variance estimate, $\text{dwell}=10$ epochs, $\text{cooldown}=4$ epochs, $\text{hysteresis}=30$ epochs, epoch length $2{,}000$ references). Upon switching, resident pages are migrated into the new policy instance ordered by recency/frequency metadata.
 
 \begin{table}[t]
 \centering
@@ -194,6 +214,25 @@ Table~\ref{tab:h1} and Fig.~\ref{fig:ceiling} summarize the exact DP oracle net 
 
 \textbf{Why is the ceiling so small?} Table~\ref{tab:policies} ranks all 21 static and adaptive policies across the 264 pairs. \code{S3-FIFO} is the single best static policy on 176 pairs ($66.7\%$) and achieves the lowest mean miss ratio ($0.4890$ at $59.5$\,ns/ref), followed by \code{CAR} ($0.5151$), \code{ARC} ($0.5189$), and \code{2Q} ($0.5192$). Because \code{S3-FIFO} handles both hot-object retention and scan resistance within one policy, window-to-window specialization yields minimal margin.
 
+\textbf{Capacity-regime breakdown.} Table~\ref{tab:cap_regime} disaggregates oracle headroom and \code{ContShadow} performance across $1\%$, $5\%$, and $10\%$ WSS. Even at $1\%$ WSS---where eviction pressure is highest---$g(C)$ averages $0.0000$ (max $0.0001$), while \code{ContShadow} suffers its largest deficit ($+0.0562$ miss ratio, $2.2$ switches/trace) because tiny shadow caches ($\Cs \le 0.2C$) become maximally noisy. Zero-cost headroom rises modestly with capacity ($0.0003 \to 0.0010 \to 0.0023$), yet full-cost switching remains negligible at every capacity.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Oracle Ceiling and ContShadow Deficit by Capacity ($W=50{,}000$)}
+\label{tab:cap_regime}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrrrrrr}
+\toprule
+Cap. & \code{S3-FIFO} & Best Static & $g(C)$ & $g(0)$ & \code{ContSh.} & $\Delta$ \\
+\midrule
+1\% WSS  & 0.5545 & 0.5496 & 0.0000 & 0.0003 & 0.6106 & +0.0562 \\
+5\% WSS  & 0.4750 & 0.4741 & 0.0000 & 0.0010 & 0.5050 & +0.0300 \\
+10\% WSS & 0.4376 & 0.4364 & 0.0001 & 0.0023 & 0.4751 & +0.0374 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \begin{table}[t]
 \centering
 \scriptsize
@@ -207,7 +246,7 @@ Table~\ref{tab:h1} and Fig.~\ref{fig:ceiling} summarize the exact DP oracle net 
 \label{sec:sensitivity}
 % =====================================================================
 
-A natural objection is that $W=50{,}000$ might smooth over rapid phase shifts, or that $c_{\text{switch}}=C$ might be overly conservative when resident metadata is migrated. To test both, we sweep $c_{\text{switch}} \in \{0, 0.10C, 0.25C, 0.50C, C\}$ across finer windows $W \in \{10{,}000, 25{,}000, 50{,}000\}$ on all 264 trace--capacity pairs (3,960 DP runs; Table~\ref{tab:csweep}, Fig.~\ref{fig:csweep}).
+A natural objection is that $W=50{,}000$ might smooth over rapid phase shifts, or that $c_{\text{switch}}=C$ might be overly conservative when resident metadata is migrated. To test both, we sweep $c_{\text{switch}} \in \{0, 0.10C, 0.25C, 0.50C, C\}$ across finer windows $W \in \{10{,}000, 25{,}000, 50{,}000\}$ on all 264 trace--capacity pairs (3,960 DP runs; Table~\ref{tab:csweep}, Fig.~\ref{fig:csweep}), and also evaluate $W=100{,}000$ at $c_{\text{switch}} \in \{0, C\}$.
 
 \begin{table}[t]
 \centering
@@ -226,10 +265,27 @@ A natural objection is that $W=50{,}000$ might smooth over rapid phase shifts, o
 
 Three findings emerge:
 \begin{enumerate}
-\item \textbf{Finer windows expose modest zero-cost headroom:} At $W=10{,}000$ and $c_{\text{switch}}=0$, $14/264$ pairs ($5.3\%$) clear $0.02$ (max $0.1331$), compared to $2/264$ at $W=50{,}000$.
-\item \textbf{Sharp $0.50C$ collapse boundary:} As soon as $c_{\text{switch}} \ge 0.50C$, **0 of 264 pairs** clear $0.02$ at \emph{any} window size ($10\text{k}$, $25\text{k}$, $50\text{k}$, or $100\text{k}$).
-\item \textbf{Design constraint:} Switching can only clear $0.02$ on rare traces if state-migration/re-warming cost is strictly below $0.50C$ \emph{and} adaptation reacts within $\le 25{,}000$ references.
+\item \textbf{Finer windows expose modest zero-cost headroom:} At $W=10{,}000$ and $c_{\text{switch}}=0$, $14/264$ pairs ($5.3\%$) clear $0.02$ (mean $0.0045$, max $0.1331$), compared to $10/264$ at $W=25{,}000$ (max $0.0828$), $2/264$ at $W=50{,}000$ (max $0.0564$), and $1/264$ at $W=100{,}000$ (mean $0.0007$, max $0.0419$).
+\item \textbf{Sharp $0.50C$ collapse boundary:} As soon as $c_{\text{switch}} \ge 0.50C$, **0 of 264 pairs** clear $0.02$ at \emph{any} window size ($10\text{k}$, $25\text{k}$, $50\text{k}$, or $100\text{k}$). Even at $W=10{,}000$ and $c_{\text{switch}}=0.50C$, the single largest net gain across all 264 pairs is $0.0081$.
+\item \textbf{Headroom concentrates in specific sources:} Table~\ref{tab:csweep_source} decomposes the finest zero-cost sweep ($W=10{,}000$, $c_{\text{switch}}=0$) by trace source. All 14 pairs clearing $0.02$ come from \code{fiu_public} ($10/36$, $27.8\%$) and \code{real_app_pageref} ($4/30$, $13.3\%$), whereas \code{instrumented_program} ($0/180$) and \code{pdl_public} ($0/18$) never reach $0.02$. Thus, switching can only pay off on non-stationary enterprise or multi-phase application workloads when state-migration cost stays strictly below $0.50C$ \emph{and} adaptation reacts within $\le 25{,}000$ references.
 \end{enumerate}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Per-Source Breakdown at $W=10{,}000$, $c_{\text{switch}}=0$}
+\label{tab:csweep_source}
+\begin{tabular}{lrrrr}
+\toprule
+Source & Pairs & Mean $g$ & Max $g$ & $\ge 0.02$ \\
+\midrule
+\code{fiu_public} & 36 & 0.0219 & 0.1331 & 10 \\
+\code{real_app_pageref} & 30 & 0.0103 & 0.0665 & 4 \\
+\code{pdl_public} & 18 & 0.0016 & 0.0087 & 0 \\
+\code{instrumented_program} & 180 & 0.0004 & 0.0116 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % =====================================================================
 \section{Results: Switching Controllers vs.\ S3-FIFO (H2)}
@@ -255,7 +311,7 @@ Table~\ref{tab:h2} and Fig.~\ref{fig:pareto} compare all 17 switching controller
 
 \textbf{No controller beats S3-FIFO (H2 confirmed).} Every switching controller incurs a \emph{higher} mean miss ratio than static \code{S3-FIFO} ($\Delta \in [+0.0393, +0.0433]$, $p_{\text{Holm}} = 1.000$ for all 17) and higher CPU overhead ($92.9$--$199.1$\,ns/ref vs.\ $59.5$\,ns/ref for \code{S3-FIFO}). Even \code{ContShadow}, which evaluates the 6-policy shadow pool every $10$ epochs ($199.1$\,ns/ref, $3.35\times$ \code{S3-FIFO}'s CPU cost), loses by $+0.0412$ miss ratio.
 
-\textbf{Trigger and budget differences are second-order.} Across all 17 variants, mean miss ratio spans a narrow band of $0.0040$ (\code{CUSUM-high} $+0.0393$ to \code{Periodic-high} $+0.0433$). The bottleneck is not detector tuning or evaluation budget, but shadow ranking error coupled with the absence of oracle headroom.
+\textbf{Trigger and budget differences are second-order.} Across all 17 variants, mean miss ratio spans a narrow band of $0.0040$ (\code{CUSUM-high} $+0.0393$ to \code{Periodic-high} $+0.0433$). Even \code{OracleTrig}, which triggers shadow evaluation exclusively at exact DP oracle switch boundaries, incurs $+0.0405$ higher miss ratio than static \code{S3-FIFO}. The bottleneck is therefore not detector tuning or trigger accuracy, but shadow ranking error coupled with the absence of oracle headroom.
 
 % =====================================================================
 \section{Controller Failure-Mode Diagnosis}
@@ -274,12 +330,12 @@ Why did \code{ContShadow}, \code{CUSUM-med}, and \code{OracleTrig} lose $+0.0405
 
 Two mechanisms explain the deficit:
 \begin{enumerate}
-\item \textbf{Sampled shadow mis-ranking:} Although \code{S3-FIFO} dominates full-cache replay, sampled shadow caches ($\Cs \le 0.2C$, $p=0.20$) compress \code{S3-FIFO}'s 10\%/90\% queue split and ghost filter into small, noisy sample windows. Consequently, \code{ContShadow} spends only $67.1\%$ of references in \code{S3-FIFO}, allocating $18.9\%$ to \code{LRU}, $6.0\%$ to \code{MRU}, $4.4\%$ to \code{LFU-A}, and $3.4\%$ to \code{2Q}. Because \code{MRU} averages $0.8314$ miss ratio vs.\ $0.4890$ for \code{S3-FIFO}, even a $6\%$ \code{MRU} share adds $+0.0205$ miss ratio directly, and $18.9\%$ \code{LRU} adds another $+0.0073$.
-\item \textbf{Consistent across all trace sources:} Even on \code{pdl_public}, where \code{ContShadow} never selects \code{MRU} ($0.000$) and stays in \code{S3-FIFO} $83.3\%$ of the time, the remaining $16.7\%$ in \code{LRU} plus switch re-warming still yields a $+0.0095$ loss. On \code{real_app_pageref}, $10.9\%$ \code{MRU} selection causes a $+0.0158$ deficit.
+\item \textbf{Sampled shadow mis-ranking:} Although \code{S3-FIFO} dominates full-cache replay, sampled shadow caches ($\Cs \le 0.2C$, $p_{\text{samp}}=0.20$) compress \code{S3-FIFO}'s 10\%/90\% queue split and ghost filter into small, noisy sample windows. Consequently, \code{ContShadow} spends only $67.1\%$ of references in \code{S3-FIFO}, allocating $18.9\%$ to \code{LRU}, $6.0\%$ to \code{MRU}, $4.4\%$ to \code{LFU-A}, and $3.4\%$ to \code{2Q}. Because \code{MRU} averages $0.8314$ miss ratio vs.\ $0.4890$ for \code{S3-FIFO}, even a $6\%$ \code{MRU} share adds $+0.0205$ miss ratio directly, and $18.9\%$ \code{LRU} adds another $+0.0073$.
+\item \textbf{Consistent across all trace sources:} Even on \code{pdl_public}, where \code{ContShadow} never selects \code{MRU} ($0.000$) and stays in \code{S3-FIFO} $83.3\%$ of the time, the remaining $16.7\%$ in \code{LRU} plus switch re-warming still yields a $+0.0095$ loss. On \code{real_app_pageref}, $10.9\%$ \code{MRU} selection causes a $+0.0158$ deficit, while on \code{instrumented_program}, $35.8\%$ combined time in non-\code{S3-FIFO} policies produces a $+0.0552$ loss.
 \end{enumerate}
 
 % =====================================================================
-\section{Predictive Rule for Unseen Families (H3)}
+\section{Predictive Rule and Case Studies (H3)}
 \label{sec:rule}
 % =====================================================================
 
@@ -304,7 +360,7 @@ We extract 11 purely observable trace features prior to cache simulation: workin
 \label{fig:roc}
 \end{figure}
 
-The strongest standardized predictors (Table~\ref{tab:feat_weights}) are \code{window_reuse_cv} ($+0.2808$), \code{uniq_window_cv} ($+0.1843$), \code{entropy_bits} ($+0.1778$), and \code{window_turnover_max} ($+0.1383$). Case studies confirm this split: \code{fiu_online.cs.fiu.edu_test} ($g(0)=0.0564$ at $10\%$ WSS) and \code{git_repo_s202} ($g(0)=0.0196$) exhibit large window-to-window reuse shifts, whereas \code{sqlite} workloads retain stable hot pages and yield $g(C) \le 0.0005$.
+The strongest standardized predictors (Table~\ref{tab:feat_weights}) are \code{window_reuse_cv} ($+0.2808$), \code{uniq_window_cv} ($+0.1843$), \code{entropy_bits} ($+0.1778$), and \code{window_turnover_max} ($+0.1383$).
 
 \begin{table}[t]
 \centering
@@ -314,14 +370,47 @@ The strongest standardized predictors (Table~\ref{tab:feat_weights}) are \code{w
 \input{table_feat_weights}
 \end{table}
 
+\subsection{Representative Trace Case Studies}
+To ground these feature weights physically, Table~\ref{tab:cases} contrasts four representative traces across our sources:
+\begin{itemize}
+\item \textbf{\code{fiu_online.cs.fiu.edu_test}:} Exhibits extreme window-to-window reuse variability (\code{window_reuse_cv} $= 2.5916$), high page entropy ($15.36$\,bits), and near-complete window turnover ($0.9999$). Its zero-cost oracle gain reaches $0.0564$ at $10\%$ WSS ($0.0208$ at $5\%$ WSS), yet paying $c_{\text{switch}}=C$ collapses the optimal switch count to zero ($g(C)=0.0000$).
+\item \textbf{\code{git_repo_s202}:} Alternates between repository packing/indexing and object traversal (\code{uniq_window_cv} $= 0.3096$, \code{entropy_bits} $= 15.05$), yielding $g(0)=0.0196$ at $10\%$ WSS ($0.0121$ at $5\%$ WSS) over \code{MGLRU-style}/\code{2Q}, but again $0$ switches once $c_{\text{switch}}=C$.
+\item \textbf{\code{python_etl_s101}:} Transitions cleanly between extract, transform, and load stages (\code{uniq_window_cv} $= 0.5904$, \code{window_reuse_cv} $= 0.7205$). It is one of only four pairs in the entire corpus where a single DP switch survives $c_{\text{switch}}=C$, yet net gain is only $0.0067$ (below $0.02$).
+\item \textbf{\code{sqlite_join_agg_s101}:} Maintains stationary join-table hot sets (\code{window_reuse_cv} $= 0.0012$, \code{uniq_window_cv} $= 0.1124$). Static \code{S3-FIFO} captures the working set throughout, leaving $g(0) \le 0.0020$ and $g(C) \le 0.0005$.
+\end{itemize}
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Representative Trace Case Studies ($10\%$ WSS, $W=50{,}000$)}
+\label{tab:cases}
+\begin{tabular}{lrrrr}
+\toprule
+Trace & \code{win_reuse_cv} & \code{uniq_win_cv} & $g(0)$ & $g(C)$ \\
+\midrule
+\code{fiu_online_test} & 2.5916 & 0.1415 & 0.0564 & 0.0000 \\
+\code{git_repo_s202} & 0.3309 & 0.3096 & 0.0196 & 0.0000 \\
+\code{python_etl_s101} & 0.7205 & 0.5904 & 0.0087 & 0.0067 \\
+\code{sqlite_join_agg} & 0.0012 & 0.1124 & 0.0020 & 0.0005 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % =====================================================================
 \section{Discussion and Threats to Validity}
 \label{sec:threats}
 % =====================================================================
 
-\textbf{Design implication.} Across 88 traces, discrete policy switching never clears $0.02$ against the best static policy once switch cost reaches $0.50C$, and even zero-cost switching helps in fewer than $1\%$ of configurations at $W=50{,}000$. Moreover, practical sampled-shadow controllers lose $+0.039$--$+0.043$ miss ratio to static \code{S3-FIFO} because small shadow caches mis-rank policies. For cache designers, engineering effort is better invested in a single scan-resistant, low-overhead policy (e.g., S3-FIFO, CAR, or SIEVE) than in drift detectors and multi-policy switching controllers.
+\textbf{Design implication.} Across 88 traces, discrete policy switching never clears $0.02$ against the best static policy once switch cost reaches $0.50C$, and even zero-cost switching helps in fewer than $1\%$ of configurations at $W=50{,}000$. Moreover, practical sampled-shadow controllers lose $+0.039$--$+0.043$ miss ratio to static \code{S3-FIFO} because small shadow caches mis-rank policies. For cache designers, engineering effort is better invested in a single scan-resistant, low-overhead policy (e.g., S3-FIFO, CAR, or SIEVE) than in drift detectors and multi-policy switching controllers. When practitioners suspect an application exhibits sharp phase transitions, our lightweight feature screen (\code{window_reuse_cv}, \code{uniq_window_cv}) offers an inexpensive pre-check before building switching infrastructure.
 
-\textbf{Limitations.} (1)~Our real-application traces cover SQLite, \code{git}, and Python ETL captured via user-space \code{LD_PRELOAD}, which intercepts file/syscall and \code{mmap} creation events rather than post-map page faults or kernel readahead; production kernel workloads may differ. (2)~Instrumented kernels represent $68\%$ of raw trace count, though macro-averaging by source and per-source diagnostics confirm identical conclusions across all four sources. (3)~Our DP oracle uses $W \in [10\text{k}, 100\text{k}]$; sub-10k micro-phases are outside our scope, though switch costs would amortize over even fewer references. (4)~Our protocol was timestamped locally in git rather than in an external registry.
+\textbf{Limitations and threats to validity.}
+\begin{enumerate}
+\item \emph{User-space trace capture:} Our real-application traces cover SQLite, \code{git}, and Python ETL captured via user-space \code{LD_PRELOAD}, which intercepts file/syscall and \code{mmap} creation events rather than post-map page faults, kernel readahead, or asynchronous writeback; in-kernel page-cache dynamics may differ.
+\item \emph{Corpus composition:} Instrumented kernels represent $68\%$ of raw trace count ($60/88$), though macro-averaging by source and per-source diagnostics (Tables~\ref{tab:h1}, \ref{tab:csweep_source}, \ref{tab:cdiag}) confirm identical conclusions across all four sources.
+\item \emph{Window granularity:} Our DP oracle uses $W \in [10\text{k}, 100\text{k}]$; sub-10k micro-phases are outside our scope, though switch costs would amortize over even fewer references and thus tighten the $0.50C$ boundary further.
+\item \emph{Controller pool size:} The 17 online controllers select from a 6-policy candidate pool rather than all 21 policies, though \code{S3-FIFO} (the overall best static policy) is included in the pool and still beaten by static \code{S3-FIFO} alone.
+\item \emph{Post hoc evidentiary status:} Our protocol was timestamped locally in git rather than in an external third-party registry; accordingly, all inferential claims are presented as post hoc.
+\end{enumerate}
 
 % =====================================================================
 \section{Conclusion}
@@ -337,7 +426,7 @@ An exact Viterbi DP hindsight oracle across 88 traces, 30 families, and three ca
 \textbf{Competing interests:} The authors declare no competing interests.
 \textbf{Data and code availability:} All simulator code, trace capture scripts, raw CSVs, and table/figure generation scripts are included in the repository.
 
-\begin{thebibliography}{27}
+\begin{thebibliography}{42}
 \footnotesize
 \setlength{\itemsep}{0pt}
 \bibitem{seq} G. Glass and P. Cao, ``Adaptive page replacement based on memory reference behavior,'' in \emph{Proc. ACM SIGMETRICS}, 1997, pp. 115--126.
@@ -346,9 +435,11 @@ An exact Viterbi DP hindsight oracle across 88 traces, 30 families, and three ca
 \bibitem{lecar} K. Vietri \emph{et al.}, ``Driving cache replacement with ML-based LeCaR,'' in \emph{Proc. 10th USENIX Workshop Hot Topics Storage File Syst. (HotStorage)}, 2018.
 \bibitem{cacheus} L. V. Rodriguez \emph{et al.}, ``Learning cache replacement with CACHEUS,'' in \emph{Proc. 19th USENIX Conf. File Storage Technol. (FAST)}, 2021, pp. 341--354.
 \bibitem{l3cache} W. Zhou, Z. Niu, Y. Xiong, J. Fang, and Q. Wang, ``3L-Cache: Low overhead and precise learning-based eviction policy for caches,'' in \emph{Proc. 23rd USENIX Conf. File Storage Technol. (FAST)}, 2025, pp. 237--254.
+\bibitem{s4fifo} H. Xia, W. Nixon, B. D. Marthen, P. Bhandari, and J. Yang, ``Learning-augmented heuristics: Simple yet smart, robust and interpretable cache eviction,'' in \emph{Proc. 20th USENIX Symp. Oper. Syst. Design Implement. (OSDI)}, 2026, pp. 2241--2259.
 \bibitem{s3fifo} J. Yang, Y. Zhang, Z. Qiu, Y. Yue, and K. V. Rashmi, ``FIFO queues are all you need for cache eviction,'' in \emph{Proc. 29th ACM Symp. Oper. Syst. Princ. (SOSP)}, 2023, pp. 130--149.
 \bibitem{sieve} Y. Zhang, J. Yang, Y. Yue, Y. Vigfusson, and K. V. Rashmi, ``SIEVE is simpler than LRU: An efficient turn-key eviction algorithm for web caches,'' in \emph{Proc. 21st USENIX Symp. Networked Syst. Design Implement. (NSDI)}, 2024.
 \bibitem{pdl} CMU Parallel Data Laboratory, ``Cache eviction tactics: cacheDatasets trace collection,'' online data repository and format README, accessed Nov. 24, 2026. The project page links to the \texttt{cacheDatasets} repository; its FIU directory contains \texttt{fiu\_madmax-110108-112108.oracleGeneral.zst}. The README specifies zstd-compressed 24-byte request records and citation requirements, but no dataset-specific licence; PDL's site-wide copyright notice says materials distributed by the server are provided on a non-commercial basis. [Online]. Available: \url{https://pdl.cmu.edu/CacheEviction/index.shtml}; \url{https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/}; \url{https://ftp.pdl.cmu.edu/pub/datasets/twemcacheWorkload/cacheDatasets/README}; \url{https://pdl.cmu.edu/Publications/copyright.shtml}.
+\bibitem{msr} D. Narayanan, A. Donnelly, and A. Rowstron, ``Write off-loading: Practical power management for enterprise storage,'' \emph{ACM Trans. Storage}, vol. 4, no. 3, Art. no. 10, 2008.
 \bibitem{car} S. Bansal and D. S. Modha, ``CAR: Clock with adaptive replacement,'' in \emph{Proc. 3rd USENIX Conf. File Storage Technol. (FAST)}, 2004, pp. 187--200.
 \bibitem{lirs} S. Jiang and X. Zhang, ``LIRS: An efficient low inter-reference recency set replacement policy to improve buffer cache performance,'' in \emph{Proc. ACM SIGMETRICS}, 2002, pp. 31--42.
 \bibitem{wtinylfu} G. Einziger, R. Friedman, and B. Manes, ``TinyLFU: A highly efficient cache admission policy,'' \emph{ACM Trans. Storage}, vol. 13, no. 4, Art. no. 35, 2017.
@@ -360,8 +451,21 @@ An exact Viterbi DP hindsight oracle across 88 traces, 30 families, and three ca
 \bibitem{mglru} Linux Kernel Organization, ``Multi-gen LRU,'' Linux kernel documentation, 2026. [Online]. Available: \url{https://docs.kernel.org/mm/multigen_lru.html}
 \bibitem{page} E. S. Page, ``Continuous inspection schemes,'' \emph{Biometrika}, vol. 41, no. 1--2, pp. 100--115, 1954.
 \bibitem{adwin} A. Bifet and R. Gavald\`{a}, ``Learning from time-changing data with adaptive windowing,'' in \emph{Proc. SIAM Int. Conf. Data Mining (SDM)}, 2007, pp. 443--448.
+\bibitem{acme02} I. Ari, A. Amer, R. Gramacy, E. L. Miller, S. A. Brandt, and D. D. E. Long, ``ACME: Adaptive caching using multiple experts,'' in \emph{Proc. Workshop Distrib. Data Struct. (WDAS)}, 2002.
 \bibitem{acme} T. Azim, A. Nadeem, and A. Ailamaki, ``Adaptive cache mode selection for queries over raw data,'' in \emph{Proc. 9th Int. Workshop Accelerating Analytics Data Manag. Syst. Using Modern Processor Storage Archit. (ADMS@VLDB)}, 2018, pp. 51--65.
+\bibitem{eaclock} G. Yuan, X. Li, S. Wu, Y. Zhu, D. Yang, C. Yao, X. Tang, and G. Chen, ``EACLOCK: An efficient and adaptive page replacement algorithm to understand your workload,'' \emph{IEEE Trans. Knowl. Data Eng.}, vol. 38, no. 11, pp. 7387--7401, Nov. 2026, doi: 10.1109/TKDE.2026.3724159. [Online]. Available: \url{https://doi.org/10.1109/TKDE.2026.3724159}.
+\bibitem{clock2q} Y. Zhai \emph{et al.}, ``Clock2Q+: A simple and efficient replacement algorithm for metadata cache in VMware vSAN,'' \emph{Proc. VLDB Endow.}, vol. 19, no. 12, pp. 3874--3887, 2026, doi: 10.14778/3827998.3828002.
+\bibitem{stale} N. Patel and H. Maniar, ``Comparative evaluation of cache replacement algorithms for time-bounded stale-tolerant data workloads,'' \emph{Int. J. Sci. Res. Technol.}, vol. 3, no. 6, pp. 556--564, 2026, doi: 10.5281/zenodo.20576370. [Online]. Available: \url{https://doi.org/10.5281/zenodo.20576370}; \href{https://ijsrtjournal.com/article/comparative-evaluation-of-cache-replacement-algorithms-for-time-bounded-stale-tolerant-data-workloads}{publisher landing page}.
+\bibitem{prefix} Y. Liu, M. Yu, and J. Yang, ``When fancy eviction fails: Rethinking cache replacement for LLM prefix reuse,'' arXiv:2609.28870, 2026, doi: 10.48550/arXiv.2609.28870.
+\bibitem{gpuext} Y. Zheng \emph{et al.}, ``gpu\_ext: Extensible OS policies for GPUs via eBPF,'' arXiv:2512.12615, 2025.
+\bibitem{msched} W. Shen, Y. Chen, R. Chen, and H. Chen, ``Towards fully-fledged GPU multitasking via proactive memory scheduling,'' arXiv:2512.24637, 2025.
 \bibitem{gama} J. Gama, I. \v{Z}liobait\.{e}, A. Bifet, M. Pechenizkiy, and A. Bouchachia, ``A survey on concept drift adaptation,'' \emph{ACM Comput. Surv.}, vol. 46, no. 4, Art. no. 44, 2014.
+\bibitem{pudd} P. Lu, J. Lu, A. Liu, and G. Zhang, ``Early concept drift detection via prediction uncertainty,'' in \emph{Proc. AAAI Conf. Artif. Intell.}, 2025; arXiv:2412.11158.
+\bibitem{spc} N. Tan, Y.-C. Shih, D. Yang, and A. Salunkhe, ``Flexible and efficient drift detection without labels,'' arXiv:2506.08734, 2025.
+\bibitem{dynthr} P. Lu, J. Lu, A. Liu, E. Yu, and G. Zhang, ``Autonomous concept drift threshold determination,'' arXiv:2511.09953, 2025.
+\bibitem{tae} N. Harshit and K. Mounvik, ``Improving real-time concept drift detection using a hybrid transformer-autoencoder framework,'' arXiv:2508.07085, 2025.
+\bibitem{htm} S. Bandyopadhyay, J. Bose, and S. Roy Chowdhury, ``A hybrid framework for real-time data drift and anomaly identification using hierarchical temporal memory and statistical tests,'' \emph{Int. J. Math. Eng. Manag. Sci.}, vol. 10, no. 3, pp. 777--796, 2025, doi: 10.33889/ijmems.2025.10.3.039.
+\bibitem{adwinu} D. N. Assis and V. M. A. Souza, ``ADWIN-U: Adaptive windowing for unsupervised drift detection on data streams,'' \emph{Knowl. Inf. Syst.}, 2025, doi: 10.1007/s10115-025-02523-1.
 \bibitem{shards} C. A. Waldspurger, N. Park, A. Garthwaite, and I. Ahmad, ``Efficient MRC construction with SHARDS,'' in \emph{Proc. 13th USENIX Conf. File Storage Technol. (FAST)}, 2015, pp. 95--110.
 \bibitem{mini} C. Waldspurger, T. Saemundsson, I. Ahmad, and N. Park, ``Cache modeling and optimization using miniature simulations,'' in \emph{Proc. USENIX Annu. Tech. Conf. (ATC)}, 2017, pp. 487--498.
 \bibitem{belady} L. A. Belady, ``A study of replacement algorithms for a virtual-storage computer,'' \emph{IBM Syst. J.}, vol. 5, no. 2, pp. 78--101, 1966.
