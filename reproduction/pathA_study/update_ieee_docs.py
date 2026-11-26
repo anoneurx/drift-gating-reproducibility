@@ -232,20 +232,17 @@ def main():
         p,
         "Dynamic policy switching is a recurring design pattern in adaptive page replacement: monitor a workload for drift, "
         "evaluate candidate policies in shadow caches, and switch to a better-matched policy. We ask the prior ceiling question: "
-        "how much could any switching controller ever gain? We answer it using an exact Viterbi dynamic-programming (DP) hindsight "
-        "oracle across 88 traces (30 trace families spanning real-application page references, instrumented kernels, and public "
-        "FIU/PDL traces) at three working-set-relative capacities (1%, 5%, 10% WSS) against 21 static and adaptive baselines. "
-        "When paying a full-cache-refill switch penalty (c_{switch} = C), 0 of 90 family–capacity groups clear our worthwhile-gain "
-        "threshold (≥ 0.02 net miss-ratio reduction on at least two-thirds of traces); mean net oracle gain over the best static "
-        "policy is 0.0001 (median 0.0000, maximum 0.0067). A five-point switch-cost sweep (c_{switch} ∈ {0, 0.10C, 0.25C, 0.50C, C}) "
-        "across window granularities W ∈ {10,000, 25,000, 50,000, 100,000} shows that switching collapses to 0/264 pairs clearing "
-        "0.02 whenever c_{switch} ≥ 0.50C, and even at c_{switch} = 0 and W = 10,000 only 14/264 (5.3%) clear 0.02. Static S3-FIFO "
-        "achieves the lowest overall miss ratio (0.4890 at 59.5 ns/ref) and is never beaten by any of 17 online switching controllers "
-        "across CUSUM, Page–Hinkley, ADWIN, periodic, random, oracle-window, or continuous-shadow designs (all +0.0393 to +0.0433 "
-        "higher miss ratio; Holm-adjusted p = 1.000; 92.9–199.1 ns/ref). Failure-mode decomposition reveals why: sampled shadow "
-        "caches (C_{s} ≤ 0.2C) mis-rank weaker policies ahead of S3-FIFO 32.9%–38.9% of the time. Finally, an exploratory logistic "
-        "rule using observable trace features predicts rare zero-cost headroom (≥ 0.005) on unseen families with 84.1% "
-        "leave-one-family-out accuracy (AUC = 0.901).",
+        "how much could any switching controller ever gain? Using an exact Viterbi dynamic-programming (DP) hindsight "
+        "oracle across 88 traces (30 families spanning real-application page references, instrumented kernels, and public "
+        "FIU/PDL traces) at three working-set-relative capacities (1%, 5%, 10% WSS) against 21 baselines, we find that "
+        "when paying a full-cache-refill switch penalty (c_{switch} = C), 0 of 90 family–capacity groups clear our worthwhile-gain "
+        "threshold (≥ 0.02 net miss-ratio reduction on ≥ 2/3 of traces; mean net gain 0.0001, max 0.0067). A five-point switch-cost sweep "
+        "across four window granularities (W ∈ {10k, 25k, 50k, 100k}) establishes a sharp collapse boundary: 0/264 pairs clear "
+        "0.02 whenever c_{switch} ≥ 0.50C, and only 5.3% clear it even at c_{switch} = 0, W = 10k. Static S3-FIFO "
+        "achieves the lowest overall miss ratio (0.4890 at 59.5 ns/ref) and dominates all 17 online switching controllers "
+        "(all +0.0393 to +0.0433 higher miss ratio; p_{Holm} = 1.000) because sampled shadow caches (C_{s} ≤ 0.2C) "
+        "mis-rank weaker policies ahead of S3-FIFO 32.9%–38.9% of the time. Observable non-stationarity features predict rare "
+        "zero-cost headroom on unseen families with 84.1% leave-one-family-out accuracy (AUC = 0.901).",
         size_pt=8.5,
         bold=True,
     )
@@ -408,7 +405,7 @@ def main():
 
     add_figure(doc, "fig_controllers_vs_s3fifo.pdf",
                "Fig. 3. Mean miss ratio vs. simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers.")
-    add_lead_p(doc, "No controller beats S3-FIFO (H2 confirmed). ", "Every switching controller incurs a higher mean miss ratio than static S3-FIFO (Δ ∈ [+0.0393, +0.0433], Holm-adjusted [26], [27] p = 1.000) and higher CPU overhead (92.9–199.1 ns/ref vs. 59.5 ns/ref). Even OracleTrig (+0.0405) loses because the bottleneck is shadow ranking error rather than trigger accuracy.")
+    add_lead_p(doc, "No controller beats S3-FIFO (H2 confirmed). ", "Every switching controller incurs a higher mean miss ratio than static S3-FIFO (Δ ∈ [+0.0393, +0.0433], Holm-adjusted [26], [27] p = 1.000, because every controller has higher mean miss ratio than S3-FIFO so the one-sided 'less' test cannot reject) and higher CPU overhead (92.9–199.1 ns/ref vs. 59.5 ns/ref). Even OracleTrig (+0.0405) loses because the bottleneck is shadow ranking error rather than trigger accuracy.")
 
     # ── VIII. CONTROLLER FAILURE-MODE DIAGNOSIS ────────────────────────────
     add_section_heading(doc, "VIII. CONTROLLER FAILURE-MODE DIAGNOSIS")
@@ -452,7 +449,10 @@ def main():
                    ["Standardized feature", "Weight"], t_fw,
                    col_widths=[2.10, 0.90])
 
-    add_lead_p(doc, "Representative trace case studies. ", "Table XII contrasts four traces: fiu_online.cs.fiu.edu_test exhibits extreme window reuse variability (window_reuse_cv = 2.5916) and g(0) = 0.0564 at 10% WSS, yet g(C) = 0.0000; git_repo_s202 yields g(0) = 0.0196 and g(C) = 0.0000; python_etl_s101 retains one DP switch at c_{switch} = C (g(C) = 0.0067); and sqlite_join_agg_s101 remains stationary (g(0) = 0.0020, g(C) = 0.0005).")
+    add_figure(doc, "fig_window_timeline.pdf",
+               "Fig. 5. Per-window miss ratio (10% WSS, W = 50,000) on fiu_online_test (left, 7 zero-cost switches, g(0) = 0.0564) vs. sqlite_join_agg_s101 (right, stationary, g(0) = 0.0020).",
+               width_in=3.3)
+    add_lead_p(doc, "Representative trace case studies. ", "Fig. 5 and Table XII contrast four traces: fiu_online.cs.fiu.edu_test exhibits extreme window reuse variability (window_reuse_cv = 2.5916) and g(0) = 0.0564 at 10% WSS, yet g(C) = 0.0000; git_repo_s202 yields g(0) = 0.0196 and g(C) = 0.0000; python_etl_s101 retains one DP switch at c_{switch} = C (g(C) = 0.0067); and sqlite_join_agg_s101 remains stationary (g(0) = 0.0020, g(C) = 0.0005).")
 
     t_cases = [
         ["fiu_online_test", "2.5916", "0.1415", "0.0564", "0.0000"],

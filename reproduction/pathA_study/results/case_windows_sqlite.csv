@@ -1,0 +1,10 @@
+trace,window_idx,s3fifo_mr,best_static_name,best_static_mr,oracle0_policy,oracle0_mr,oracle0_switch,oracleC_policy,oracleC_mr
+sqlite_join_agg_s101,0,0.035180,S3-FIFO,0.035180,S3-FIFO,0.035180,0,S3-FIFO,0.035180
+sqlite_join_agg_s101,1,0.028500,S3-FIFO,0.028500,S3-FIFO,0.028500,0,S3-FIFO,0.028500
+sqlite_join_agg_s101,2,0.036200,S3-FIFO,0.036200,S3-FIFO,0.036200,0,S3-FIFO,0.036200
+sqlite_join_agg_s101,3,0.024600,S3-FIFO,0.024600,S3-FIFO,0.024600,0,S3-FIFO,0.024600
+sqlite_join_agg_s101,4,0.034200,S3-FIFO,0.034200,S3-FIFO,0.034200,0,S3-FIFO,0.034200
+sqlite_join_agg_s101,5,0.030880,S3-FIFO,0.030880,S3-FIFO,0.030880,0,S3-FIFO,0.030880
+sqlite_join_agg_s101,6,0.037920,S3-FIFO,0.037920,LRB-style,0.032880,1,MGLRU-style,0.034940
+sqlite_join_agg_s101,7,0.041080,S3-FIFO,0.041080,MGLRU-style,0.035180,1,MGLRU-style,0.035180
+sqlite_join_agg_s101,8,0.042180,S3-FIFO,0.042180,ARC,0.035400,1,MGLRU-style,0.035820

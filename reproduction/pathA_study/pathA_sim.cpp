@@ -1595,6 +1595,20 @@ int main(int argc, char** argv) {
     DPOracle dpZero = solveDPOracle(pruns, 0.0, window, nWin);
     DPOracle dpCharged = solveDPOracle(pruns, (double)C, window, nWin);
 
+    if (mode == "windows") {
+        ofstream fw(outPrefix + "_windows.csv");
+        fw << "trace,window_idx,s3fifo_mr,best_static_name,best_static_mr,oracle0_policy,oracle0_mr,oracle0_switch,oracleC_policy,oracleC_mr\n";
+        for (size_t w = 0; w < nWin; w++) {
+            fw << label << ',' << w << ',' << fixed << setprecision(6)
+               << (double)pruns[s3Idx].winMiss[w] / (double)window << ','
+               << pruns[bestIdx].name << ',' << (double)pruns[bestIdx].winMiss[w] / (double)window << ','
+               << pruns[dpZero.chosen[w]].name << ',' << (double)dpZero.chosenMiss[w] / (double)window << ','
+               << (dpZero.didSwitch[w] ? 1 : 0) << ','
+               << pruns[dpCharged.chosen[w]].name << ',' << (double)dpCharged.chosenMiss[w] / (double)window << '\n';
+        }
+        return 0;
+    }
+
     if (mode == "oracle" || mode == "all") {
         {
             ofstream fs(outPrefix + "_oracle_summary.csv");
