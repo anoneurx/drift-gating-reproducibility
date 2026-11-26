@@ -1,0 +1,12 @@
+feature,weight
+window_reuse_cv,0.2808
+uniq_window_cv,0.1843
+entropy_bits,0.1778
+window_turnover_max,0.1383
+wss_per_ref,0.0715
+top10_share,-0.0622
+window_turnover_mean,0.0502
+reuse_cv,-0.0470
+top1_share,-0.0322
+half_unique_diff,-0.0155
+prefix20_turnover,-0.0107
