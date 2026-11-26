@@ -169,7 +169,21 @@ For each trace--capacity pair and window size $W$, we simulate all $P=21$ polici
 \begin{equation}
   \mathrm{dp}[t][p] = m_{t,p} + \min_{q \in \{1,\ldots,P\}} \Big(\mathrm{dp}[t-1][q] + c_{\text{switch}} \mathbf{1}[p \neq q]\Big),
 \end{equation}
-initialized with $\mathrm{dp}[1][p] = m_{1,p}$ for all $p \in \{1,\ldots,P\}$, and backtracking from $\arg\min_p \mathrm{dp}[T][p]$ to recover the optimal switch count and schedule.
+initialized with $\mathrm{dp}[1][p] = m_{1,p}$ for all $p \in \{1,\ldots,P\}$, and backtracking from $\arg\min_p \mathrm{dp}[T][p]$ to recover the optimal switch count and schedule. Algorithm~\ref{alg:pipeline} summarizes the paired oracle and online-controller evaluation loop.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Algorithm 1: Exact DP Oracle \& Controller Evaluation}
+\label{alg:pipeline}
+\begin{tabular}{p{0.94\columnwidth}}
+\toprule
+1.\ \textbf{Warm-up:} Replay $n_{\text{warm}}=\min(100\text{k},\lfloor 0.1n\rfloor)$ refs; partition remaining $n_{\text{eval}}=TW$ refs into $T$ windows of size $W$.\\
+2.\ \textbf{Oracle DP:} Simulate $P=21$ policies to form $\{m_{t,p}\}$; solve Eq.~(4) for $c_{\text{switch}}\in\{0,0.10C,0.25C,0.50C,C\}$ to obtain $g(c_{\text{switch}})$.\\
+3.\ \textbf{Online Controllers:} Execute active policy at capacity $C$; on drift trigger (or every $10$ epochs), rank $6$-policy pool in shadow caches ($\Cs/\Dw<1$ or $1.0C$ ablation) via $4$-block LCB ($z=1.28$) and migrate resident metadata on switch.\\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Switching Controllers and Hyperparameters}
 We evaluate 17 online switching controllers over a \textbf{6-policy candidate pool} (\code{LRU}, \code{LFU-A}, \code{2Q}, \code{MRU}, \code{S3-FIFO}, \code{ARC}) against static \code{S3-FIFO} (Table~\ref{tab:hyperparams}). All controllers sample references into a rolling window at rate $p_{\text{samp}}=0.20$ and rank candidates in shadow caches of capacity $\Cs = \min(\lfloor 0.2C\rfloor, \max(8, \lfloor 0.5\Dw\rfloor))$ so that $\Cs/\Dw < 1$ holds by construction. Candidate selection uses a lower-confidence-bound (LCB) rule ($z=1.28$, $40\%$ shadow warm-up, $4$-block variance estimate, $\text{dwell}=10$ epochs, $\text{cooldown}=4$ epochs, $\text{hysteresis}=30$ epochs, epoch length $2{,}000$ references). Upon switching, resident pages are migrated into the new policy instance ordered by recency/frequency metadata.
@@ -356,7 +370,38 @@ Controller & $\Delta$ MR & $p_{\text{Wilc}}$ & Sw. & ns/ref & S3 & LRU & MRU \\
 \end{tabular}}
 \end{table}
 
-Removing sampling noise cuts the deficit from $+0.0412$ to $+0.0284$, and eliminating cold-start truncation via \code{PersistentShadow} cuts it further to $+0.0175$ (raising \code{S3-FIFO} share to $77.0\%$, and $86.1\%$ on \code{fiu_public}). Nevertheless, \emph{every} ablation still loses significantly to static \code{S3-FIFO} ($p=1.000$)---even when paying $50.2\times$ CPU overhead ($2{,}985.3$\,ns/ref vs.\ $59.5$\,ns/ref)---confirming that the barrier is the absence of oracle headroom, not shadow implementation artifacts.
+Removing sampling noise cuts the deficit from $+0.0412$ to $+0.0284$, and eliminating cold-start truncation via \code{PersistentShadow} cuts it further to $+0.0175$ (raising \code{S3-FIFO} share to $77.0\%$, and $86.1\%$ on \code{fiu_public}; Fig.~\ref{fig:ablation}). Nevertheless, \emph{every} ablation still loses significantly to static \code{S3-FIFO} ($p=1.000$)---even when paying $50.2\times$ CPU overhead ($2{,}985.3$\,ns/ref vs.\ $59.5$\,ns/ref)---confirming that the barrier is the absence of oracle headroom, not shadow implementation artifacts.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figs/fig_shadow_ablation.pdf}
+\caption{Shadow ablation progression from sampled $0.2C$ (\code{ContShadow}) to full $1.0C$ (\code{FullShadow}) and continuously warmed $1.0C$ (\code{PersistentShadow}). Even with zero sampling noise and zero cold-start truncation, switching still loses $+0.0175$ miss ratio at $50.2\times$ CPU cost.}
+\label{fig:ablation}
+\end{figure}
+
+\subsection{Real Backing-Store I/O Latency and Throughput}
+To verify these simulator overheads under real Linux storage syscalls, we replay \code{sqlite_join_agg_s101} and \code{fiu_online_test} ($10\%$ WSS) against a $4$\,KB-aligned backing file using \code{pread} after \code{POSIX_FADV_DONTNEED} (Table~\ref{tab:real_io}). Static \code{S3-FIFO} achieves the lowest miss ratio on both traces while sustaining $1.90\times$ higher throughput than \code{PersistentShadow} on \code{sqlite} ($319.26$ vs.\ $168.22$\,kops/s; $p_{99}=4.75$\,$\mu$s vs.\ $7.05$\,$\mu$s) and $1.17\times$ higher throughput on \code{fiu_online} ($160.77$ vs.\ $137.51$\,kops/s; $p_{99}=19.07$\,$\mu$s vs.\ $21.44$\,$\mu$s).
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Real Linux $4$\,KB Backing-Store I/O Benchmark ($10\%$ WSS)}
+\label{tab:real_io}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Trace & Policy & MR & kops/s & $p_{50}$ ($\mu$s) & $p_{99}$ ($\mu$s) \\
+\midrule
+\code{sqlite_join} & \code{S3-FIFO} & 0.0345 & 319.26 & 1.47 & 4.75 \\
+\code{sqlite_join} & \code{ContShadow} & 0.0425 & 309.00 & 1.47 & 4.82 \\
+\code{sqlite_join} & \code{PersistentSh.} & 0.0405 & 168.22 & 4.68 & 7.05 \\
+\midrule
+\code{fiu_online} & \code{S3-FIFO} & 0.7425 & 160.77 & 3.35 & 19.07 \\
+\code{fiu_online} & \code{ContShadow} & 0.7625 & 161.42 & 3.35 & 17.67 \\
+\code{fiu_online} & \code{PersistentSh.} & 0.7507 & 137.51 & 4.82 & 21.44 \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
 % =====================================================================
 \section{Predictive Rule and Case Studies (H3)}
@@ -384,15 +429,7 @@ We extract 11 purely observable trace features prior to cache simulation: workin
 \label{fig:roc}
 \end{figure}
 
-The strongest standardized predictors (Table~\ref{tab:feat_weights}) are \code{window_reuse_cv} ($+0.2808$), \code{uniq_window_cv} ($+0.1843$), \code{entropy_bits} ($+0.1778$), and \code{window_turnover_max} ($+0.1383$).
-
-\begin{table}[t]
-\centering
-\footnotesize
-\caption{Standardized Logistic Weights (Exploratory H3)}
-\label{tab:feat_weights}
-\input{table_feat_weights}
-\end{table}
+The strongest standardized predictors (full 11-feature weights in Supplement Table~\ref{S-tab:feat_weights}) are \code{window_reuse_cv} ($+0.2808$), \code{uniq_window_cv} ($+0.1843$), \code{entropy_bits} ($+0.1778$), and \code{window_turnover_max} ($+0.1383$).
 
 \subsection{Representative Trace Case Studies}
 To ground these feature weights physically, Fig.~\ref{fig:timeline} and Table~\ref{tab:cases} contrast representative traces across our sources:

@@ -437,6 +437,21 @@ def main():
     add_ieee_table(doc, "TABLE IX-B. FULL-CAPACITY (C_{s} = C, p_{samp} = 1.0) AND PERSISTENT SHADOW ABLATION (n = 264)",
                    ["Controller", "Δ MR", "p", "Sw.", "ns/ref", "S3", "LRU", "MRU"], t_ab,
                    col_widths=[1.05, 0.42, 0.35, 0.32, 0.42, 0.28, 0.28, 0.28])
+    add_figure(doc, "fig_shadow_ablation.pdf",
+               "Fig. 6. Shadow ablation progression from sampled 0.2C (ContShadow) to full 1.0C (FullShadow) and continuously warmed 1.0C (PersistentShadow).")
+
+    add_lead_p(doc, "Real backing-store I/O latency and throughput. ", "Replaying sqlite_join_agg_s101 and fiu_online_test (10% WSS) against a 4 KB backing file with pread after POSIX_FADV_DONTNEED confirms that static S3-FIFO achieves the lowest miss ratio while sustaining 1.90× higher throughput than PersistentShadow on sqlite (319.26 vs. 168.22 kops/s; p_{99} = 4.75 vs. 7.05 μs) and 1.17× higher on fiu_online (160.77 vs. 137.51 kops/s).")
+    t_rio = [
+        ["sqlite_join", "S3-FIFO", "0.0345", "319.26", "1.47", "4.75"],
+        ["sqlite_join", "ContShadow", "0.0425", "309.00", "1.47", "4.82"],
+        ["sqlite_join", "PersistentSh.", "0.0405", "168.22", "4.68", "7.05"],
+        ["fiu_online", "S3-FIFO", "0.7425", "160.77", "3.35", "19.07"],
+        ["fiu_online", "ContShadow", "0.7625", "161.42", "3.35", "17.67"],
+        ["fiu_online", "PersistentSh.", "0.7507", "137.51", "4.82", "21.44"],
+    ]
+    add_ieee_table(doc, "TABLE IX-C. REAL LINUX 4 KB BACKING-STORE I/O BENCHMARK (10% WSS)",
+                   ["Trace", "Policy", "MR", "kops/s", "p_{50} (μs)", "p_{99} (μs)"], t_rio,
+                   col_widths=[0.65, 0.72, 0.42, 0.48, 0.48, 0.48])
 
     # ── IX. PREDICTIVE RULE AND CASE STUDIES (H3) ──────────────────────────
     add_section_heading(doc, "IX. PREDICTIVE RULE AND CASE STUDIES (H3)")
