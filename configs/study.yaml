@@ -1,0 +1,74 @@
+# Study Configuration: "When Does Policy Switching Beat the Best Static Policy?"
+# All hyperparameters match Table II and Sections III-IX of the paper.
+
+study:
+  name: pathA_ceiling_study
+  total_traces: 88
+  total_families: 30
+  worthwhile_gain_threshold: 0.02
+  family_group_pass_fraction: 0.6667
+
+seeds:
+  random_controller_seed: 4242         # std::mt19937_64 in src/pathA_sim.cpp (SwitchingController)
+  cluster_bootstrap_seed: 42           # np.random.default_rng(42) in table/figure generation
+  cluster_bootstrap_resamples: 3000
+
+oracle:
+  warmup_max_refs: 100000
+  warmup_fraction: 0.10
+  capacities_primary: [0.01, 0.05, 0.10]
+  capacities_extended: [0.25, 0.50]
+  windows_primary: [50000, 100000]
+  windows_finesweep: [5000, 10000, 25000, 50000]
+  switch_costs_primary: [0.0, 1.0]
+  switch_costs_finesweep: [0.0, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.50, 1.00]
+  policies_count: 21
+
+controllers:
+  candidate_pool_primary: ["LRU", "LFU-A", "2Q", "MRU", "S3-FIFO", "ARC"]
+  candidate_pool_expanded: 21
+  epoch_refs: 2000
+  shadow_sampling_rate: 0.20
+  shadow_capacity_fraction: 0.20
+  shadow_distinct_cap_fraction: 0.50
+  shadow_min_pages: 8
+  shadow_warmup_fraction: 0.40
+  lcb_z: 1.28
+  lcb_blocks: 4
+  dwell_epochs: 10
+  cooldown_epochs: 4
+  hysteresis_epochs: 30
+  triggers:
+    cusum:
+      delta: 0.5
+      h: {low: 8.0, med: 5.0, high: 3.0}
+    page_hinkley:
+      delta: 0.005
+      lambda: {low: 8.0, med: 5.0, high: 3.0}
+    adwin:
+      delta: {low: 0.0005, med: 0.002, high: 0.01}
+    periodic:
+      interval_epochs: {low: 40, med: 20, high: 10}
+    random:
+      prob_per_epoch: {low: 0.02, med: 0.05, high: 0.10}
+    oracle_trig:
+      mode: dp_switch_boundaries
+    cont_shadow:
+      eval_interval_epochs: 10
+
+exploratory_h3:
+  l2_lambda: 0.5
+  posthoc_zero_cost_threshold: 0.005
+  window_refs: 50000
+  features:
+    - wss_per_ref
+    - top1_share
+    - top10_share
+    - entropy_bits
+    - reuse_cv
+    - uniq_window_cv
+    - window_turnover_mean
+    - window_turnover_max
+    - window_reuse_cv
+    - half_unique_diff
+    - prefix20_turnover

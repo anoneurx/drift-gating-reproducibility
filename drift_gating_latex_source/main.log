@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  26 NOV 2026 08:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  26 NOV 2026 16:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -633,238 +633,236 @@ Package microtype Info: Loading generic protrusion settings for font family
 (./table_sources.tex
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1.
-)
-Underfull \hbox (badness 10000) in paragraph at lines 97--98
-[]\T1/ptm/m/n/10 (+20) A for-mal prob-lem for-mu-la-tion and ex-act Viterbi
- []
-
-
-Underfull \hbox (badness 6047) in paragraph at lines 97--98
-\T1/ptm/m/n/10 (+20) DP or-a-cle ceil-ing across 88 traces and three ca-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 97--98
-\T1/ptm/m/n/10 (+20) pac-i-ties, in-clud-ing a 5-point switch-cost sweep
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 97--98
-\T1/ptm/m/n/10 (+20) ($\OML/ztmcm/m/it/10 c[] \OMS/ztmcm/m/n/10 2 f\OT1/ztmcm/m
-/n/10 0\OML/ztmcm/m/it/10 ; \OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m
-/n/10 10\OML/ztmcm/m/it/10 C; \OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm
-/m/n/10 25\OML/ztmcm/m/it/10 C; \OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztm
-cm/m/n/10 50\OML/ztmcm/m/it/10 C; C\OMS/ztmcm/m/n/10 g$\T1/ptm/m/n/10 (+20) ) a
-nd 4 win-dow
- []
-
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-
-dist/fonts/enc/dvips/base/8r.enc}
+) [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texm
+f-dist/fonts/enc/dvips/base/8r.enc}
 
 
 ]
 Underfull \hbox (badness 2990) in paragraph at lines 116--117
-\T1/ptm/m/n/10 (+20) Sequential change-point detectors---CUSUM [[][]21[][]], Pa
+\T1/ptm/m/n/10 (+20) Sequential change-point detectors---CUSUM [[][]24[][]], Pa
 ge--
  []
 
-[2]
-Underfull \hbox (badness 1281) in paragraph at lines 142--143
+
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
+[]\T1/ptm/m/n/10 (+20) To eval-u-ate can-di-dates with-out full-size repli-cas,
+
+ []
+
+
+Underfull \hbox (badness 4193) in paragraph at lines 118--119
+\T1/ptm/m/n/10 (+20) SHARDS [[][]36[][]] and minia-ture sim-u-la-tions [[][]37[
+][]] ex-e-cute
+ []
+
+
+Underfull \hbox (badness 1286) in paragraph at lines 128--129
+\OML/ztmcm/m/it/10 n[] \OT1/ztmcm/m/n/10 = [](100[]000\OML/ztmcm/m/it/10 ; \OMS
+/ztmcm/m/n/10 b\OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 1\OML/z
+tmcm/m/it/10 n\OMS/ztmcm/m/n/10 c\OT1/ztmcm/m/n/10 )$ \T1/ptm/m/n/10 (+20) and 
+par-ti-tion the re-main-ing
+ []
+
+
+Underfull \hbox (badness 1281) in paragraph at lines 140--141
 []\T1/ptm/b/n/10 (+20) Proposition 1 (Nec-es-sary Con-di-tion for Worth-while
  []
 
+[2]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
-54.
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+50.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) (./table_h1.tex)
-<figs/fig_oracle_ceiling.pdf, id=232, 317.98799pt x 173.448pt>
+<figs/fig_oracle_ceiling.pdf, id=233, 317.98799pt x 173.448pt>
 File: figs/fig_oracle_ceiling.pdf Graphic file (type pdf)
 <use figs/fig_oracle_ceiling.pdf>
-Package pdftex.def Info: figs/fig_oracle_ceiling.pdf  used on input line 228.
+Package pdftex.def Info: figs/fig_oracle_ceiling.pdf  used on input line 224.
 (pdftex.def)             Requested size: 252.2227pt x 137.57555pt.
-
 [3]
-Underfull \hbox (badness 1097) in paragraph at lines 239--240
-\T1/ptm/m/n/10 (+20) and $\OT1/ztmcm/m/n/10 10%$ \T1/ptm/m/n/10 (+20) WSS. Even
- at $\OT1/ztmcm/m/n/10 1%$ \T1/ptm/m/n/10 (+20) WSS---where evic-tion pres-
+Underfull \hbox (badness 4013) in paragraph at lines 259--260
+\T1/ptm/m/n/10 (+20) flush-ing the cache, re-al-is-tic switch-ing penal-ties li
+e in
+ []
+
+
+Underfull \hbox (badness 6300) in paragraph at lines 259--260
+\OML/ztmcm/m/it/10 c[] \OMS/ztmcm/m/n/10 2 \OT1/ztmcm/m/n/10 [0\OML/ztmcm/m/it/
+10 ; \OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 25\OML/ztmcm/m/it
+/10 C\OT1/ztmcm/m/n/10 ]$\T1/ptm/m/n/10 (+20) . We sweep a 9-point cost grid
  []
 
 (./table_cost_sweep.tex)
-<figs/fig_cost_sweep.pdf, id=252, 317.98799pt x 173.448pt>
+<figs/fig_cost_sweep.pdf, id=251, 332.44202pt x 180.675pt>
 File: figs/fig_cost_sweep.pdf Graphic file (type pdf)
 <use figs/fig_cost_sweep.pdf>
-Package pdftex.def Info: figs/fig_cost_sweep.pdf  used on input line 275.
-(pdftex.def)             Requested size: 252.2227pt x 137.57555pt.
-
-Underfull \hbox (badness 1755) in paragraph at lines 284--285
-\T1/cmtt/m/n/10 fiu _ public$ \T1/ptm/m/n/10 (+20) ($\OT1/ztmcm/m/n/10 10\OML/z
-tmcm/m/it/10 =\OT1/ztmcm/m/n/10 36$\T1/ptm/m/n/10 (+20) , $\OT1/ztmcm/m/n/10 27
-\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 8%$\T1/ptm/m/n/10 (+20) ) and $\T1/cmtt/m
-/n/10 real _ app _ pageref$
- []
-
-[4 <./figs/fig_oracle_ceiling.pdf>] (./table_h2.tex)
-<figs/fig_controllers_vs_s3fifo.pdf, id=319, 317.98799pt x 180.675pt>
+Package pdftex.def Info: figs/fig_cost_sweep.pdf  used on input line 271.
+(pdftex.def)             Requested size: 252.2227pt x 137.07732pt.
+ (./table_h2.tex)
+<figs/fig_controllers_vs_s3fifo.pdf, id=258, 317.98799pt x 180.675pt>
 File: figs/fig_controllers_vs_s3fifo.pdf Graphic file (type pdf)
 <use figs/fig_controllers_vs_s3fifo.pdf>
 Package pdftex.def Info: figs/fig_controllers_vs_s3fifo.pdf  used on input line
- 321.
+ 317.
 (pdftex.def)             Requested size: 252.2227pt x 143.30786pt.
- (./table_ctrl_diag.tex)
-[5 <./figs/fig_cost_sweep.pdf>]
+ [4 <./figs/fig_oracle_ceiling.pdf>]
+(./table_ctrl_diag.tex)
+<figs/fig_shadow_ranking.pdf, id=323, 303.534pt x 166.22101pt>
+File: figs/fig_shadow_ranking.pdf Graphic file (type pdf)
+<use figs/fig_shadow_ranking.pdf>
+Package pdftex.def Info: figs/fig_shadow_ranking.pdf  used on input line 341.
+(pdftex.def)             Requested size: 252.2227pt x 138.12064pt.
+
+Underfull \hbox (badness 1688) in paragraph at lines 349--350
+\T1/ptm/m/n/10 (+20) mov-ing sam-pling noise via $\T1/cmtt/m/n/10 FullShadow-[]
+1 . 0C$ \T1/ptm/m/n/10 (+20) ($\OML/ztmcm/m/it/10 C[] \OT1/ztmcm/m/n/10 =
+ []
+
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 351.
+(hyperref)                removing `math shift' on input line 352.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 351.
+(hyperref)                removing `math shift' on input line 352.
 
-
-Underfull \hbox (badness 1286) in paragraph at lines 352--353
-\T1/ptm/m/n/10 (+20) win-dow in sam-pled shadow caches ($\OML/ztmcm/m/it/10 p[]
- \OT1/ztmcm/m/n/10 = 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 20$\T1/ptm/m/n/10 (
-+20) , $\OML/ztmcm/m/it/10 C[] \OMS/ztmcm/m/n/10 ^^T
- []
-
-
-Underfull \hbox (badness 6461) in paragraph at lines 373--374
-\T1/ptm/m/n/10 (+20) to $\OT1/ztmcm/m/n/10 +0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n
-/10 0284$\T1/ptm/m/n/10 (+20) , and elim-i-nat-ing cold-start trun-ca-tion via
- []
-
-
-Underfull \hbox (badness 3250) in paragraph at lines 373--374
-\T1/cmtt/m/n/10 PersistentShadow$ \T1/ptm/m/n/10 (+20) cuts it fur-ther to $\OT
-1/ztmcm/m/n/10 +0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 0175$ \T1/ptm/m/n/10 (+2
-0) (rais-ing
- []
-
-<figs/fig_shadow_ablation.pdf, id=385, 505.89pt x 180.675pt>
+<figs/fig_shadow_ablation.pdf, id=327, 505.89pt x 180.675pt>
 File: figs/fig_shadow_ablation.pdf Graphic file (type pdf)
 <use figs/fig_shadow_ablation.pdf>
-Package pdftex.def Info: figs/fig_shadow_ablation.pdf  used on input line 377.
+Package pdftex.def Info: figs/fig_shadow_ablation.pdf  used on input line 376.
 (pdftex.def)             Requested size: 252.2227pt x 90.08087pt.
 
-Underfull \hbox (badness 1831) in paragraph at lines 411--412
-\T1/ptm/m/n/10 (+20) We ex-tract 11 purely ob-serv-able trace fea-tures prior t
-o
+Underfull \hbox (badness 2753) in paragraph at lines 382--383
+\T1/ptm/m/n/10 (+20) the Linux OS page cache rather than phys-i-cal NVMe
  []
 
 
-Underfull \vbox (badness 1337) has occurred while \output is active []
+Underfull \hbox (badness 1082) in paragraph at lines 382--383
+\T1/ptm/m/n/10 (+20) stor-age ($\OMS/ztmcm/m/n/10 ^^U \OT1/ztmcm/m/n/10 80 []$\
+T1/ptm/m/n/10 (+20) ). Even un-der fast page-cache syscalls,
+ []
 
 
+Underfull \hbox (badness 1939) in paragraph at lines 382--383
+\T1/ptm/m/n/10 (+20) vs. $\OT1/ztmcm/m/n/10 160\OML/ztmcm/m/it/10 :\OT1/ztmcm/m
+/n/10 77$\T1/ptm/m/n/10 (+20) kops/s), while $\T1/cmtt/m/n/10 ContShadow$ \T1/p
+tm/m/n/10 (+20) matches $\T1/cmtt/m/n/10 S3-[]FIFO$
+ []
+
+
+Underfull \hbox (badness 4303) in paragraph at lines 410--411
+\T1/ptm/m/n/10 (+20) set den-sity ($\T1/cmtt/m/n/10 wss _ per _ ref$\T1/ptm/m/n
+/10 (+20) , $\T1/cmtt/m/n/10 top1 _ share$\T1/ptm/m/n/10 (+20) , $\T1/cmtt/m/n/
+10 top10 _ share$\T1/ptm/m/n/10 (+20) ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 410--411
+\T1/cmtt/m/n/10 entropy _ bits$\T1/ptm/m/n/10 (+20) ), reuse-distance dis-per-s
+ion ($\T1/cmtt/m/n/10 reuse _ cv$\T1/ptm/m/n/10 (+20) ),
+ []
+
+[5 <./figs/fig_cost_sweep.pdf> <./figs/fig_controllers_vs_s3fifo.pdf>]
 (./table_h3.tex)
-<figs/fig_lofo_roc.pdf, id=389, 289.08pt x 180.675pt>
+<figs/fig_lofo_roc.pdf, id=452, 289.08pt x 180.675pt>
 File: figs/fig_lofo_roc.pdf Graphic file (type pdf)
 <use figs/fig_lofo_roc.pdf>
-Package pdftex.def Info: figs/fig_lofo_roc.pdf  used on input line 427.
+Package pdftex.def Info: figs/fig_lofo_roc.pdf  used on input line 424.
 (pdftex.def)             Requested size: 232.04442pt x 145.02815pt.
-<figs/fig_window_timeline.pdf, id=393, 491.436pt x 169.8345pt>
+<figs/fig_window_timeline.pdf, id=455, 491.436pt x 169.8345pt>
 File: figs/fig_window_timeline.pdf Graphic file (type pdf)
 <use figs/fig_window_timeline.pdf>
-Package pdftex.def Info: figs/fig_window_timeline.pdf  used on input line 439.
+Package pdftex.def Info: figs/fig_window_timeline.pdf  used on input line 433.
 (pdftex.def)             Requested size: 478.71634pt x 165.44672pt.
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 444.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 438.
 
-Underfull \hbox (badness 10000) in paragraph at lines 444--445
-[]$\T1/cmtt/m/n/10 fiu _ online . cs . fiu . edu _ test$\T1/ptm/b/n/10 (+20) : 
-\T1/ptm/m/n/10 (+20) Ex-hibits ex-treme
+Underfull \hbox (badness 10000) in paragraph at lines 438--439
+[]$\T1/cmtt/m/n/10 fiu _ online _ test$\T1/ptm/b/n/10 (+20) : \T1/ptm/m/n/10 (+
+20) High window-reuse vari-abil-ity
  []
 
 
-Underfull \hbox (badness 1997) in paragraph at lines 444--445
-\OT1/ztmcm/m/n/10 = 2\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 5916$\T1/ptm/m/n/10 
-(+20) ), high page en-tropy ($\OT1/ztmcm/m/n/10 15\OML/ztmcm/m/it/10 :\OT1/ztmc
-m/m/n/10 36$\T1/ptm/m/n/10 (+20) bits), and near-
+Underfull \hbox (badness 10000) in paragraph at lines 441--442
+[]$\T1/cmtt/m/n/10 sqlite _ join _ agg _ s101$\T1/ptm/b/n/10 (+20) : \T1/ptm/m/
+n/10 (+20) Sta-tion-ary join hot sets
  []
 
-[6 <./figs/fig_controllers_vs_s3fifo.pdf> <./figs/fig_shadow_ablation.pdf>]
-Underfull \hbox (badness 1320) in paragraph at lines 445--446
-[]$\T1/cmtt/m/n/10 git _ repo _ s202$\T1/ptm/b/n/10 (+20) : \T1/ptm/m/n/10 (+20
-) Al-ter-nates be-tween repos-i-tory pack-
- []
-
-[7 <./figs/fig_lofo_roc.pdf>]
-Underfull \hbox (badness 1874) in paragraph at lines 509--510
+[6 <./figs/fig_shadow_ranking.pdf> <./figs/fig_shadow_ablation.pdf>]
+Underfull \hbox (badness 1874) in paragraph at lines 505--506
 []\T1/ptm/m/n/8 (+20) CMU Par-al-lel Data Lab-o-ra-tory, ``Cache evic-tion tac-
 tics: cache-
  []
 
 
-Underfull \hbox (badness 6592) in paragraph at lines 509--510
+Underfull \hbox (badness 6592) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) Datasets trace col-lec-tion,'' on-line data repos-i-tory an
 d for-mat
  []
 
 
-Underfull \hbox (badness 6047) in paragraph at lines 509--510
+Underfull \hbox (badness 6047) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) README, ac-cessed Nov. 24, 2026. The project page links
  []
 
 
-Underfull \hbox (badness 4543) in paragraph at lines 509--510
+Underfull \hbox (badness 4543) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) to the \T1/cmtt/m/n/8 cacheDatasets \T1/ptm/m/n/8 (+20) rep
 os-i-tory; its FIU di-rec-tory con-tains
  []
 
 
-Underfull \hbox (badness 4454) in paragraph at lines 509--510
+Underfull \hbox (badness 4454) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) right no-tice says ma-te-ri-als dis-tributed by the server 
 are pro-
  []
 
 
-Underfull \hbox (badness 2865) in paragraph at lines 509--510
+Underfull \hbox (badness 2865) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) vided on a non-commercial ba-sis. [On-line]. Avail-able: []
 []$https : / /
  []
 
 
-Underfull \hbox (badness 1803) in paragraph at lines 509--510
+Underfull \hbox (badness 1803) in paragraph at lines 505--506
 \T1/ptm/m/n/8 (+20) pdl . cmu . edu / CacheEviction / index . shtml$[][]; [][]$
 https : / / ftp . pdl . cmu . edu / pub /
  []
 
-[8 <./figs/fig_window_timeline.pdf>] [9
-
-] (./main.aux)
+[7 <./figs/fig_lofo_roc.pdf>] [8 <./figs/fig_window_timeline.pdf>] (./main.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-08-10>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: F43E9BCC69EAAC68BA96983DDF990BC3;4533.
+(rerunfilecheck)             Checksum: D1B09F2BC2FEEA3D9514BA17055B1C46;4587.
  ) 
 Here is how much of TeX's memory you used:
- 16297 strings out of 469089
- 254011 string characters out of 5459373
- 743131 words of memory out of 5000000
- 44436 multiletter control sequences out of 15000+600000
- 765541 words of font info for 520 fonts, out of 8000000 for 9000
+ 16318 strings out of 469089
+ 254447 string characters out of 5459373
+ 758297 words of memory out of 5000000
+ 44445 multiletter control sequences out of 15000+600000
+ 768770 words of font info for 534 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 74i,14n,79p,1722b,644s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/kashie/.texlive2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.60
-0pk> </tmp/texfonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </home/kashie/.texliv
-e2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk></usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/rsfs/rsfs10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.
-pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/
-texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
-ri8a.pfb>
-Output written on main.pdf (9 pages, 332708 bytes).
+ 74i,14n,79p,1695b,635s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </tmp/texfonts/pk/ljfour/jknappen/ec/ectc0800.600pk> </tmp/texfonts/pk/ljfou
+r/jknappen/ec/ecit0900.600pk> </tmp/texfonts/pk/ljfour/jknappen/ec/ectt0800.600
+pk> </tmp/texfonts/pk/ljfour/jknappen/ec/ectt0800.525pk> </tmp/texfonts/pk/ljfo
+ur/jknappen/ec/ectt1000.600pk></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/rsfs/rsfs10.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
+bi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on main.pdf (8 pages, 344271 bytes).
 PDF statistics:
- 933 PDF objects out of 1000 (max. 8388607)
- 425 compressed objects within 5 object streams
- 110 named destinations out of 1000 (max. 500000)
- 132287 words of extra memory for PDF output out of 154059 (max. 10000000)
+ 986 PDF objects out of 1000 (max. 8388607)
+ 427 compressed objects within 5 object streams
+ 106 named destinations out of 1000 (max. 500000)
+ 135364 words of extra memory for PDF output out of 154059 (max. 10000000)
 

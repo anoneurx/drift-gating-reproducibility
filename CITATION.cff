@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite the paper below."
+title: "When Does Policy Switching Beat the Best Static Policy? A Reproducible Ceiling Study"
+type: software
+authors:
+  - family-names: Qasim
+    given-names: Muhammad
+    affiliation: "University of Management and Technology (UMT); Anoneurx Research Lab"
+    email: "itskashie@anoneurx.com"
+  - family-names: Tahir
+    given-names: Hunain
+    affiliation: "University of Management and Technology (UMT)"
+  - family-names: Ahmad
+    given-names: Hussain
+    affiliation: "University of Management and Technology (UMT)"
+  - family-names: Ghouri
+    given-names: Mohsin Ghaffar
+    affiliation: "University of Management and Technology (UMT)"
+repository-code: "https://github.com/anoneurx/drift-gating-reproducibility"
+license: MIT
+date-released: "2026-11-26"
+doi: "TODO_ZENODO_DOI"
+keywords:
+  - page replacement
+  - cache replacement
+  - policy switching
+  - drift detection
+  - hindsight oracle

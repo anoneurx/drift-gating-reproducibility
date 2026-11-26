@@ -1,0 +1,35 @@
+MIT License
+
+Copyright (c) 2026 Muhammad Qasim, Hunain Tahir, Hussain Ahmad, and Mohsin Ghaffar Ghouri
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+DATA LICENSES (SEPARATE FROM SOFTWARE):
+- Real-application traces (`real_app_pageref`, captured via `tracer/pc_trace.c`)
+  and instrumented-program kernel traces (`instrumented_program`) are original
+  work released under CC-BY-4.0.
+- Public FIU block-I/O traces (`fiu_public`) originate from the Florida
+  International University I/O trace dataset (Koller & Rangaswami, ACM TOS 2010)
+  via the CMU PDL cacheDatasets mirror and remain subject to their respective
+  upstream non-commercial / academic terms.
+- Public PDL storage/cache traces (`pdl_public`: Alibaba, CloudPhysics, MetaKV,
+  MSR, Tencent, Twitter) remain subject to the CMU Parallel Data Laboratory
+  (PDL) copyright notice and upstream dataset licenses:
+  https://pdl.cmu.edu/Publications/copyright.shtml

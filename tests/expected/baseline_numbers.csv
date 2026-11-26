@@ -1,0 +1,12 @@
+metric,value,tolerance,source,description
+meet_fullc_W50k,2,2,finesweep.csv,Pairs meeting 2% gain at c=C W=50k (of 440 incl. 25/50% WSS)
+meet_halfc_W50k,4,2,finesweep.csv,Pairs meeting 2% gain at c>=0.5C W=50k (of 440)
+meet_c0_W50k,19,2,finesweep.csv,Pairs meeting 2% gain at c=0 W=50k (of 440)
+meet_c0_W5k,20,2,finesweep.csv,Pairs meeting 2% gain at c=0 W=5k (of 264)
+meet_c01_W5k,13,2,finesweep.csv,Pairs meeting 2% gain at c=0.10C W=5k (of 264)
+s3fifo_mean_mr,0.4890,0.001,oracle_summary.csv,S3-FIFO mean miss ratio across 264 pairs (W=50k c=0)
+contShadow_top1_agree,0.6767,0.01,shadow_ranking.csv,ContShadow-0.2C top-1 shadow ranking accuracy
+contShadow_mean_delta,0.0412,0.005,h2_controller_analysis.csv,ContShadow mean miss ratio excess vs S3-FIFO (positive = controller is worse)
+all_pval_wilcoxon,1.0,0.001,h2_controller_analysis.csv,All 17 controller Wilcoxon p-values (one-sided vs S3-FIFO)
+n_pairs_oracle,264,0,oracle_summary.csv,Total trace x capacity pairs in main study (W=50k c=0)
+n_controllers,17,0,h2_controller_analysis.csv,Number of switching controllers (excluding S3-FIFO baseline)

@@ -1,0 +1,94 @@
+% =====================================================================
+%  Supplementary Material for:
+%  When Does Policy Switching Beat the Best Static Policy?
+% =====================================================================
+\documentclass[10pt,twocolumn]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[letterpaper,top=0.75in,bottom=0.9in,left=0.65in,right=0.65in,columnsep=0.22in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,longtable,graphicx,xcolor,microtype,url,array,enumitem,titlesec}
+\usepackage[font=footnotesize,labelfont=bf,labelsep=period,justification=justified,singlelinecheck=false]{caption}
+\usepackage[colorlinks=true,allcolors=blue!50!black,breaklinks=true]{hyperref}
+\urlstyle{rm}
+
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\titleformat{\section}{\centering\normalfont\small\scshape}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalfont\small\itshape}{\thesubsection.}{0.6em}{}
+\captionsetup[table]{labelsep=newline,justification=centering,textfont=sc,labelfont=sc,singlelinecheck=true}
+\pagestyle{plain}
+\sloppy
+
+\begin{document}
+
+\twocolumn[
+\begin{center}
+{\LARGE Supplementary Material:\\\medskip
+When Does Policy Switching Beat the Best Static Policy?\\A Reproducible Ceiling Study\par}
+\vspace{6pt}
+{\large Muhammad Qasim, Hunain Tahir, Hussain Ahmad, and Mohsin Ghaffar Ghouri\par}
+\end{center}
+\vspace{6pt}
+]
+
+\section{Local Protocol Record (Post Hoc Status)}
+\label{sec:protocol}
+The study hypotheses (H1--H3), endpoints, smallest worthwhile gain ($\ge 0.02$ net miss-ratio reduction on $\ge 2/3$ of traces in a family--capacity group), capacity levels ($1\%$, $5\%$, $10\%$ WSS), and controller configurations were recorded in the project git repository in \path{PATH_A_STUDY_PROTOCOL.md} (commit \path{ab5841c}) prior to executing \path{run_study.py}. Because there was no external third-party preregistration, all results are reported with post hoc status.
+
+\section{Full 21-Policy Comparison}
+\label{sec:policies}
+Table~\ref{tab:policies} lists all 21 replacement policies evaluated across the 264 trace--capacity pairs ($W=50{,}000$), ranked by mean miss ratio.
+
+\begin{table}[h]
+\centering
+\scriptsize
+\caption{All 21 Policies Across 264 Trace--Capacity Pairs}
+\label{tab:policies}
+\input{table_policies}
+\end{table}
+
+\section{Zero-Cost Ceiling and Window Sensitivity}
+\label{sec:zerocost}
+\label{sec:window}
+At $W=100{,}000$ references ($264$ pairs), the DP oracle at $c_{\text{switch}}=C$ yields mean net gain $0.0001$, median $0.0000$, maximum $0.0067$, and $0/264 \ge 0.02$. At $c_{\text{switch}}=0$ ($W=100{,}000$), mean net gain is $0.0007$, median $0.0000$, maximum $0.0419$, and $1/264$ clears $0.02$ (\path{fiu_online.cs.fiu.edu_test} at $10\%$ WSS).
+
+\section{Feature Weights for Unseen-Family Rule}
+\label{sec:weights}
+Table~\ref{tab:feat_weights} reports the standardized global $L_2$-logistic regression weights for the exploratory zero-cost headroom rule ($\max_{\text{cap}} g_{c=0} \ge 0.005$).
+
+\begin{table}[h]
+\centering
+\footnotesize
+\caption{Standardized Logistic Weights (Exploratory H3)}
+\label{tab:feat_weights}
+\input{table_feat_weights}
+\end{table}
+
+\section{Per-Family Oracle Ceiling Breakdown}
+\label{sec:families}
+Table~\ref{tab:all_families} reports the mean net oracle gain at both $c_{\text{switch}}=C$ and $c_{\text{switch}}=0$ for all 30 trace families $\times$ 3 capacities (90 groups).
+
+\onecolumn
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{0.85}
+\captionof{table}{Exact DP Oracle Net Gain Across All 90 Family--Capacity Groups ($W=50{,}000$)}
+\label{tab:all_families}
+\input{table_all_families}
+\end{center}
+\twocolumn
+
+\section{Reproducibility Package}
+To regenerate all study CSVs, tables, figures, and PDFs from scratch:
+\begin{enumerate}
+\item Compile simulator: \path{g++ -O3 -std=c++17 reproduction/pathA_study/pathA_sim.cpp -o reproduction/pathA_study/pathA_sim}
+\item Run simulations: \path{python3 reproduction/pathA_study/run_study.py --workers 6}
+\item Extract features: \path{python3 reproduction/pathA_study/extract_features.py}
+\item Analyze \& generate LaTeX assets: \path{python3 reproduction/pathA_study/analyze_pathA_study.py} and \path{python3 reproduction/pathA_study/generate_paper_assets.py}
+\item Build PDFs: \path{cd drift_gating_latex_source && python3 build.py && pdflatex supplement.tex && pdflatex supplement.tex}
+\end{enumerate}
+
+\end{document}

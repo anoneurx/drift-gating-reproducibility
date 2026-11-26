@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  26 NOV 2026 08:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Debian) (preloaded format=pdflatex 2026.10.14)  26 NOV 2026 16:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -705,12 +705,12 @@ Here is how much of TeX's memory you used:
  693333 words of font info for 200 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  74i,7n,79p,1007b,525s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/kashie/.texlive2026/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.60
-0pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/urw/times/utmri8a.pfb>
+ </tmp/texfonts/pk/ljfour/jknappen/ec/ectt1000.600pk></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri
+8a.pfb>
 Output written on supplement.pdf (3 pages, 73297 bytes).
 PDF statistics:
  139 PDF objects out of 1000 (max. 8388607)

@@ -1213,6 +1213,7 @@ struct CtrlCfg {
     int evalDelay = 10, cooldown = 4, dwell = 10, hyst = 30;
     double z = 1.28, H = 50000.0, Kfrac = 0.0;
     bool persistentShadow = false;
+    bool useAll21 = false;
 };
 
 struct CtrlOutcome {
@@ -1254,21 +1255,23 @@ struct SwitchingController {
     RNG trigRng;
     int switches = 0, shadowEvals = 0;
     u64 shadowCpuNs = 0;
-    array<u64, 6> activeRefs{};
+    array<u64, 21> activeRefs{};
     const vector<size_t>* oracleSwitchRefs = nullptr;
     size_t nextOracleIdx = 0;
     vector<unique_ptr<Policy>> pShad;
     vector<array<double, 4>> pBlk;
     int pEpInWin = 0;
 
+    const vector<string>& cands() const { return cfg.useAll21 ? allPolicyNames() : ctrlCands(); }
+
     SwitchingController(int c, const CtrlCfg& cfg_, const vector<size_t>* oRefs = nullptr)
-        : C(max(1, c)), cfg(cfg_), act(mkPolicy(ctrlCands()[0], C)), actId(0),
+        : C(max(1, c)), cfg(cfg_), act(mkPolicy(cands()[0], C)), actId(0),
           ageRefs((u64)50 * cfg_.W), last(NP, 0), cnt(NP, 0),
           trigRng(99), oracleSwitchRefs(oRefs) {
         thr = (cfg.p >= 1.0) ? 0xFFFFFFFFFFFFFFFFULL : (u64)(cfg.p * 18446744073709551615.0);
         if (cfg.persistentShadow) {
-            for (const auto& nm : ctrlCands()) pShad.push_back(mkPolicy(nm, C));
-            pBlk.assign(ctrlCands().size(), {0, 0, 0, 0});
+            for (const auto& nm : cands()) pShad.push_back(mkPolicy(nm, C));
+            pBlk.assign(cands().size(), {0, 0, 0, 0});
         }
     }
 
@@ -1290,7 +1293,7 @@ struct SwitchingController {
         u64 t0 = cpu_ns();
         Eval E;
         if (cfg.persistentShadow) {
-            size_t nC = ctrlCands().size();
+            size_t nC = cands().size();
             E.blk = pBlk;
             E.tot.assign(nC, 0.0);
             for (size_t c = 0; c < nC; c++) {
@@ -1314,11 +1317,11 @@ struct SwitchingController {
             Cs = min(Cs, max(8, (int)lround(cfg.csCapF * Dw)));
         }
         size_t wm = (size_t)(w.size() * 0.4), rest = w.size() - wm;
-        size_t nC = ctrlCands().size();
+        size_t nC = cands().size();
         E.blk.assign(nC, {0, 0, 0, 0});
         E.tot.assign(nC, 0.0);
         for (size_t c = 0; c < nC; c++) {
-            auto pol = mkPolicy(ctrlCands()[c], Cs);
+            auto pol = mkPolicy(cands()[c], Cs);
             for (size_t i = 0; i < w.size(); i++) {
                 bool h = pol->access(w[i]);
                 if (i >= wm && !h) {
@@ -1337,7 +1340,7 @@ struct SwitchingController {
 
     int decide(const Eval& E, bool initial) {
         if (!E.ok) return actId;
-        size_t nC = ctrlCands().size();
+        size_t nC = cands().size();
         if (initial) {
             int b = 0;
             for (size_t c = 1; c < nC; c++) if (E.tot[c] < E.tot[b]) b = (int)c;
@@ -1369,7 +1372,7 @@ struct SwitchingController {
         vector<uint16_t> c;
         c.reserve(pg.size());
         for (u32 q : pg) c.push_back(cnt[q]);
-        auto np = mkPolicy(ctrlCands()[id], C);
+        auto np = mkPolicy(cands()[id], C);
         np->load(pg, c);
         act = std::move(np);
         prevId = actId;
@@ -1487,7 +1490,7 @@ struct SwitchingController {
 
     bool access(u32 p, bool countEval = false) {
         t++;
-        if (countEval && actId >= 0 && actId < 6) activeRefs[actId]++;
+        if (countEval && actId >= 0 && actId < 21) activeRefs[actId]++;
         last[p] = (u32)min<u64>(t, 0xFFFFFFFFu);
         if (cnt[p] < 65535) cnt[p]++;
         if (ageRefs && t % ageRefs == 0) for (int i = 0; i < NP; i++) cnt[i] >>= 1;
@@ -1644,6 +1647,95 @@ int main(int argc, char** argv) {
                << (dpZero.didSwitch[w] ? 1 : 0) << ','
                << pruns[dpCharged.chosen[w]].name << ',' << (double)dpCharged.chosenMiss[w] / (double)window << '\n';
         }
+        return 0;
+    }
+
+    if (mode == "finesweep") {
+        ofstream fsw(outPrefix + "_finesweep.csv");
+        fsw << "trace,family,source,cap_frac,C,window,nwin,cost_frac,switch_cost,"
+               "best_static,best_static_miss_ratio,s3fifo_miss_ratio,"
+               "oracle_miss_ratio,oracle_switches,oracle_objective_ratio,net_gain_vs_best,net_gain_vs_s3fifo\n";
+        for (double cf : {0.0, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.50, 1.00}) {
+            double sc = cf * (double)C;
+            DPOracle dpc = solveDPOracle(pruns, sc, window, nWin);
+            fsw << label << ',' << family << ',' << source << ',' << capFrac << ','
+                << C << ',' << window << ',' << nWin << ',' << fixed << setprecision(2) << cf << ','
+                << setprecision(1) << sc << ',' << pruns[bestIdx].name << ','
+                << setprecision(9) << bestRatio << ',' << s3Ratio << ','
+                << setprecision(9) << dpc.missRatio << ','
+                << dpc.switches << ',' << dpc.objectiveRatio << ','
+                << (bestRatio - dpc.objectiveRatio) << ',' << (s3Ratio - dpc.objectiveRatio) << '\n';
+        }
+        return 0;
+    }
+
+    if (mode == "ranking") {
+        // 1. Direct shadow ranking accuracy against full-cache window best among 6 candidates
+        // Evaluate every 20,000 refs (10 epochs) across eval range [warm, evalEnd)
+        ofstream fr(outPrefix + "_ranking.csv");
+        fr << "trace,family,source,cap_frac,C,mode,evals,top1_agree,shadow_picks_s3,true_best_s3\n";
+        const auto& c6 = ctrlCands();
+        vector<unique_ptr<Policy>> fullCands;
+        for (const auto& nm : c6) fullCands.push_back(mkPolicy(nm, C));
+        for (size_t i = 0; i < warm; i++) for (auto& fc : fullCands) fc->access(refs[i]);
+
+        u64 thr02 = (u64)(0.20 * 18446744073709551615.0);
+        for (auto [mname, pSamp, csCapF] : vector<tuple<string,double,double>>{{"ContShadow-0.2C", 0.20, 0.50}, {"FullShadow-1.0C", 1.00, 0.00}}) {
+            // Re-init fullCands cleanly
+            vector<unique_ptr<Policy>> fc2;
+            for (const auto& nm : c6) fc2.push_back(mkPolicy(nm, C));
+            for (size_t i = 0; i < warm; i++) for (auto& p : fc2) p->access(refs[i]);
+            int evals = 0, agree = 0, shS3 = 0, trS3 = 0;
+            size_t step = 20000;
+            for (size_t pos = warm; pos + step <= evalEnd; pos += step) {
+                vector<size_t> trueMiss(6, 0);
+                vector<u32> samp;
+                for (size_t i = pos; i < pos + step; i++) {
+                    for (size_t c = 0; c < 6; c++) if (!fc2[c]->access(refs[i])) trueMiss[c]++;
+                    if (pSamp >= 1.0 || SwitchingController::hsh(refs[i]) < thr02) samp.push_back(refs[i]);
+                }
+                if (samp.size() < 100) continue;
+                int Cs = max(8, (int)lround(pSamp * C));
+                if (csCapF > 0.0) {
+                    unordered_set<u32> uniq(samp.begin(), samp.end());
+                    Cs = min(Cs, max(8, (int)lround(csCapF * (int)uniq.size())));
+                }
+                size_t wm = (size_t)(samp.size() * 0.4);
+                vector<size_t> shMiss(6, 0);
+                for (size_t c = 0; c < 6; c++) {
+                    auto sp = mkPolicy(c6[c], Cs);
+                    for (size_t i = 0; i < samp.size(); i++) {
+                        bool h = sp->access(samp[i]);
+                        if (i >= wm && !h) shMiss[c]++;
+                    }
+                }
+                size_t trBest = min_element(trueMiss.begin(), trueMiss.end()) - trueMiss.begin();
+                size_t shBest = min_element(shMiss.begin(), shMiss.end()) - shMiss.begin();
+                evals++;
+                if (trBest == shBest) agree++;
+                if (c6[shBest] == "S3-FIFO") shS3++;
+                if (c6[trBest] == "S3-FIFO") trS3++;
+            }
+            fr << label << ',' << family << ',' << source << ',' << capFrac << ',' << C << ','
+               << mname << ',' << evals << ',' << agree << ',' << shS3 << ',' << trS3 << '\n';
+        }
+
+        // 2. ContShadow-21 (all 21 policies in candidate pool)
+        CtrlCfg c21; c21.name = "ContShadow-21"; c21.trigger = "contshadow"; c21.budget = "cont21";
+        c21.contEvery = 10; c21.useAll21 = true;
+        SwitchingController ctrl21(C, c21, nullptr);
+        size_t miss21 = 0;
+        u64 t0 = cpu_ns();
+        for (size_t i = 0; i < evalEnd; i++) {
+            bool hit = ctrl21.access(refs[i], i >= warm);
+            if (i >= warm && !hit) miss21++;
+        }
+        u64 el21 = cpu_ns() - t0;
+        ofstream f21(outPrefix + "_pool21.csv");
+        f21 << "trace,family,source,cap_frac,C,controller,miss_ratio,s3fifo_miss_ratio,switches,ns_per_ref\n";
+        f21 << label << ',' << family << ',' << source << ',' << capFrac << ',' << C << ",ContShadow-21,"
+            << fixed << setprecision(9) << ((double)miss21 / (double)evalRefs) << ','
+            << s3Ratio << ',' << ctrl21.switches << ',' << setprecision(3) << ((double)el21 / (double)evalEnd) << '\n';
         return 0;
     }
 

@@ -140,10 +140,13 @@ def main():
     lines += [r"\bottomrule", r"\end{tabular}"]
     (TEX_DIR / "table_policies.tex").write_text("\n".join(lines) + "\n")
 
-    # ── 4. Table: H2 Controllers vs S3-FIFO ────────────────────────────────
+    # ── 4. Table: H2 Controllers vs S3-FIFO (2-sided Wilcoxon + Cluster CI) ──
     s3_mr = {(r["trace"], r["cap_frac"]): float(r["miss_ratio"]) for r in pol if r["policy"] == "S3-FIFO"}
     s3_ns_mean = np.mean([float(r["ns_per_ref"]) for r in pol if r["policy"] == "S3-FIFO"])
     s3_mr_mean = np.mean(list(s3_mr.values()))
+
+    rng = np.random.default_rng(42)
+    fams_list = sorted(set(r["family"] for r in ctrl))
 
     ctrl_names = sorted(set(r["controller"] for r in ctrl) - {"S3-FIFO"})
     raw_p = []
@@ -151,29 +154,33 @@ def main():
     for cname in ctrl_names:
         sub = [r for r in ctrl if r["controller"] == cname]
         deltas = np.array([float(r["miss_ratio"]) - s3_mr[(r["trace"], r["cap_frac"])] for r in sub])
+        fam_arrs = [np.array([float(r["miss_ratio"]) - s3_mr[(r["trace"], r["cap_frac"])] for r in sub if r["family"] == f]) for f in fams_list]
+        boots = [np.concatenate([fam_arrs[i] for i in rng.integers(0, len(fams_list), size=len(fams_list))]).mean() for _ in range(3000)]
+        ci_lo, ci_hi = np.quantile(boots, 0.025), np.quantile(boots, 0.975)
         sw = np.mean([float(r["switches"]) for r in sub])
         ev = np.mean([float(r["shadow_evals"]) for r in sub])
         ns = np.mean([float(r["ns_per_ref"]) for r in sub])
         try:
-            _, p = stats.wilcoxon(deltas, alternative="less")
+            _, p = stats.wilcoxon(deltas, alternative="two-sided")
             if np.isnan(p):
                 p = 1.0
         except Exception:
             p = 1.0
         raw_p.append(p)
-        ctrl_stats.append((cname, len(deltas), deltas.mean(), sw, ev, ns))
+        ctrl_stats.append((cname, len(deltas), deltas.mean(), ci_lo, ci_hi, sw, ev, ns))
     holm_p = holm_correction(raw_p)
 
     lines = [
-        r"\begin{tabular}{lrrrrr}",
+        r"\begin{tabular}{llrrrr}",
         r"\toprule",
-        r"Controller & $\Delta$ MR & $p_{\text{Holm}}$ & Switches & Evals & ns/ref \\",
+        r"Controller & $\Delta$ MR [95\% Cluster CI] & $p_{\text{Holm}}$ & Sw. & Evals & ns/ref \\",
         r"\midrule",
-        f"S3-FIFO (static) & 0.0000 & --- & 0.00 & 0.0 & {s3_ns_mean:.1f} \\\\",
+        f"S3-FIFO (static) & 0.0000 [---] & --- & 0.00 & 0.0 & {s3_ns_mean:.1f} \\\\",
         r"\midrule",
     ]
-    for (cname, n, dmean, sw, ev, ns), cp in sorted(zip(ctrl_stats, holm_p), key=lambda x: x[0][2]):
-        lines.append(f"{tex_esc(cname)} & {dmean:+.4f} & {cp:.3f} & {sw:.2f} & {ev:.1f} & {ns:.1f} \\\\")
+    for (cname, n, dmean, clo, chi, sw, ev, ns), cp in sorted(zip(ctrl_stats, holm_p), key=lambda x: x[0][2]):
+        pstr = "$<10^{-15}$" if cp < 1e-15 else f"{cp:.3f}"
+        lines.append(f"{tex_esc(cname)} & {dmean:+.4f} [{clo:+.3f}, {chi:+.3f}] & {pstr} & {sw:.2f} & {ev:.1f} & {ns:.1f} \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (TEX_DIR / "table_h2.tex").write_text("\n".join(lines) + "\n")
 
@@ -217,6 +224,12 @@ def main():
     lofo_preds = np.array(lofo_preds)
     lofo_true = np.array(lofo_true)
     lofo_acc = ((lofo_preds >= 0.5) == lofo_true).mean()
+    tp = ((lofo_preds >= 0.5) & (lofo_true == 1)).sum()
+    tn = ((lofo_preds < 0.5) & (lofo_true == 0)).sum()
+    fp = ((lofo_preds >= 0.5) & (lofo_true == 0)).sum()
+    fn = ((lofo_preds < 0.5) & (lofo_true == 1)).sum()
+    lofo_bacc = 0.5 * (tp / max(1, tp + fn) + tn / max(1, tn + fp))
+    lofo_f1 = (2 * tp) / max(1, 2 * tp + fp + fn)
 
     def calc_auc(yt, ys):
         pos, neg = ys[yt == 1], ys[yt == 0]
@@ -229,7 +242,11 @@ def main():
                      ("Public holdout (train on real-app)", srcs != "real_app_pageref")]:
         w = fit_lr(Xn[~te], y_bin[~te], lam=0.5)
         p = sig(Xn[te] @ w)
-        cs_rows.append((name, int(te.sum()), int((~te).sum()), ((p >= 0.5) == y_bin[te]).mean(), calc_auc(y_bin[te], p)))
+        yt = y_bin[te]
+        tp_c = ((p >= 0.5) & (yt == 1)).sum(); tn_c = ((p < 0.5) & (yt == 0)).sum()
+        fp_c = ((p >= 0.5) & (yt == 0)).sum(); fn_c = ((p < 0.5) & (yt == 1)).sum()
+        bacc_c = 0.5 * (tp_c / max(1, tp_c + fn_c) + tn_c / max(1, tn_c + fp_c))
+        cs_rows.append((name, int(te.sum()), int((~te).sum()), bacc_c, calc_auc(yt, p)))
 
     wg = fit_lr(Xn, y_bin, lam=0.5)
     weights = sorted(zip(FEATS, wg[1:]), key=lambda x: abs(x[1]), reverse=True)
@@ -244,15 +261,16 @@ def main():
     lines = [
         r"\begin{tabular}{lrrrr}",
         r"\toprule",
-        r"Evaluation split & $n_{\text{test}}$ & $n_{\text{train}}$ & Acc. & AUC \\",
+        r"Evaluation split & $n_{\text{test}}$ & $n_{\text{train}}$ & Bal.\ Acc. & AUC \\",
         r"\midrule",
-        r"Pre-spec.\ ($c=C, g \ge 0.02$) & 88 & --- & 1.000 & --- \\",
-        f"Expl.\ LOFO ($c=0, g \\ge 0.005$) & 88 & --- & {lofo_acc:.3f} & {lofo_auc:.3f} \\\\",
+        r"Primary ($c=C, g \ge 0.02$) & 88 & --- & 0.500 & --- \\",
+        f"Expl.\\ LOFO ($c=0, g \\ge 0.005$) & 88 & --- & {lofo_bacc:.3f} & {lofo_auc:.3f} \\\\",
     ]
-    for name, nte, ntr, acc, auc in cs_rows:
-        lines.append(f"{name} & {nte} & {ntr} & {acc:.3f} & {auc:.3f} \\\\")
+    for name, nte, ntr, bacc, auc in cs_rows:
+        lines.append(f"{name} & {nte} & {ntr} & {bacc:.3f} & {auc:.3f} \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (TEX_DIR / "table_h3.tex").write_text("\n".join(lines) + "\n")
+    print(f"H3 LOFO raw_acc={lofo_acc:.3f}, bal_acc={lofo_bacc:.3f}, f1={lofo_f1:.3f}, auc={lofo_auc:.3f}")
 
     lines = [
         r"\begin{tabular}{lr}",
@@ -308,7 +326,7 @@ def main():
     ax.set_xticks(pos)
     ax.set_xticklabels(short)
     ax.set_ylabel("Net oracle gain vs. best static")
-    ax.set_ylim(-0.002, 0.064)
+    ax.set_ylim(-0.002, 0.088)
     ax.legend(fontsize=6.5, ncol=2, frameon=False, loc="upper right")
     ax.grid(axis="y", linestyle=":", alpha=0.5)
     fig.tight_layout()
@@ -325,16 +343,16 @@ def main():
         dy = -0.0035 if p in ("S3-FIFO", "CAR", "LRU") else 0.002
         ax.annotate(p, (x, y), xytext=(x + 2, y + dy), fontsize=6.5)
 
-    cx = [s[5] for s in ctrl_stats]
+    cx = [s[7] for s in ctrl_stats]
     cy = [s3_mr_mean + s[2] for s in ctrl_stats]
     ax.scatter(cx, cy, s=26, color="#d62728", marker="o", alpha=0.85, label="Switching controllers (17)", zorder=3)
     ax.annotate("ContShadow", (cx[ctrl_names.index("ContShadow")], cy[ctrl_names.index("ContShadow")]),
-                xytext=(155, 0.533), fontsize=6.5, color="#d62728")
+                xytext=(142, 0.534), arrowprops=dict(arrowstyle="-", color="#d62728", lw=0.6), fontsize=6.5, color="#d62728")
     ax.annotate("CUSUM-high", (cx[ctrl_names.index("CUSUM-high")], cy[ctrl_names.index("CUSUM-high")]),
-                xytext=(112, 0.525), fontsize=6.5, color="#d62728")
+                xytext=(114, 0.525), fontsize=6.5, color="#d62728")
     ax.set_xlabel("Simulator CPU cost (ns / reference)")
     ax.set_ylabel("Mean miss ratio (264 trace-cap pairs)")
-    ax.set_xlim(30, 215)
+    ax.set_xlim(20, 240)
     ax.set_ylim(0.480, 0.542)
     ax.legend(fontsize=7, frameon=False, loc="lower right")
     ax.grid(True, linestyle=":", alpha=0.5)
@@ -357,7 +375,7 @@ def main():
     ax.plot([0, 1], [0, 1], "k--", linewidth=0.9, label="Chance (AUC = 0.500)")
     ax.set_xlabel("False positive rate")
     ax.set_ylabel("True positive rate")
-    ax.set_title("Unseen-family prediction (zero-cost gain >= 0.005)")
+    ax.set_title("Exploratory LOFO ROC (g(0) >= 0.005)", fontsize=8)
     ax.legend(fontsize=7, frameon=False, loc="lower right")
     ax.grid(True, linestyle=":", alpha=0.5)
     fig.tight_layout()
@@ -368,22 +386,24 @@ def main():
     print(f"LOFO exploratory: acc={lofo_acc:.3f}, auc={lofo_auc:.3f}")
 
 
-    # ── 8. Table: Switch-Cost x Window Sensitivity ─────────────────────────
+    # ── 8. Table: Fine Switch-Cost x Window Sensitivity (from finesweep.csv) ──
+    fsw = load_csv("finesweep.csv")
+    fsw_low = [r for r in fsw if float(r["cap_frac"]) <= 0.10]
     lines = [
-        r"\begin{tabular}{llrrrrr}",
+        r"\begin{tabular}{llrrrrrrr}",
         r"\toprule",
-        r"$W$ & $c_{\text{switch}}$ & Mean $g$ & $p_{90}$ $g$ & Max $g$ & $\ge 0.02$ & Avg sw. \\",
+        r"$W$ & $c_{\text{sw}}$ & Mean $g$ & Max $g$ & $\ge .005$ & $\ge .01$ & $\ge .02$ & Sw. \\",
         r"\midrule",
     ]
-    for w in (10000, 25000, 50000):
-        for cf in ("0.00", "0.10", "0.25", "0.50", "1.00"):
-            sub = [r for r in csweep if int(r["window"]) == w and r["cost_frac"] == cf]
+    for w in (5000, 10000, 25000, 50000):
+        for cf in ("0.00", "0.02", "0.05", "0.10", "0.25", "0.50", "1.00"):
+            sub = [r for r in fsw_low if int(r["window"]) == w and r["cost_frac"] == cf]
             g = np.array([float(r["net_gain_vs_best"]) for r in sub])
             sw = np.mean([float(r["oracle_switches"]) for r in sub])
             clabel = "$0$" if cf == "0.00" else (f"${cf}C$" if cf != "1.00" else "$C$")
             lines.append(
-                f"{w//1000}k & {clabel} & {g.mean():.4f} & {np.quantile(g,0.9):.4f} & "
-                f"{g.max():.4f} & {int((g>=0.02).sum())}/264 & {sw:.2f} \\\\"
+                f"{w//1000}k & {clabel} & {g.mean():.4f} & {g.max():.5f} & "
+                f"{int((g>=0.005).sum())} & {int((g>=0.01).sum())} & {int((g>=0.02).sum())} & {sw:.2f} \\\\"
             )
         if w != 50000:
             lines.append(r"\midrule")
@@ -412,25 +432,55 @@ def main():
     lines += [r"\bottomrule", r"\end{tabular}"]
     (TEX_DIR / "table_ctrl_diag.tex").write_text("\n".join(lines) + "\n")
 
-    # ── 10. Fig 4: Switch-Cost x Window Sensitivity Curve ──────────────────
-    fig, ax = plt.subplots(figsize=(4.4, 2.4))
-    cfs = [0.00, 0.10, 0.25, 0.50, 1.00]
-    for w, col, mk in [(10000, "#d62728", "o"), (25000, "#1f77b4", "s"), (50000, "#2ca02c", "^")]:
+    # ── 10. Fig 4: Fine Switch-Cost x Window Sensitivity Curve ─────────────
+    fig, ax = plt.subplots(figsize=(4.6, 2.5))
+    cfs = [0.00, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.50, 1.00]
+    for w, col, mk in [(5000, "#9467bd", "D"), (10000, "#d62728", "o"), (25000, "#1f77b4", "s"), (50000, "#2ca02c", "^")]:
         pcts = []
         for cf in cfs:
-            sub = [r for r in csweep if int(r["window"]) == w and abs(float(r["cost_frac"]) - cf) < 1e-4]
+            sub = [r for r in fsw_low if int(r["window"]) == w and abs(float(r["cost_frac"]) - cf) < 1e-4]
             pcts.append(100.0 * np.mean([float(r["net_gain_vs_best"]) >= 0.02 for r in sub]))
-        ax.plot(cfs, pcts, marker=mk, linewidth=1.6, color=col, label=f"W = {w//1000}k refs")
-    ax.axvline(0.50, color="#555555", linestyle="--", linewidth=1.0, label="0.50C collapse boundary")
+        ax.plot(cfs, pcts, marker=mk, ms=3.8, linewidth=1.5, color=col, label=f"W = {w//1000}k refs")
+    ax.axvline(0.50, color="#555555", linestyle="--", linewidth=1.0, label="0.50C zero-clearing point")
     ax.set_xlabel("Switch penalty fraction (c_switch / C)")
     ax.set_ylabel("Pairs clearing >= 0.02 (%)")
-    ax.set_xticks(cfs)
-    ax.set_xticklabels(["0", "0.10C", "0.25C", "0.50C", "1.00C"])
-    ax.set_ylim(-0.3, 6.2)
-    ax.legend(fontsize=7, frameon=False, loc="upper right")
+    ax.set_xticks([0.00, 0.10, 0.20, 0.25, 0.50, 1.00])
+    ax.set_xticklabels(["0", "0.10C", "0.20C", "0.25C", "0.50C", "1.00C"], fontsize=7)
+    ax.set_ylim(-0.3, 8.6)
+    ax.legend(fontsize=6.5, frameon=False, loc="upper right")
     ax.grid(True, linestyle=":", alpha=0.5)
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_cost_sweep.pdf")
+    plt.close(fig)
+
+    # ── 11. Fig 5b: Shadow Ranking Accuracy (from shadow_ranking.csv) ──────
+    sr = load_csv("shadow_ranking.csv")
+    modes = ["ContShadow-0.2C", "FullShadow-1.0C"]
+    metrics = []
+    for m in modes:
+        sub = [r for r in sr if r["mode"] == m]
+        tot_ev = sum(int(r["evals"]) for r in sub)
+        top1 = 100.0 * sum(int(r["top1_agree"]) for r in sub) / tot_ev
+        sh_s3 = 100.0 * sum(int(r["shadow_picks_s3"]) for r in sub) / tot_ev
+        tr_s3 = 100.0 * sum(int(r["true_best_s3"]) for r in sub) / tot_ev
+        metrics.append((top1, sh_s3, tr_s3))
+
+    fig, ax = plt.subplots(figsize=(4.2, 2.3))
+    x = np.arange(3)
+    w_b = 0.32
+    ax.bar(x - w_b/2, metrics[0], w_b, label="ContShadow-0.2C (sampled)", color="#d62728")
+    ax.bar(x + w_b/2, metrics[1], w_b, label="FullShadow-1.0C (cold 20k)", color="#1f77b4")
+    for i, (v0, v1) in enumerate(zip(metrics[0], metrics[1])):
+        ax.text(i - w_b/2, v0 + 1.5, f"{v0:.1f}%", ha="center", fontsize=6.5)
+        ax.text(i + w_b/2, v1 + 1.5, f"{v1:.1f}%", ha="center", fontsize=6.5)
+    ax.set_xticks(x)
+    ax.set_xticklabels(["Top-1 policy\nagreement", "Shadow picks\nS3-FIFO", "True window\nbest is S3-FIFO"], fontsize=7)
+    ax.set_ylabel("Share of eval windows (%)")
+    ax.set_ylim(0, 84)
+    ax.legend(fontsize=6.5, frameon=False, loc="upper right")
+    ax.grid(axis="y", linestyle=":", alpha=0.5)
+    fig.tight_layout()
+    fig.savefig(FIG_DIR / "fig_shadow_ranking.pdf")
     plt.close(fig)
 
 
