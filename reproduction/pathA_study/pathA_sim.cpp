@@ -1212,6 +1212,7 @@ struct CtrlCfg {
     int contEvery = 10;
     int evalDelay = 10, cooldown = 4, dwell = 10, hyst = 30;
     double z = 1.28, H = 50000.0, Kfrac = 0.0;
+    bool persistentShadow = false;
 };
 
 struct CtrlOutcome {
@@ -1256,12 +1257,19 @@ struct SwitchingController {
     array<u64, 6> activeRefs{};
     const vector<size_t>* oracleSwitchRefs = nullptr;
     size_t nextOracleIdx = 0;
+    vector<unique_ptr<Policy>> pShad;
+    vector<array<double, 4>> pBlk;
+    int pEpInWin = 0;
 
     SwitchingController(int c, const CtrlCfg& cfg_, const vector<size_t>* oRefs = nullptr)
         : C(max(1, c)), cfg(cfg_), act(mkPolicy(ctrlCands()[0], C)), actId(0),
           ageRefs((u64)50 * cfg_.W), last(NP, 0), cnt(NP, 0),
           trigRng(99), oracleSwitchRefs(oRefs) {
         thr = (cfg.p >= 1.0) ? 0xFFFFFFFFFFFFFFFFULL : (u64)(cfg.p * 18446744073709551615.0);
+        if (cfg.persistentShadow) {
+            for (const auto& nm : ctrlCands()) pShad.push_back(mkPolicy(nm, C));
+            pBlk.assign(ctrlCands().size(), {0, 0, 0, 0});
+        }
     }
 
     static u64 hsh(u32 x) {
@@ -1281,6 +1289,21 @@ struct SwitchingController {
     Eval evaluate(int startEp) {
         u64 t0 = cpu_ns();
         Eval E;
+        if (cfg.persistentShadow) {
+            size_t nC = ctrlCands().size();
+            E.blk = pBlk;
+            E.tot.assign(nC, 0.0);
+            for (size_t c = 0; c < nC; c++) {
+                for (int b = 0; b < 4; b++) E.tot[c] += E.blk[c][b];
+            }
+            E.Braw = max(1.0, (double)max(1, pEpInWin) * cfg.W / 4.0);
+            E.ok = true;
+            pBlk.assign(nC, {0, 0, 0, 0});
+            pEpInWin = 0;
+            shadowEvals++;
+            shadowCpuNs += (cpu_ns() - t0);
+            return E;
+        }
         vector<u32> w;
         for (const auto& s : win) if (s.ep >= startEp) w.push_back(s.page);
         if (w.size() < 100) return E;
@@ -1470,8 +1493,23 @@ struct SwitchingController {
         if (ageRefs && t % ageRefs == 0) for (int i = 0; i < NP; i++) cnt[i] >>= 1;
         bool hit = act->access(p);
         if (!hit) epochMiss++;
-        if (cfg.p >= 1.0 || hsh(p) < thr) win.push_back({p, ep});
-        if (++epochRefs == cfg.W) { epochRefs = 0; endEpoch(); }
+        if (cfg.persistentShadow) {
+            int totWinRefs = max(1, cfg.contEvery * cfg.W);
+            int curPos = pEpInWin * cfg.W + epochRefs;
+            int b = min(3, (int)((long long)curPos * 4 / totWinRefs));
+            u64 ts0 = cpu_ns();
+            for (size_t c = 0; c < pShad.size(); c++) {
+                if (!pShad[c]->access(p)) pBlk[c][b]++;
+            }
+            shadowCpuNs += (cpu_ns() - ts0);
+        } else if (cfg.p >= 1.0 || hsh(p) < thr) {
+            win.push_back({p, ep});
+        }
+        if (++epochRefs == cfg.W) {
+            epochRefs = 0;
+            if (cfg.persistentShadow) pEpInWin++;
+            endEpoch();
+        }
         return hit;
     }
 };
@@ -1731,6 +1769,16 @@ int main(int argc, char** argv) {
         {
             CtrlCfg c; c.name = "FullShadow-CostAware"; c.trigger = "contshadow"; c.budget = "full_k1";
             c.p = 1.0; c.csCapF = 0.0; c.Kfrac = 1.0; c.contEvery = 10;
+            abSuite.push_back(c);
+        }
+        {
+            CtrlCfg c; c.name = "PersistentShadow"; c.trigger = "contshadow"; c.budget = "pers";
+            c.p = 1.0; c.csCapF = 0.0; c.Kfrac = 0.0; c.contEvery = 10; c.persistentShadow = true;
+            abSuite.push_back(c);
+        }
+        {
+            CtrlCfg c; c.name = "PersistentShadow-CostAware"; c.trigger = "contshadow"; c.budget = "pers_k1";
+            c.p = 1.0; c.csCapF = 0.0; c.Kfrac = 1.0; c.contEvery = 10; c.persistentShadow = true;
             abSuite.push_back(c);
         }
         ofstream fa(outPrefix + "_ablation.csv");

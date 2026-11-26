@@ -139,13 +139,13 @@ The \textbf{net oracle gain} over the best static policy is
 \end{equation}
 Notice that $g(c_{\text{switch}}) \ge 0$ holds identically because any constant schedule $\pi_t \equiv p^*$ incurs zero switches.
 
-\textbf{Theorem 1 (Necessary Condition for Worthwhile Switching).} \emph{Let a schedule $\pi$ make $S \ge 1$ switches over $n_{\text{eval}}$ references with mean inter-switch dwell $\bar{L} = n_{\text{eval}}/S$, per-switch penalty $c_{\text{switch}} = \beta C$ ($\beta \ge 0$), and gross (zero-cost) miss-ratio reduction $\Delta\bar{m} = (M_{\text{best}} - \sum_t m_{t,\pi_t})/n_{\text{eval}}$. Then $\pi$ clears net gain threshold $\tau > 0$ only if}
+\textbf{Proposition 1 (Necessary Condition for Worthwhile Switching).} \emph{Let a schedule $\pi$ make $S \ge 1$ switches over $n_{\text{eval}}$ references with mean inter-switch dwell $\bar{L} = n_{\text{eval}}/S$, per-switch penalty $c_{\text{switch}} = \beta C$ ($\beta \ge 0$), and gross (zero-cost) miss-ratio reduction $\Delta\bar{m} = (M_{\text{best}} - \sum_t m_{t,\pi_t})/n_{\text{eval}}$. Then $\pi$ clears net gain threshold $\tau > 0$ only if}
 \begin{equation}
   \bar{L} \ge \frac{\beta C}{\Delta\bar{m} - \tau}, \qquad \text{or equivalently} \qquad \beta \le \frac{\bar{L}\,(\Delta\bar{m} - \tau)}{C}.
 \end{equation}
 \emph{Proof.} Substituting $S = n_{\text{eval}}/\bar{L}$ and $c_{\text{switch}}=\beta C$ into Eq.~(1)--(2) gives $g(\beta C) = \Delta\bar{m} - \beta C / \bar{L}$. Requiring $g(\beta C) \ge \tau$ yields $\beta C / \bar{L} \le \Delta\bar{m} - \tau$. $\square$
 
-Theorem~1 explains why the empirical $0.50C$ collapse boundary in Section~\ref{sec:sensitivity} is structural rather than an artifact of DP windowing: unless non-stationary phases persist for $\bar{L} \ge \beta C / (\Delta\bar{m} - \tau)$ references without losing their miss-ratio advantage $\Delta\bar{m}$, switch penalties erase any gross gain.
+Proposition~1 explains why the empirical $0.50C$ collapse boundary in Section~\ref{sec:sensitivity} is structural rather than an artifact of DP windowing: unless non-stationary phases persist for $\bar{L} \ge \beta C / (\Delta\bar{m} - \tau)$ references without losing their miss-ratio advantage $\Delta\bar{m}$, switch penalties erase any gross gain.
 
 Online controllers do not observe $m_{t,p}$ for all $p \in \mathcal{P}$ without paying evaluation cost. Instead, a controller monitors the active miss stream using a drift trigger and, when triggered (or periodically), evaluates a candidate pool $\mathcal{P}_{\text{cand}} \subseteq \mathcal{P}$ in sampled shadow caches at sampling rate $p_{\text{samp}} \in (0, 1]$ and scaled capacity $\Cs$. To prevent working-set collapse in the shadow cache, $\Cs$ must satisfy $\Cs / \Dw < 1$, where $\Dw$ is the number of distinct pages observed in the sampled evaluation window.
 
@@ -334,13 +334,13 @@ Two mechanisms explain the deficit:
 \item \textbf{Consistent across all trace sources:} Even on \code{pdl_public}, where \code{ContShadow} never selects \code{MRU} ($0.000$) and stays in \code{S3-FIFO} $83.3\%$ of the time, the remaining $16.7\%$ in \code{LRU} plus switch re-warming still yields a $+0.0095$ loss. On \code{real_app_pageref}, $10.9\%$ \code{MRU} selection causes a $+0.0158$ deficit, while on \code{instrumented_program}, $35.8\%$ combined time in non-\code{S3-FIFO} policies produces a $+0.0552$ loss.
 \end{enumerate}
 
-\subsection{Noise-Free ($1.0C$) and Cost-Aware Shadow Ablation}
-A natural question is whether eliminating shadow sampling noise ($p_{\text{samp}}=1.0$, $\Cs=C$) or enforcing a cost-aware switch threshold ($K=C$) recovers switching gains. Table~\ref{tab:ablation} evaluates both ablations across all 264 trace--capacity pairs.
+\subsection{Noise-Free ($1.0C$), Persistent, and Cost-Aware Shadow Ablation}
+A natural objection is that cold-replaying a $20{,}000$-reference window in sampled shadow caches ($p_{\text{samp}}=0.20$, $\Cs \le 0.2C$) handicaps \code{S3-FIFO} via both sampling noise and cold-start truncation. To isolate both effects, Table~\ref{tab:ablation} evaluates: (i)~\code{FullShadow} ($p_{\text{samp}}=1.0$, $\Cs=C$ on the $20{,}000$-reference window), (ii)~\code{PersistentShadow} (six continuously warmed $1.0C$ shadow caches running across the entire trace with zero cold-start truncation), and (iii)~cost-aware variants ($K=C$).
 
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Noise-Free ($C_s=C, p_{\text{samp}}=1.0$) Shadow Ablation ($n=264$)}
+\caption{Full-Capacity ($C_s=C, p_{\text{samp}}=1.0$) and Persistent Shadow Ablation ($n=264$)}
 \label{tab:ablation}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{lrrrrrrr}
@@ -348,13 +348,15 @@ A natural question is whether eliminating shadow sampling noise ($p_{\text{samp}
 Controller & $\Delta$ MR & $p_{\text{Wilc}}$ & Sw. & ns/ref & S3 & LRU & MRU \\
 \midrule
 \code{ContShadow} ($0.2C$) & +0.0412 & 1.000 & 1.73 & 199.1 & .671 & .189 & .060 \\
-\code{FullShadow} ($1.0C$) & +0.0284 & 1.000 & 1.12 & 639.4 & .627 & .262 & .018 \\
-\code{FullSh.-CostAware} & +0.0286 & 1.000 & 0.77 & 630.1 & .577 & .324 & .011 \\
+\code{FullShadow} ($1.0C$) & +0.0284 & 1.000 & 1.12 & 705.0 & .627 & .262 & .018 \\
+\code{FullSh.-CostAware} & +0.0286 & 1.000 & 0.77 & 691.0 & .577 & .324 & .011 \\
+\code{PersistentShadow} & +0.0175 & 1.000 & 1.55 & 2985.3 & .770 & .158 & .012 \\
+\code{PersSh.-CostAware} & +0.0191 & 1.000 & 0.83 & 2900.9 & .652 & .283 & .009 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-Removing sampling noise cuts the deficit from $+0.0412$ to $+0.0284$ and reduces \code{MRU} selection from $6.0\%$ to $1.8\%$, while cost-aware gating reduces switches from $1.73$ to $0.77$. Nevertheless, \emph{both} ablations still lose significantly to static \code{S3-FIFO} ($p=1.000$) at $10.7\times$ its CPU cost ($630$--$639$\,ns/ref vs.\ $59.5$\,ns/ref), because finite rolling evaluation windows still under-estimate \code{S3-FIFO}'s long-horizon ghost/demotion advantage relative to \code{LRU} ($26.2\%$--$32.4\%$ time-share).
+Removing sampling noise cuts the deficit from $+0.0412$ to $+0.0284$, and eliminating cold-start truncation via \code{PersistentShadow} cuts it further to $+0.0175$ (raising \code{S3-FIFO} share to $77.0\%$, and $86.1\%$ on \code{fiu_public}). Nevertheless, \emph{every} ablation still loses significantly to static \code{S3-FIFO} ($p=1.000$)---even when paying $50.2\times$ CPU overhead ($2{,}985.3$\,ns/ref vs.\ $59.5$\,ns/ref)---confirming that the barrier is the absence of oracle headroom, not shadow implementation artifacts.
 
 % =====================================================================
 \section{Predictive Rule and Case Studies (H3)}

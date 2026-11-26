@@ -289,7 +289,7 @@ def main():
     # ── III. PROBLEM FORMULATION AND HYPOTHESES ────────────────────────────
     add_section_heading(doc, "III. PROBLEM FORMULATION AND HYPOTHESES")
     add_p(doc, "Let σ = (x_{1}, …, x_{n}) be a sequence of n page references over distinct pages U with working-set size WSS = |U|. For target capacity C = ⌊α · WSS⌋ (α ∈ {0.01, 0.05, 0.10}), we discard a warm-up prefix of n_{warm} = min(100,000, ⌊0.1n⌋) references and partition the remaining stream into T = ⌊(n − n_{warm})/W⌋ non-overlapping windows of size W (n_{eval} = T · W). Given a policy pool P and per-window misses m_{t,p}, let M_{best} = min_{p} ∑_{t} m_{t,p} be the best single static policy miss count.")
-    add_p(doc, "A discrete switching schedule π = (π_{1}, …, π_{T}) incurs penalty c_{switch} ≥ 0 whenever π_{t} ≠ π_{t−1}. Net oracle gain is g(c_{switch}) = (M_{best} − min_{π} M(π; c_{switch})) / n_{eval} ≥ 0. Theorem 1 (Necessary Condition for Worthwhile Switching): for S ≥ 1 switches with mean dwell L̄ = n_{eval}/S, switch penalty c_{switch} = βC, and gross gain Δm̄, clearing threshold τ requires L̄ ≥ βC / (Δm̄ − τ), or β ≤ L̄(Δm̄ − τ)/C. Online controllers evaluate a candidate pool P_{cand} ⊆ P in sampled shadow caches satisfying C_{s}/D_{w} < 1. We test: (H1) at c_{switch} = C and W = 50,000, fewer than 10% of family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces; (H2) no online controller beats static S3-FIFO under Holm-adjusted paired Wilcoxon tests; and (H3) observable trace features predict unseen-family headroom under LOFO cross-validation.")
+    add_p(doc, "A discrete switching schedule π = (π_{1}, …, π_{T}) incurs penalty c_{switch} ≥ 0 whenever π_{t} ≠ π_{t−1}. Net oracle gain is g(c_{switch}) = (M_{best} − min_{π} M(π; c_{switch})) / n_{eval} ≥ 0. Proposition 1 (Necessary Condition for Worthwhile Switching): for S ≥ 1 switches with mean dwell L̄ = n_{eval}/S, switch penalty c_{switch} = βC, and gross gain Δm̄, clearing threshold τ requires L̄ ≥ βC / (Δm̄ − τ), or β ≤ L̄(Δm̄ − τ)/C. Online controllers evaluate a candidate pool P_{cand} ⊆ P in sampled shadow caches satisfying C_{s}/D_{w} < 1. We test: (H1) at c_{switch} = C and W = 50,000, fewer than 10% of family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces; (H2) no online controller beats static S3-FIFO under Holm-adjusted paired Wilcoxon tests; and (H3) observable trace features predict unseen-family headroom under LOFO cross-validation.")
 
     # ── IV. ORACLE AND EXPERIMENTAL DESIGN ─────────────────────────────────
     add_section_heading(doc, "IV. ORACLE AND EXPERIMENTAL DESIGN")
@@ -426,13 +426,15 @@ def main():
                    col_widths=[0.95, 0.45, 0.30, 0.30, 0.28, 0.28, 0.28, 0.28])
     add_p(doc, "Table IX explains the +0.041 deficit: sampled shadow caches (C_{s} ≤ 0.2C, p_{samp} = 0.20) compress S3-FIFO's 10%/90% queue split and ghost filter into noisy sample windows, mis-ranking LRU (18.9%–22.5%), MRU (5.9%–7.4%), and LFU-A (4.4%–6.6%) ahead of S3-FIFO 32.9%–38.9% of the time.")
 
-    add_lead_p(doc, "Noise-free (1.0C) and cost-aware shadow ablation. ", "Eliminating shadow sampling noise (FullShadow: C_{s} = C, p_{samp} = 1.0) reduces the deficit from +0.0412 to +0.0284 and cuts MRU selection from 6.0% to 1.8%, while adding a cost-aware gate (FullShadow-CostAware: K = C) lowers switches from 1.73 to 0.77. Yet both still lose significantly to static S3-FIFO (p = 1.000) at 10.7× CPU cost (630–639 ns/ref vs. 59.5 ns/ref) because finite rolling windows under-estimate S3-FIFO relative to LRU (26.2%–32.4% share).")
+    add_lead_p(doc, "Noise-free (1.0C), persistent, and cost-aware shadow ablation. ", "Eliminating shadow sampling noise (FullShadow: C_{s} = C, p_{samp} = 1.0) reduces the deficit from +0.0412 to +0.0284, and eliminating cold-start truncation (PersistentShadow: six continuously warmed 1.0C shadow caches) cuts it further to +0.0175 (77.0% S3-FIFO share). Yet every ablation still loses significantly to static S3-FIFO (p = 1.000), even at 50.2× CPU cost (2,985.3 ns/ref vs. 59.5 ns/ref).")
     t_ab = [
         ["ContShadow (0.2C)", "+0.0412", "1.000", "1.73", "199.1", ".671", ".189", ".060"],
-        ["FullShadow (1.0C)", "+0.0284", "1.000", "1.12", "639.4", ".627", ".262", ".018"],
-        ["FullSh.-CostAware", "+0.0286", "1.000", "0.77", "630.1", ".577", ".324", ".011"],
+        ["FullShadow (1.0C)", "+0.0284", "1.000", "1.12", "705.0", ".627", ".262", ".018"],
+        ["FullSh.-CostAware", "+0.0286", "1.000", "0.77", "691.0", ".577", ".324", ".011"],
+        ["PersistentShadow", "+0.0175", "1.000", "1.55", "2985.3", ".770", ".158", ".012"],
+        ["PersSh.-CostAware", "+0.0191", "1.000", "0.83", "2900.9", ".652", ".283", ".009"],
     ]
-    add_ieee_table(doc, "TABLE IX-B. NOISE-FREE (C_{s} = C, p_{samp} = 1.0) SHADOW ABLATION (n = 264)",
+    add_ieee_table(doc, "TABLE IX-B. FULL-CAPACITY (C_{s} = C, p_{samp} = 1.0) AND PERSISTENT SHADOW ABLATION (n = 264)",
                    ["Controller", "Δ MR", "p", "Sw.", "ns/ref", "S3", "LRU", "MRU"], t_ab,
                    col_widths=[1.05, 0.42, 0.35, 0.32, 0.42, 0.28, 0.28, 0.28])
 
