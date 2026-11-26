@@ -1261,7 +1261,7 @@ struct SwitchingController {
         : C(max(1, c)), cfg(cfg_), act(mkPolicy(ctrlCands()[0], C)), actId(0),
           ageRefs((u64)50 * cfg_.W), last(NP, 0), cnt(NP, 0),
           trigRng(99), oracleSwitchRefs(oRefs) {
-        thr = (u64)(cfg.p * 18446744073709551615.0);
+        thr = (cfg.p >= 1.0) ? 0xFFFFFFFFFFFFFFFFULL : (u64)(cfg.p * 18446744073709551615.0);
     }
 
     static u64 hsh(u32 x) {
@@ -1470,7 +1470,7 @@ struct SwitchingController {
         if (ageRefs && t % ageRefs == 0) for (int i = 0; i < NP; i++) cnt[i] >>= 1;
         bool hit = act->access(p);
         if (!hit) epochMiss++;
-        if (hsh(p) < thr) win.push_back({p, ep});
+        if (cfg.p >= 1.0 || hsh(p) < thr) win.push_back({p, ep});
         if (++epochRefs == cfg.W) { epochRefs = 0; endEpoch(); }
         return hit;
     }
@@ -1718,6 +1718,42 @@ int main(int argc, char** argv) {
                 fd << ',' << setprecision(4) << ((double)ctrl.activeRefs[k] / (double)evalRefs);
             }
             fd << '\n';
+        }
+    }
+
+    if (mode == "ablation") {
+        vector<CtrlCfg> abSuite;
+        {
+            CtrlCfg c; c.name = "FullShadow"; c.trigger = "contshadow"; c.budget = "full";
+            c.p = 1.0; c.csCapF = 0.0; c.Kfrac = 0.0; c.contEvery = 10;
+            abSuite.push_back(c);
+        }
+        {
+            CtrlCfg c; c.name = "FullShadow-CostAware"; c.trigger = "contshadow"; c.budget = "full_k1";
+            c.p = 1.0; c.csCapF = 0.0; c.Kfrac = 1.0; c.contEvery = 10;
+            abSuite.push_back(c);
+        }
+        ofstream fa(outPrefix + "_ablation.csv");
+        fa << "trace,family,source,cap_frac,C,window,controller,miss_ratio,s3fifo_miss_ratio,switches,shadow_evals,ns_per_ref,"
+              "lru_frac,lfua_frac,q2_frac,mru_frac,s3fifo_frac,arc_frac\n";
+        for (const auto& cfg : abSuite) {
+            SwitchingController ctrl(C, cfg, nullptr);
+            size_t miss = 0;
+            u64 t0 = cpu_ns();
+            for (size_t i = 0; i < evalEnd; i++) {
+                bool hit = ctrl.access(refs[i], i >= warm);
+                if (i >= warm && !hit) miss++;
+            }
+            u64 elapsed = cpu_ns() - t0;
+            double mr = (double)miss / (double)evalRefs;
+            double nsRef = (double)elapsed / (double)evalEnd;
+            fa << label << ',' << family << ',' << source << ',' << capFrac << ','
+               << C << ',' << window << ',' << cfg.name << ',' << fixed << setprecision(9) << mr << ','
+               << s3Ratio << ',' << ctrl.switches << ',' << ctrl.shadowEvals << ',' << setprecision(3) << nsRef;
+            for (int k = 0; k < 6; k++) {
+                fa << ',' << setprecision(4) << ((double)ctrl.activeRefs[k] / (double)evalRefs);
+            }
+            fa << '\n';
         }
     }
     return 0;
