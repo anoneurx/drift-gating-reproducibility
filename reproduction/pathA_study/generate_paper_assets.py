@@ -149,38 +149,52 @@ def main():
     fams_list = sorted(set(r["family"] for r in ctrl))
 
     ctrl_names = sorted(set(r["controller"] for r in ctrl) - {"S3-FIFO"})
-    raw_p = []
+    raw_p_pair, raw_p_fam = [], []
     ctrl_stats = []
     for cname in ctrl_names:
         sub = [r for r in ctrl if r["controller"] == cname]
         deltas = np.array([float(r["miss_ratio"]) - s3_mr[(r["trace"], r["cap_frac"])] for r in sub])
         fam_arrs = [np.array([float(r["miss_ratio"]) - s3_mr[(r["trace"], r["cap_frac"])] for r in sub if r["family"] == f]) for f in fams_list]
+        fam_means = np.array([fa.mean() for fa in fam_arrs])
         boots = [np.concatenate([fam_arrs[i] for i in rng.integers(0, len(fams_list), size=len(fams_list))]).mean() for _ in range(3000)]
         ci_lo, ci_hi = np.quantile(boots, 0.025), np.quantile(boots, 0.975)
         sw = np.mean([float(r["switches"]) for r in sub])
         ev = np.mean([float(r["shadow_evals"]) for r in sub])
         ns = np.mean([float(r["ns_per_ref"]) for r in sub])
         try:
-            _, p = stats.wilcoxon(deltas, alternative="two-sided")
-            if np.isnan(p):
-                p = 1.0
+            _, p_pair = stats.wilcoxon(deltas, alternative="two-sided")
+            if np.isnan(p_pair): p_pair = 1.0
         except Exception:
-            p = 1.0
-        raw_p.append(p)
-        ctrl_stats.append((cname, len(deltas), deltas.mean(), ci_lo, ci_hi, sw, ev, ns))
-    holm_p = holm_correction(raw_p)
+            p_pair = 1.0
+        try:
+            _, p_fam = stats.wilcoxon(fam_means, alternative="two-sided")
+            if np.isnan(p_fam): p_fam = 1.0
+        except Exception:
+            p_fam = 1.0
+        ranks = stats.rankdata(np.abs(fam_means))
+        w_pos = ranks[fam_means > 0].sum()
+        w_neg = ranks[fam_means < 0].sum()
+        rb_fam = (w_pos - w_neg) / max(1e-12, w_pos + w_neg)
+        raw_p_pair.append(p_pair)
+        raw_p_fam.append(p_fam)
+        ctrl_stats.append((cname, len(deltas), deltas.mean(), ci_lo, ci_hi, sw, ev, ns, rb_fam))
+    holm_p_fam = holm_correction(raw_p_fam)
 
     lines = [
-        r"\begin{tabular}{llrrrr}",
+        r"\begin{tabular}{llrrrrr}",
         r"\toprule",
-        r"Controller & $\Delta$ MR [95\% Cluster CI] & $p_{\text{Holm}}$ & Sw. & Evals & ns/ref \\",
+        r"Controller & $\Delta$ MR [95\% Cluster CI] & $p_{\text{fam,Holm}}$ & $r_b$ & Sw. & Evals & ns/ref \\",
         r"\midrule",
-        f"S3-FIFO (static) & 0.0000 [---] & --- & 0.00 & 0.0 & {s3_ns_mean:.1f} \\\\",
+        f"S3-FIFO (static) & 0.0000 [---] & --- & --- & 0.00 & 0.0 & {s3_ns_mean:.1f} \\\\",
         r"\midrule",
     ]
-    for (cname, n, dmean, clo, chi, sw, ev, ns), cp in sorted(zip(ctrl_stats, holm_p), key=lambda x: x[0][2]):
-        pstr = "$<10^{-15}$" if cp < 1e-15 else f"{cp:.3f}"
-        lines.append(f"{tex_esc(cname)} & {dmean:+.4f} [{clo:+.3f}, {chi:+.3f}] & {pstr} & {sw:.2f} & {ev:.1f} & {ns:.1f} \\\\")
+    for (cname, n, dmean, clo, chi, sw, ev, ns, rb), cp in sorted(zip(ctrl_stats, holm_p_fam), key=lambda x: x[0][2]):
+        if cp < 1e-3:
+            mant, exp = f"{cp:.1e}".split("e")
+            pstr = f"${mant}\\times 10^{{{int(exp)}}}$"
+        else:
+            pstr = f"{cp:.3f}"
+        lines.append(f"{tex_esc(cname)} & {dmean:+.4f} [{clo:+.3f}, {chi:+.3f}] & {pstr} & {rb:+.2f} & {sw:.2f} & {ev:.1f} & {ns:.1f} \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (TEX_DIR / "table_h2.tex").write_text("\n".join(lines) + "\n")
 
@@ -202,9 +216,11 @@ def main():
     fams = np.array([feat[t]["family"] for t in traces])
     srcs = np.array([feat[t]["source"] for t in traces])
 
-    mu, sd = X.mean(0), X.std(0)
-    sd[sd < 1e-9] = 1.0
-    Xn = np.hstack([np.ones((len(X), 1)), (X - mu) / sd])
+    def std_fold(Xtr_raw, Xte_raw):
+        m, s = Xtr_raw.mean(0), Xtr_raw.std(0)
+        s[s < 1e-9] = 1.0
+        return (np.hstack([np.ones((len(Xtr_raw), 1)), (Xtr_raw - m) / s]),
+                np.hstack([np.ones((len(Xte_raw), 1)), (Xte_raw - m) / s]))
 
     def sig(z):
         return 1.0 / (1.0 + np.exp(-np.clip(z, -50, 50)))
@@ -218,8 +234,9 @@ def main():
     lofo_preds, lofo_true = [], []
     for fam in sorted(set(fams)):
         te = fams == fam
-        w = fit_lr(Xn[~te], y_bin[~te], lam=0.5)
-        lofo_preds.extend(sig(Xn[te] @ w).tolist())
+        Xtr_f, Xte_f = std_fold(X[~te], X[te])
+        w = fit_lr(Xtr_f, y_bin[~te], lam=0.5)
+        lofo_preds.extend(sig(Xte_f @ w).tolist())
         lofo_true.extend(y_bin[te].tolist())
     lofo_preds = np.array(lofo_preds)
     lofo_true = np.array(lofo_true)
@@ -240,15 +257,17 @@ def main():
     cs_rows = []
     for name, te in [("Real-app holdout (train on public)", srcs == "real_app_pageref"),
                      ("Public holdout (train on real-app)", srcs != "real_app_pageref")]:
-        w = fit_lr(Xn[~te], y_bin[~te], lam=0.5)
-        p = sig(Xn[te] @ w)
+        Xtr_c, Xte_c = std_fold(X[~te], X[te])
+        w = fit_lr(Xtr_c, y_bin[~te], lam=0.5)
+        p = sig(Xte_c @ w)
         yt = y_bin[te]
         tp_c = ((p >= 0.5) & (yt == 1)).sum(); tn_c = ((p < 0.5) & (yt == 0)).sum()
         fp_c = ((p >= 0.5) & (yt == 0)).sum(); fn_c = ((p < 0.5) & (yt == 1)).sum()
         bacc_c = 0.5 * (tp_c / max(1, tp_c + fn_c) + tn_c / max(1, tn_c + fp_c))
         cs_rows.append((name, int(te.sum()), int((~te).sum()), bacc_c, calc_auc(yt, p)))
 
-    wg = fit_lr(Xn, y_bin, lam=0.5)
+    X_global, _ = std_fold(X, X)
+    wg = fit_lr(X_global, y_bin, lam=0.5)
     weights = sorted(zip(FEATS, wg[1:]), key=lambda x: abs(x[1]), reverse=True)
 
     # Save exploratory CSVs

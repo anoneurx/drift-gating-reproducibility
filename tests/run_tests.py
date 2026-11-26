@@ -51,7 +51,7 @@ def run_sim(trace_path, label, family, source, cap_frac, C, window, mode="oracle
             "--source",   source,
             "--cap-frac", str(cap_frac),
             "--C",        str(C),
-            "--np",       str(C),
+            "--np",       str(max(100, C * 10)),
             "--window",   str(window),
             "--out-prefix", prefix,
             "--mode",     mode,
@@ -118,7 +118,7 @@ def test_seed_reproducibility():
         def run_once(prefix_suffix):
             prefix = os.path.join(td, f"out{prefix_suffix}")
             cmd = [SIM, "--trace", trace_path, "--label", "rep", "--family", "unit",
-                   "--source", "unit", "--cap-frac", "0.1", "--C", "2, --np", "2",
+                   "--source", "unit", "--cap-frac", "0.1", "--C", "2", "--np", "20",
                    "--window", "20", "--out-prefix", prefix, "--mode", "oracle"]
             subprocess.run(cmd, capture_output=True, timeout=30)
             csv_p = prefix + "_oracle_summary.csv"

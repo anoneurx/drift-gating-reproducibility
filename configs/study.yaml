@@ -9,7 +9,8 @@ study:
   family_group_pass_fraction: 0.6667
 
 seeds:
-  random_controller_seed: 4242         # std::mt19937_64 in src/pathA_sim.cpp (SwitchingController)
+  lrb_policy_seed: 4242                # std::mt19937_64 in src/pathA_sim.cpp (LRBStyle)
+  random_controller_seed: 99           # std::mt19937_64 in src/pathA_sim.cpp (SwitchingController::trigRng)
   cluster_bootstrap_seed: 42           # np.random.default_rng(42) in table/figure generation
   cluster_bootstrap_resamples: 3000
 
@@ -44,13 +45,13 @@ controllers:
       h: {low: 8.0, med: 5.0, high: 3.0}
     page_hinkley:
       delta: 0.005
-      lambda: {low: 8.0, med: 5.0, high: 3.0}
+      lambda: {low: 9.0, med: 5.0, high: 2.0}
     adwin:
-      delta: {low: 0.0005, med: 0.002, high: 0.01}
+      delta: {low: 0.0002, med: 0.002, high: 0.02}
     periodic:
       interval_epochs: {low: 40, med: 20, high: 10}
     random:
-      prob_per_epoch: {low: 0.02, med: 0.05, high: 0.10}
+      prob_per_epoch: {low: 0.025, med: 0.05, high: 0.10}
     oracle_trig:
       mode: dp_switch_boundaries
     cont_shadow:

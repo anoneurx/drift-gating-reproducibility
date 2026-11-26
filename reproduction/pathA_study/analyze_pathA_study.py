@@ -169,9 +169,9 @@ def analyze_controllers(ctrl_rows, oracle_rows):
         arr = np.array(deltas)
         if len(arr) < 10:
             continue
-        # H0: delta == 0 (no improvement), one-tailed (ctrl better → delta < 0)
+        # H0: delta == 0 (two-sided; positive delta means controller loses to S3-FIFO)
         try:
-            stat, p = stats.wilcoxon(arr, alternative="less")
+            stat, p = stats.wilcoxon(arr, alternative="two-sided")
         except Exception:
             p = 1.0
         pvals_raw[ctrl] = p
@@ -255,14 +255,14 @@ def analyze_rule(h1_rows, feat_rows):
     fam_all = np.array(fam_all)
     src_all = np.array(src_all)
 
-    # Normalize
-    mu = X_all.mean(0)
-    sd = X_all.std(0)
-    sd[sd < 1e-9] = 1.0
-    Xn = (X_all - mu) / sd
-    Xn_aug = np.hstack([np.ones((len(Xn), 1)), Xn])  # add bias
+    def std_fold(Xtr_raw, Xte_raw):
+        m = Xtr_raw.mean(0)
+        s = Xtr_raw.std(0)
+        s[s < 1e-9] = 1.0
+        return (np.hstack([np.ones((len(Xtr_raw), 1)), (Xtr_raw - m) / s]),
+                np.hstack([np.ones((len(Xte_raw), 1)), (Xte_raw - m) / s]))
 
-    # LOFO
+    # LOFO (leak-free: standardize inside each fold)
     lofo_preds, lofo_true = [], []
     lofo_rows = []
     for fam in families:
@@ -270,8 +270,8 @@ def analyze_rule(h1_rows, feat_rows):
         train_mask = ~test_mask
         if train_mask.sum() < 5 or test_mask.sum() < 1:
             continue
-        X_tr, y_tr = Xn_aug[train_mask], y_all[train_mask]
-        X_te, y_te = Xn_aug[test_mask], y_all[test_mask]
+        X_tr, X_te = std_fold(X_all[train_mask], X_all[test_mask])
+        y_tr, y_te = y_all[train_mask], y_all[test_mask]
         w = fit_logreg(X_tr, y_tr, lam=0.1)
         probs = predict_logreg(w, X_te)
         preds = (probs >= 0.5).astype(float)
@@ -302,8 +302,8 @@ def analyze_rule(h1_rows, feat_rows):
             ("real_app_pageref", real_mask, pub_mask),
             ("public", pub_mask, real_mask),
         ]:
-            X_tr, y_tr = Xn_aug[train_mask_cs], y_all[train_mask_cs]
-            X_te, y_te = Xn_aug[hold_mask], y_all[hold_mask]
+            X_tr, X_te = std_fold(X_all[train_mask_cs], X_all[hold_mask])
+            y_tr, y_te = y_all[train_mask_cs], y_all[hold_mask]
             w = fit_logreg(X_tr, y_tr, lam=0.1)
             probs = predict_logreg(w, X_te)
             acc = ((probs >= 0.5).astype(float) == y_te).mean()
@@ -318,7 +318,8 @@ def analyze_rule(h1_rows, feat_rows):
             print(f"  Cross-source holdout={hold_src}: acc={acc:.3f}  AUC={auc_cs:.3f}")
 
     # Fit global model and report feature weights
-    w_global = fit_logreg(Xn_aug, y_all, lam=0.1)
+    X_global, _ = std_fold(X_all, X_all)
+    w_global = fit_logreg(X_global, y_all, lam=0.1)
     feat_weights = []
     for i, fname in enumerate(FEATURES):
         feat_weights.append({"feature": fname, "weight": f"{w_global[i + 1]:.4f}"})

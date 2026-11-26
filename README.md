@@ -193,8 +193,9 @@ warmup_frac: 0.10                          # 10% of trace discarded as warmup
 
 | Component | Seed | Location | Notes |
 |-----------|------|----------|-------|
-| `SwitchingController` RNG | `4242` (mt19937_64) | `src/pathA_sim.cpp` line ~992 | Hardcoded; not a CLI flag yet |
-| Cluster bootstrap (Python) | `42` | `generate_paper_assets.py` line ~148 | `np.random.default_rng(42)` |
+| `LRBStyle` RNG | `4242` (`RNG`) | `src/pathA_sim.cpp` line 992 | Hardcoded; not a CLI flag yet |
+| `SwitchingController` RNG | `99` (`trigRng`) | `src/pathA_sim.cpp` line 1270 | Used by `Random-*` triggers |
+| Cluster bootstrap (Python) | `42` | `generate_paper_assets.py` line 148 | `np.random.default_rng(42)` |
 | DP oracle | deterministic | — | Viterbi DP has no randomness |
 
 The DP oracle and all static-policy miss ratios are fully deterministic. Controller results use seed 4242; re-running the simulator binary with identical arguments produces identical CSV output.
