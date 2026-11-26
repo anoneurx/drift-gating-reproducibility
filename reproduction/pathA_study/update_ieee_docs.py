@@ -87,8 +87,21 @@ def add_lead_p(doc, lead, body_text, italic_lead=True, bold_lead=True):
     return p
 
 
-def set_cell_margins(cell, top=22, bottom=22, left=40, right=40):
+def set_cell_width_dxa(cell, dxa):
     tcPr = cell._tc.get_or_add_tcPr()
+    tcW = tcPr.find(qn("w:tcW"))
+    if tcW is None:
+        tcW = OxmlElement("w:tcW")
+        tcPr.append(tcW)
+    tcW.set(qn("w:w"), str(dxa))
+    tcW.set(qn("w:type"), "dxa")
+
+
+def set_cell_margins(cell, top=18, bottom=18, left=22, right=22):
+    tcPr = cell._tc.get_or_add_tcPr()
+    tcMar = tcPr.find(qn("w:tcMar"))
+    if tcMar is not None:
+        tcPr.remove(tcMar)
     tcMar = OxmlElement("w:tcMar")
     for m, val in [("top", top), ("bottom", bottom), ("left", left), ("right", right)]:
         node = OxmlElement(f"w:{m}")
@@ -123,37 +136,68 @@ def set_row_borders(row, top=None, bottom=None):
             tcBorders.append(b)
 
 
-def add_ieee_table(doc, caption, headers, rows, col_widths=None, right_align_from=1):
+def add_ieee_table(doc, caption, headers, rows, col_widths=None, right_align_from=1, font_pt=7.0):
     cap = add_p(doc, align=WD_ALIGN_PARAGRAPH.CENTER, space_before=5, space_after=2)
     add_rich_runs(cap, caption, size_pt=7.5, bold=True)
 
+    max_col_in = 3.25
+    if col_widths is None:
+        col_widths = [max_col_in / len(headers)] * len(headers)
+    total_w = sum(col_widths)
+    if total_w > max_col_in:
+        scale = max_col_in / total_w
+        col_widths = [w * scale for w in col_widths]
+    dxa_widths = [int(round(w * 1440)) for w in col_widths]
+
     tbl = doc.add_table(rows=1 + len(rows), cols=len(headers))
     tbl.autofit = False
+    tblPr = tbl._tbl.tblPr
+    tblW = tblPr.find(qn("w:tblW"))
+    if tblW is None:
+        tblW = OxmlElement("w:tblW")
+        tblPr.append(tblW)
+    tblW.set(qn("w:w"), str(sum(dxa_widths)))
+    tblW.set(qn("w:type"), "dxa")
+    tblLayout = tblPr.find(qn("w:tblLayout"))
+    if tblLayout is None:
+        tblLayout = OxmlElement("w:tblLayout")
+        tblPr.append(tblLayout)
+    tblLayout.set(qn("w:type"), "fixed")
+
+    tblGrid = tbl._tbl.tblGrid
+    if tblGrid is not None:
+        for gc in list(tblGrid):
+            tblGrid.remove(gc)
+        for dw in dxa_widths:
+            gc = OxmlElement("w:gridCol")
+            gc.set(qn("w:w"), str(dw))
+            tblGrid.append(gc)
+
     hdr_row = tbl.rows[0]
     for j, h in enumerate(headers):
         cell = hdr_row.cells[j]
-        if col_widths:
-            cell.width = Inches(col_widths[j])
+        cell.width = Inches(col_widths[j])
+        set_cell_width_dxa(cell, dxa_widths[j])
         set_cell_margins(cell)
         p = cell.paragraphs[0]
         p.alignment = WD_ALIGN_PARAGRAPH.RIGHT if j >= right_align_from else WD_ALIGN_PARAGRAPH.LEFT
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(0)
-        add_rich_runs(p, h, size_pt=7.5, bold=True)
+        add_rich_runs(p, h, size_pt=font_pt, bold=True)
     set_row_borders(hdr_row, top=8, bottom=4)
 
     for i, row_data in enumerate(rows):
         row = tbl.rows[1 + i]
         for j, val in enumerate(row_data):
             cell = row.cells[j]
-            if col_widths:
-                cell.width = Inches(col_widths[j])
+            cell.width = Inches(col_widths[j])
+            set_cell_width_dxa(cell, dxa_widths[j])
             set_cell_margins(cell)
             p = cell.paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.RIGHT if j >= right_align_from else WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.space_before = Pt(0)
             p.paragraph_format.space_after = Pt(0)
-            add_rich_runs(p, str(val), size_pt=7.5, bold=(i == len(rows) - 1 and str(row_data[0]).startswith("Total")))
+            add_rich_runs(p, str(val), size_pt=font_pt, bold=(i == len(rows) - 1 and str(row_data[0]).startswith("Total")))
         set_row_borders(row, top=None, bottom=(8 if i == len(rows) - 1 else None))
 
     add_p(doc, "", space_before=0, space_after=3)
@@ -293,7 +337,14 @@ def main():
 
     # ── IV. ORACLE AND EXPERIMENTAL DESIGN ─────────────────────────────────
     add_section_heading(doc, "IV. ORACLE AND EXPERIMENTAL DESIGN")
-    add_lead_p(doc, "Simulator and exact DP oracle. ", "Our C++17 simulator pathA_sim executes 21 policies under identical replay and measures CPU time via CLOCK_PROCESS_CPUTIME_ID. Using Viterbi DP in O(T P^{2}) time, we compute the exact minimum-cost schedule dp[t][p] = m_{t,p} + min_{q}(dp[t−1][q] + c_{switch} · 1[p ≠ q]).")
+    add_lead_p(doc, "Simulator and exact DP oracle. ", "Our C++17 simulator pathA_sim executes 21 policies under identical replay and measures CPU time via CLOCK_PROCESS_CPUTIME_ID. Using Viterbi DP in O(T P^{2}) time, we compute the exact minimum-cost schedule dp[t][p] = m_{t,p} + min_{q}(dp[t−1][q] + c_{switch} · 1[p ≠ q]). Algorithm 1 summarizes the paired evaluation loop.")
+    t_alg = [
+        ["1. Warm-up: Replay n_{warm} = min(100k, ⌊0.1n⌋) refs; partition remaining n_{eval} = TW refs into T windows of size W."],
+        ["2. Oracle DP: Simulate P = 21 policies to form {m_{t,p}}; solve Viterbi DP for c_{switch} ∈ {0, 0.10C, 0.25C, 0.50C, C} to obtain g(c_{switch})."],
+        ["3. Online Controllers: Execute active policy at capacity C; on drift trigger (or every 10 epochs), rank 6-policy pool in shadow caches (C_{s}/D_{w} < 1 or 1.0C ablation) via 4-block LCB (z = 1.28) and migrate resident metadata on switch."],
+    ]
+    add_ieee_table(doc, "ALGORITHM 1. EXACT DP ORACLE & CONTROLLER EVALUATION",
+                   ["Evaluation Pipeline"], t_alg, col_widths=[3.25], right_align_from=2, font_pt=7.0)
     add_lead_p(doc, "Switching controllers and hyperparameters. ", "We evaluate 17 online switching controllers over a 6-policy candidate pool (LRU, LFU-A, 2Q, MRU, S3-FIFO, ARC) against static S3-FIFO (Table II). Controllers sample references at p_{samp} = 0.20 and rank candidates in shadow caches (C_{s} ≤ 0.2C) via a lower-confidence-bound rule (z = 1.28, 40% warm-up, 4-block variance, dwell = 10, cooldown = 4, hysteresis = 30, epoch = 2,000 refs).")
 
     t_hp = [
@@ -331,26 +382,14 @@ def main():
                "Fig. 1. Mean and maximum net oracle gain across trace sources for c_{switch} = C and c_{switch} = 0 (W = 50,000).")
 
     add_lead_p(doc, "Switching rarely clears the threshold (H1 confirmed). ", "When paying the full-refill switch cost (c_{switch} = C), 0 of 90 family–capacity groups meet ≥ 0.02 on ≥ 2/3 of traces. Across all 264 pairs at W = 50,000, mean g = 0.0001, median g = 0.0000, p_{90} = 0.0000, and max g = 0.0067 (python_etl_s101 at 10% WSS). Equal-source macro-averaging yields identical mean g = 0.0001. Even at c_{switch} = 0, only 2/264 pairs (0.8%) reach 0.02 (fiu_online.cs.fiu.edu_test at 10% WSS: 0.0564; 5% WSS: 0.0208).")
-    add_lead_p(doc, "Static S3-FIFO dominance & capacity breakdown. ", "Across all 264 pairs, S3-FIFO is best on 176 pairs (66.7%) with lowest mean miss ratio (0.4890 at 59.5 ns/ref), followed by CAR (0.5151), ARC (0.5189), and 2Q (0.5192) (Table IV). Table V disaggregates headroom and ContShadow across 1%, 5%, and 10% WSS: g(C) remains ≤ 0.0001 at every capacity, while ContShadow's deficit peaks at 1% WSS (+0.0562).")
-
-    pol_mr, pol_ns = {}, {}
-    for r in pol:
-        pol_mr.setdefault(r["policy"], []).append(float(r["miss_ratio"]))
-        pol_ns.setdefault(r["policy"], []).append(float(r["ns_per_ref"]))
-    best_counts = Counter(r["best_static"] for r in c_rows)
-    ranked_pols = sorted(pol_mr.keys(), key=lambda p: np.mean(pol_mr[p]))
-    t3_rows = [[p, f"{np.mean(pol_mr[p]):.4f}", f"{np.median(pol_mr[p]):.4f}", best_counts[p], f"{np.mean(pol_ns[p]):.1f}"]
-               for p in ranked_pols]
-    add_ieee_table(doc, "TABLE IV. ALL 21 POLICIES RANKED BY MEAN MISS RATIO (264 PAIRS)",
-                   ["Policy", "Mean MR", "Med. MR", "Best", "ns/ref"], t3_rows,
-                   col_widths=[0.95, 0.60, 0.60, 0.45, 0.55])
+    add_lead_p(doc, "Static S3-FIFO dominance & capacity breakdown. ", "Across all 264 pairs (full 21-policy ranking in Supplement Table S1), S3-FIFO is best on 176 pairs (66.7%) with lowest mean miss ratio (0.4890 at 59.5 ns/ref), followed by CAR (0.5151), ARC (0.5189), and 2Q (0.5192). Table IV disaggregates headroom and ContShadow across 1%, 5%, and 10% WSS: g(C) remains ≤ 0.0001 at every capacity, while ContShadow's deficit peaks at 1% WSS (+0.0562).")
 
     t_cap = [
         ["1% WSS", "0.5545", "0.5496", "0.0000", "0.0003", "0.6106", "+0.0562"],
         ["5% WSS", "0.4750", "0.4741", "0.0000", "0.0010", "0.5050", "+0.0300"],
         ["10% WSS", "0.4376", "0.4364", "0.0001", "0.0023", "0.4751", "+0.0374"],
     ]
-    add_ieee_table(doc, "TABLE V. ORACLE CEILING AND CONTSHADOW DEFICIT BY CAPACITY (W = 50,000)",
+    add_ieee_table(doc, "TABLE IV. ORACLE CEILING AND CONTSHADOW DEFICIT BY CAPACITY (W = 50,000)",
                    ["Cap.", "S3-FIFO", "Best St.", "g(C)", "g(0)", "ContSh.", "Δ"], t_cap,
                    col_widths=[0.55, 0.45, 0.45, 0.42, 0.42, 0.45, 0.46])
 
@@ -428,15 +467,15 @@ def main():
 
     add_lead_p(doc, "Noise-free (1.0C), persistent, and cost-aware shadow ablation. ", "Eliminating shadow sampling noise (FullShadow: C_{s} = C, p_{samp} = 1.0) reduces the deficit from +0.0412 to +0.0284, and eliminating cold-start truncation (PersistentShadow: six continuously warmed 1.0C shadow caches) cuts it further to +0.0175 (77.0% S3-FIFO share). Yet every ablation still loses significantly to static S3-FIFO (p = 1.000), even at 50.2× CPU cost (2,985.3 ns/ref vs. 59.5 ns/ref).")
     t_ab = [
-        ["ContShadow (0.2C)", "+0.0412", "1.000", "1.73", "199.1", ".671", ".189", ".060"],
-        ["FullShadow (1.0C)", "+0.0284", "1.000", "1.12", "705.0", ".627", ".262", ".018"],
-        ["FullSh.-CostAware", "+0.0286", "1.000", "0.77", "691.0", ".577", ".324", ".011"],
-        ["PersistentShadow", "+0.0175", "1.000", "1.55", "2985.3", ".770", ".158", ".012"],
-        ["PersSh.-CostAware", "+0.0191", "1.000", "0.83", "2900.9", ".652", ".283", ".009"],
+        ["ContSh. (0.2C)", "+0.0412", "1.000", "1.73", "199.1", ".671", ".189", ".060"],
+        ["FullSh. (1.0C)", "+0.0284", "1.000", "1.12", "705.0", ".627", ".262", ".018"],
+        ["FullSh.-CA", "+0.0286", "1.000", "0.77", "691.0", ".577", ".324", ".011"],
+        ["PersistSh.", "+0.0175", "1.000", "1.55", "2985", ".770", ".158", ".012"],
+        ["PersSh.-CA", "+0.0191", "1.000", "0.83", "2901", ".652", ".283", ".009"],
     ]
     add_ieee_table(doc, "TABLE IX-B. FULL-CAPACITY (C_{s} = C, p_{samp} = 1.0) AND PERSISTENT SHADOW ABLATION (n = 264)",
                    ["Controller", "Δ MR", "p", "Sw.", "ns/ref", "S3", "LRU", "MRU"], t_ab,
-                   col_widths=[1.05, 0.42, 0.35, 0.32, 0.42, 0.28, 0.28, 0.28])
+                   col_widths=[0.82, 0.42, 0.34, 0.31, 0.40, 0.30, 0.30, 0.30], font_pt=6.5)
     add_figure(doc, "fig_shadow_ablation.pdf",
                "Fig. 6. Shadow ablation progression from sampled 0.2C (ContShadow) to full 1.0C (FullShadow) and continuously warmed 1.0C (PersistentShadow).")
 
@@ -455,7 +494,7 @@ def main():
 
     # ── IX. PREDICTIVE RULE AND CASE STUDIES (H3) ──────────────────────────
     add_section_heading(doc, "IX. PREDICTIVE RULE AND CASE STUDIES (H3)")
-    add_p(doc, "Because 0/90 groups clear ≥ 0.02 at c_{switch} = C, the primary target is uniformly negative (LOFO accuracy 1.000, AUC undefined). On an exploratory target predicting max_{cap} g(0) ≥ 0.005 (13/88 positive traces), L_{2}-regularized logistic regression achieves 84.1% LOFO accuracy (AUC = 0.901) and 0.890–1.000 cross-source AUC (Table X, Fig. 4). Top predictors are window_reuse_cv (+0.2808), uniq_window_cv (+0.1843), entropy_bits (+0.1778), and window_turnover_max (+0.1383) (Table XI).")
+    add_p(doc, "Because 0/90 groups clear ≥ 0.02 at c_{switch} = C, the primary target is uniformly negative (LOFO accuracy 1.000, AUC undefined). On an exploratory target predicting max_{cap} g(0) ≥ 0.005 (13/88 positive traces), L_{2}-regularized logistic regression achieves 84.1% LOFO accuracy (AUC = 0.901) and 0.890–1.000 cross-source AUC (Table X, Fig. 4). Top predictors (full 11-feature weights in Supplement Table S2) are window_reuse_cv (+0.2808), uniq_window_cv (+0.1843), entropy_bits (+0.1778), and window_turnover_max (+0.1383).")
 
     t5_rows = [
         ["Primary (c=C, g ≥ 0.02)", "88", "---", "1.000", "---"],
@@ -470,11 +509,6 @@ def main():
     add_figure(doc, "fig_lofo_roc.pdf",
                "Fig. 4. Exploratory LOFO ROC curve predicting zero-cost headroom ≥ 0.005 on unseen trace families (AUC = 0.901).",
                width_in=3.1)
-
-    t_fw = [[r["feature"], f"{float(r['weight']):+.4f}"] for r in fweights]
-    add_ieee_table(doc, "TABLE XI. STANDARDIZED LOGISTIC WEIGHTS (EXPLORATORY H3)",
-                   ["Standardized feature", "Weight"], t_fw,
-                   col_widths=[2.10, 0.90])
 
     add_figure(doc, "fig_window_timeline.pdf",
                "Fig. 5. Per-window miss ratio (10% WSS, W = 50,000) on fiu_online_test (left, 7 zero-cost switches, g(0) = 0.0564) vs. sqlite_join_agg_s101 (right, stationary, g(0) = 0.0020).",
