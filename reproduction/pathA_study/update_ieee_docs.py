@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Update Drift_Gating_Final_IEEE.docx and Drift_Gating_Final_IEEE.pdf in IEEE 2-column format."""
+"""Update Drift_Gating_Final_IEEE.docx and Drift_Gating_Final_IEEE.pdf in IEEE 2-column format.
+Synchronized with drift_gating_latex_source/main_template.tex (11-section Q1 audit revision).
+"""
 import csv
 import re
 import shutil
 import subprocess
-from collections import Counter
 from pathlib import Path
 import numpy as np
 
@@ -80,7 +81,7 @@ def add_section_heading(doc, text):
     return p
 
 
-def add_lead_p(doc, lead, body_text, italic_lead=True, bold_lead=True):
+def add_lead_p(doc, lead, body_text, italic_lead=False, bold_lead=True):
     p = add_p(doc, align=WD_ALIGN_PARAGRAPH.JUSTIFY, space_before=1, space_after=3)
     add_rich_runs(p, lead, size_pt=9.0, bold=bold_lead, italic=italic_lead)
     add_rich_runs(p, body_text, size_pt=9.0)
@@ -203,10 +204,13 @@ def add_ieee_table(doc, caption, headers, rows, col_widths=None, right_align_fro
     add_p(doc, "", space_before=0, space_after=3)
 
 
-def add_figure(doc, pdf_name, caption, width_in=3.3):
+def add_figure(doc, pdf_name, caption, width_in=3.25):
+    pdf_path = FIG_DIR / pdf_name
+    if not pdf_path.exists():
+        return
     png_prefix = TMP_FIGS / pdf_name.replace(".pdf", "")
     subprocess.run(
-        ["pdftoppm", "-png", "-r", "300", "-singlefile", str(FIG_DIR / pdf_name), str(png_prefix)],
+        ["pdftoppm", "-png", "-r", "300", "-singlefile", str(pdf_path), str(png_prefix)],
         check=True,
     )
     png_path = Path(str(png_prefix) + ".png")
@@ -238,16 +242,6 @@ def configure_margins(section):
 
 def main():
     manifest = load_csv("manifest.csv")
-    ora = load_csv("oracle_summary.csv")
-    pol = load_csv("oracle_policy.csv")
-    ctrl = load_csv("controllers.csv")
-    fsw = load_csv("finesweep.csv")
-    fsw_low = [r for r in fsw if float(r["cap_frac"]) <= 0.10]
-    cdiag = load_csv("ctrl_diag.csv")
-    fweights = load_csv("h3_exploratory_weights.csv")
-
-    c_rows = [r for r in ora if float(r["switch_cost"]) > 0]
-    z_rows = [r for r in ora if float(r["switch_cost"]) == 0]
 
     doc = Document()
     configure_margins(doc.sections[0])
@@ -275,20 +269,21 @@ def main():
     set_font(p.add_run("Abstract—"), 8.5, bold=True, italic=True)
     add_rich_runs(
         p,
-        "Dynamic policy switching is a common pattern in adaptive page replacement: monitor a workload for drift, "
-        "rank candidate policies in shadow caches, and switch when a candidate outperforms the incumbent. We bound the "
-        "achievable headroom of discrete policy switching using a Viterbi dynamic-programming (DP) hindsight oracle—"
-        "exact under an independent-replay model—across 88 traces (30 families) and capacities from 1% to 50% of "
-        "working-set size (WSS) against 21 baselines. At a worst-case full-refill penalty (c_{switch} = C, W = 50,000), "
-        "0 of 90 family–capacity groups (1%–10% WSS) clear a 0.02 net miss-ratio reduction (mean 0.0001, max 0.0067). "
-        "Under realistic metadata-migration penalties (c_{switch} ≤ 0.10C) and fine windows (W = 5,000), only 13/264 "
-        "pairs (4.9%) clear 0.02; across W ∈ {5k, 10k, 25k, 50k}, 0/264 pairs clear 0.02 once c_{switch} ≥ 0.50C. "
-        "Static S3-FIFO achieves the lowest mean miss ratio (0.4890 at 59.5 ns/ref) and outperforms all 17 online "
-        "controllers (+0.0393 to +0.0433 higher miss ratio; two-sided p < 10^{-15}, 95% family-cluster CI excluding zero), "
-        "as well as noise-free (1.0C), persistent-shadow (+0.0175, p = 1.04×10^{-20}), and 21-policy-pool (+0.0470) "
-        "ablations, because cold-window shadow evaluation mis-ranks the top-1 policy in 32% of windows. An exploratory "
-        "leave-one-family-out ranker predicts rare zero-cost headroom with AUC = 0.901 but 0.493 balanced accuracy due to "
-        "14.8% class imbalance.",
+        "Discrete policy switching is a recurring design pattern in adaptive cache and page replacement: monitor a workload "
+        "for drift, rank candidate policies in shadow caches, and switch when a candidate outperforms the incumbent. We bound "
+        "the achievable headroom of discrete switching using an exact Viterbi dynamic-programming (DP) hindsight oracle under "
+        "an independent-replay model across 88 traces (30 workload families), 21 baseline policies, and cache capacities from "
+        "1% to 50% of working-set size (WSS). At an assumed full-refill penalty (c_{switch} = C, W = 50,000), 0 of 90 "
+        "family–capacity groups (1%–10% WSS) clear a 0.02 net miss-ratio reduction (trace-weighted mean 0.0001, family-macro "
+        "mean 0.0001, max 0.0067); across 1%–50% WSS, only 2/440 pairs (both at 25% WSS) clear 0.02. Under assumed lower "
+        "migration penalties (c_{switch} ≤ 0.10C) and fine windows (W = 5,000), 13/264 pairs (4.9%) clear 0.02, and 0/264 "
+        "clear 0.02 once c_{switch} ≥ 0.50C across W ∈ {5k, 10k, 25k, 50k}. Static S3-FIFO achieves the lowest global mean "
+        "miss ratio (0.4890 at 59.5 ns/ref across 1%–10% WSS) and outperforms all 17 online switching controllers (+0.0393 "
+        "to +0.0433 higher miss ratio; family-level n = 30 two-sided Holm-adjusted p ≤ 1.2×10^{-4}, rank-biserial r_{b} ≥ 0.91, "
+        "95% family-cluster bootstrap CI excluding zero), as well as noise-free (1.0C), persistent-shadow (+0.0175), and "
+        "21-policy-pool (+0.0470) ablations, because cold-window shadow evaluation mis-ranks the top-1 policy in 32% of "
+        "evaluation windows. An exploratory leak-free leave-one-family-out ranker distinguishes rare zero-cost headroom "
+        "(13/88 traces) with AUC = 0.895 (PR-AUC = 0.471) but 0.493 balanced accuracy (F_{1} = 0.000) due to class imbalance.",
         size_pt=8.5,
         bold=True,
     )
@@ -299,11 +294,36 @@ def main():
 
     # ── I. INTRODUCTION ────────────────────────────────────────────────────
     add_section_heading(doc, "I. INTRODUCTION")
-    add_p(doc, "Page replacement determines which memory pages are evicted when physical memory is full. Because real workloads mix phases with distinct access patterns—sequential scans, hot-object reuse, and random I/O—no single static policy is optimal at every instant. This observation has motivated three decades of adaptive replacement research, from SEQ [1] and EELRU [2] through ARC [3], LeCaR [4], CACHEUS [5], and recent learned policies [6], [28].")
-    add_p(doc, "A recurring architecture in this literature is discrete policy switching: monitor the miss stream for workload drift, evaluate a pool of candidate policies via sampled shadow caches, and switch the active policy when a candidate outperforms the incumbent by a statistical margin. Each switch carries a state-migration or cache-rewarm cost, while the hoped-for benefit is a lower miss ratio in the new regime. Whether that benefit exceeds the cost in realistic workloads—especially against modern scan-resistant static baselines such as S3-FIFO [7] and SIEVE [8]—is rarely quantified as a strict upper bound.")
-    add_p(doc, "We pose one concrete question: when, if ever, does discrete policy switching beat the best static policy once switch costs are counted? Rather than proposing yet another switching heuristic, we bound the entire design space using an exact hindsight oracle—the optimal per-window policy schedule found by Viterbi dynamic programming—and compare it against the best no-switch policy on the same trace.")
-    add_lead_p(doc, "Protocol. ", "We recorded three hypotheses (H1–H3), endpoints, and the smallest worthwhile gain (≥ 0.02 net miss-ratio reduction on at least two-thirds of traces in a family–capacity group) in a local git commit prior to executing the study, without external third-party preregistration; accordingly, we treat the study as post hoc.")
-    add_lead_p(doc, "Traces. ", "We evaluate 88 traces spanning 30 families and four sources (Table I): (i) 10 real-application page-level traces captured via an LD_PRELOAD tracer on SQLite workloads, git repository operations, and a Python ETL pipeline; (ii) 60 instrumented-program page traces across 15 algorithmic kernels; (iii) 12 public FIU block-I/O traces [9]; and (iv) 6 public PDL storage/cache traces [9], [29]. Every trace is evaluated at capacities 1%, 5%, and 10% of its working-set size (WSS), yielding 264 trace–capacity pairs. Because instrumented kernels represent 68% of raw trace count, we report both aggregate and per-source statistics throughout.")
+    add_p(doc, "Page and cache replacement determines which blocks remain resident when memory is constrained. Because real workloads alternate among sequential scans, hot-object reuse, and random I/O, no single static eviction rule is optimal in every interval. This observation has motivated decades of adaptive replacement designs, from SEQ [1] and EELRU [2] to ARC [3], LeCaR [4], CACHEUS [5], and recent learning-augmented policies [6], [28].")
+    add_p(doc, "A recurring architecture in this literature is discrete policy switching: monitor the miss stream for workload drift, evaluate a pool of candidate policies via sampled shadow caches, and switch the active policy when a candidate outperforms the incumbent. Each transition incurs metadata migration or cache warm-up overhead, while the hoped-for benefit is a lower miss ratio in the new regime. Whether that benefit exceeds transition costs—especially against modern scan-resistant static baselines such as S3-FIFO [7] and SIEVE [8]—is rarely bounded explicitly.")
+    add_p(doc, "We ask one concrete question: when, if ever, does discrete policy switching beat the best static policy once switching costs are counted? Rather than proposing a new switching controller, we compute a Viterbi dynamic-programming (DP) hindsight oracle under an independent-replay model across 88 traces and compare it against both the per-pair best static policy and the global best static policy (S3-FIFO). We also evaluate 17 online switching controllers, diagnose why they underperform static S3-FIFO, and test whether workload features predict rare switching headroom.")
+    add_lead_p(doc, "Contributions. ", "(1) Model-Relative Oracle Ceiling: An exact Viterbi DP ceiling under independent replay across 88 traces (1%–50% WSS), 9 normalized switch-cost fractions (c_{switch} ∈ [0, C]), and 4 window sizes (W ∈ {5k, 10k, 25k, 50k}), plus aggregation-sensitivity checks across trace-, family-, source-, and non-stationary-weighted averages. (2) Simulator & Oracle Validation: Unit validation of core replacement policies against hand-worked traces, brute-force P^{T} verification of the Viterbi DP, and a state-carrying vs. independent-replay comparison quantifying cold-transition penalties. (3) Cluster-Aware Controller Evaluation & Failure Diagnosis: A matched comparison of 17 online controllers plus 4 shadow ablations and a 21-policy expansion (ContShadow-21) against static S3-FIFO using family-level (n = 30) cluster inference, direct shadow-ranking accuracy across 9,564 windows, and measured switchTo() migration latency. (4) Exploratory Screening & Reproducible Artifact: A leak-free leave-one-family-out (LOFO) screening analysis separating ranking (AUC = 0.895) from classification (F_{1} = 0.000), together with a public artifact repository.")
+
+    # ── II. BACKGROUND AND RELATED WORK ────────────────────────────────────
+    add_section_heading(doc, "II. BACKGROUND AND RELATED WORK")
+    add_p(doc, "Adaptive cache replacement spans three paradigms: (i) continuous internal adaptation, such as ARC [3], CAR [10], and DIP set-dueling [16]; (ii) online expert weighting (Hedge [37]) over two policies, as in ACME [30], LeCaR [4], and CACHEUS [5]; and (iii) epoch-based discrete policy switching driven by drift detectors (CUSUM [20], Page–Hinkley [20], ADWIN [21], Gama et al. [22]) and sampled shadow caches (SHARDS [23], miniature simulations [24], Acme [19]). Recent learned and learning-augmented policies—including Hawkeye [35], LRB [34], 3L-Cache [28], LPR [17], EACLOCK [31], Clock2Q+ [32], and S4FIFO [6]—target single-policy robustness, while S3-FIFO [7] and SIEVE [8] demonstrate that lightweight FIFO-based scan resistance rivals complex adaptive structures. Large-scale studies such as Twitter's cache analysis [36] motivate evaluating across diverse workload regimes, and emerging GPU/eBPF memory schedulers [38], [39] revive interest in runtime policy selection. Unlike prior controller proposals, our work provides an empirical ceiling study bounded by an independent-replay DP oracle and a cluster-aware failure diagnosis of discrete switching.")
+
+    # ── III. PROBLEM FORMULATION ───────────────────────────────────────────
+    add_section_heading(doc, "III. PROBLEM FORMULATION")
+    add_p(doc, "Let a trace be a sequence of page references r_{1}, ..., r_{N} with working-set size WSS = |{r_{1}, ..., r_{N}}| and cache capacity C = max(1, round(f · WSS)) for capacity fraction f ∈ {0.01, 0.05, 0.10, 0.25, 0.50}. After a warm-up prefix of N_{warm} = min(100,000, floor(0.1 N)) references, the remaining N_{eval} = N - N_{warm} references are partitioned into T = floor(N_{eval} / W) complete windows of length W (trailing incomplete references N_{eval} mod W are omitted so every window has equal weight).")
+    add_p(doc, "We distinguish four quantities across a policy pool P (|P| = 21): (1) Best Global Static Policy: The single policy p_{glob}* ∈ P minimizing mean miss ratio across all (i, f) pairs (here, S3-FIFO). (2) Per-Pair Best Static Policy: p_{i,f}* = argmin_{p ∈ P} MR_{i,f,p}, chosen ex post for each trace–capacity pair. By Jensen's inequality, E[min_{p} MR_{i,f,p}] ≤ min_{p} E[MR_{i,f,p}]. (3) Independent-Replay Hindsight Oracle: The minimum-cost schedule (p_{1}, ..., p_{T}) ∈ P^{T} computed over independently replayed per-window miss counts m_{t,p} with fixed transition penalty c_{switch}. (4) State-Carrying Switching Execution: Executing a schedule (p_{1}, ..., p_{T}) in a single live cache where switching at window boundaries transfers resident page IDs and coarse recency/frequency metadata via switchTo().")
+    add_p(doc, "Our primary confirmatory hypotheses (recorded locally in git before running the study, without external third-party preregistration and hence treated as post hoc) tested: H1, whether the oracle clears a 0.02 net miss-ratio gain on ≥ 2/3 of traces in any family–capacity group; H2, whether any online controller beats static S3-FIFO; and H3 (exploratory), whether trace features predict zero-cost headroom on unseen families.")
+
+    # ── IV. MATHEMATICAL MODEL ─────────────────────────────────────────────
+    add_section_heading(doc, "IV. MATHEMATICAL MODEL")
+    add_p(doc, "Under the independent-replay model, each policy p ∈ P processes the full trace [1, N_{warm} + TW] with its own warm cache state, producing per-window miss counts m_{t,p} for t = 1, ..., T. Given normalized switch penalty c_{switch} = βC (β ∈ [0, 1]), the Viterbi dynamic program solves dp[1][p] = m_{1,p} and dp[t][p] = m_{t,p} + min_{q ∈ P}(dp[t-1][q] + c_{switch} · 1[p ≠ q]) for t = 2, ..., T. Initial policy selection at t = 1 is free. Ties in stay ≤ switch break in favor of staying (1[p ≠ q] = 0) to avoid zero-gain switches. Using running best and second-best predecessors per window, the DP runs in O(TP) time and O(TP) space. Defining S = sum_{t=2}^{T} 1[p_{t}* ≠ p_{t-1}*], the oracle objective ratio is J* = (sum_{t=1}^{T} m_{t,p_{t}*} + S · c_{switch}) / (TW), and the net gain over the per-pair best static policy is g(c_{switch}) = MR(p_{i,f}*) - J*.")
+    add_lead_p(doc, "Necessary break-even condition (Proposition 1). ", "A single switch paying c_{switch} achieves positive net gain only if its cumulative miss reduction across the subsequent dwell ΔM ≥ c_{switch}, i.e., mean per-window miss-ratio reduction > c_{switch} / (W · L) over L windows. For c_{switch} = C = 5,000 and W = 50,000, one switch requires >10% miss-ratio reduction in a single window just to break even.")
+    add_lead_p(doc, "What the model does and does not establish. ", "Because m_{t,p} comes from independent warm caches, the oracle ignores cold-cache and missing-ghost-state penalties upon switching; thus g(c_{switch} = 0) upper-bounds zero-penalty switching, while g(c_{switch}) is an upper bound for any real controller whose transition cost is at least c_{switch} additional misses. It is not a universal bound if a real switch avoids misses below independent replay (impossible for cold transitions) or incurs cascades exceeding c_{switch}.")
+
+    # ── V. EXPERIMENTAL METHODOLOGY ────────────────────────────────────────
+    add_section_heading(doc, "V. EXPERIMENTAL METHODOLOGY")
+    add_p(doc, "All experiments run in a single-file C++17 simulator (src/pathA_sim.cpp, 1,900 lines) implementing 21 policies: S3-FIFO [7], SIEVE [8], ARC [3], CAR [10], LIRS [11], W-TinyLFU [12], 2Q [13], CLOCK-Pro [14], LeCaR [4], CACHEUS [5], LHD [15], DIP-set-duel [16], LPR-style [17], 3L-style [28], MGLRU-style [18], LRB-style (online SGD [34]), LRU, FIFO, CLOCK, LFU-A, and MRU (compared against Belady-inspired oracle bounds [25]).")
+    add_p(doc, "We evaluate 17 online switching controllers over a 6-policy pool (LRU, LFU-A, 2Q, MRU, S3-FIFO, ARC): 3 budgets (low/med/high) each for CUSUM (h ∈ {8, 5, 3}), Page-Hinkley (λ ∈ {9, 5, 2}), ADWIN (δ ∈ {2×10^{-4}, 2×10^{-3}, 2×10^{-2}}), Periodic (10, 20, 40 epochs), and Random (p_{trig} ∈ {0.025, 0.05, 0.10}, seed 99), plus OracleTrig (oracle switch boundaries) and ContShadow (every 10 epochs). Epoch length is 2,000 references; shadow caches sample 20% by page hash with C_{s} = min(round(0.2C), max(8, round(0.5 D_{w}))), 40% shadow warm-up, and z = 1.28 lower-confidence-bound selection over 4 sub-blocks. In switchTo(), resident page IDs sorted by last access timestamp and access counts are loaded into the new policy; policy-specific ghost lists (S3-FIFO ghost, ARC B_{1}/B_{2}, 2Q A_{1out}) cannot be preserved across heterogeneous policies. We also test 4 shadow ablations (FullShadow, FullShadow-CostAware, PersistentShadow, PersistentShadow-CostAware with p = 1.0, C_{s} = C) and ContShadow-21 (all 21 policies).")
+    add_lead_p(doc, "Switch-cost modeling. ", "We treat c_{switch} = βC across β ∈ {0, 0.02, 0.05, 0.10, 0.15, 0.20, 0.25, 0.50, 1.00} as assumed normalized cost scenarios rather than empirically calibrated hardware penalties, and separately measure actual in-memory switchTo() migration latency in C++.")
+
+    # ── VI. DATASET AND WORKLOAD CHARACTERIZATION ──────────────────────────
+    add_section_heading(doc, "VI. DATASET AND WORKLOAD CHARACTERIZATION")
+    add_p(doc, "We evaluate 88 traces spanning 30 workload families and four sources (Table I): (i) 10 real-application page traces captured via LD_PRELOAD (SQLite, git, Python ETL; 0.31M–2.29M refs); (ii) 60 instrumented-program page traces across 15 kernels (0.30M refs each, median WSS 3,907); (iii) 12 public FIU block-I/O traces [9], [33] (0.42M–0.50M refs, median WSS 156,736); and (iv) 6 public PDL storage/cache traces [9], [29], [36] (1.00M refs each, median WSS 171,823).")
 
     src_labels = {
         "real_app_pageref": "Real-app (SQLite, git, Python)",
@@ -324,227 +344,82 @@ def main():
                    ["Source", "Fam.", "Tr.", "Refs", "WSS (med)"], t1_rows,
                    col_widths=[1.48, 0.34, 0.30, 0.48, 0.65])
 
-    add_lead_p(doc, "Contributions. ", "(1) An independent-replay Viterbi DP oracle ceiling across 88 traces and capacities from 1% to 50% WSS, including a 9-point switch-cost sweep and 4 window granularities (W ∈ {5k, 10k, 25k, 50k}), establishing an empirical 0.50C zero-clearing point; (2) A matched-cost comparison of 17 switching controllers plus a 21-policy expansion (ContShadow-21) against static S3-FIFO using two-sided Wilcoxon tests and family-cluster bootstrap CIs; (3) Direct causal diagnosis via shadow-ranking accuracy across 9,564 evaluation windows, noise-free/persistent ablations, and user-space pread overhead; (4) An exploratory unseen-family risk score via LOFO and cross-source holdout.")
+    add_p(doc, "Two structural limitations of the corpus are audited directly: (1) instrumented kernels comprise 68.2% of traces and yield only 2–5 windows at W = 50k–100k; and (2) FIU traces have high WSS relative to length (≥ 31% compulsory first-touch misses). To ensure kernel stationary traces do not mask switching headroom elsewhere, Section VIII reports trace-weighted, 30-family macro-averaged, 4-source equal-weighted, and non-stationary-only (g(0) > 0.001, n = 21 traces) aggregates.")
 
-    # ── II. BACKGROUND AND RELATED WORK ────────────────────────────────────
-    add_section_heading(doc, "II. BACKGROUND AND RELATED WORK")
-    add_lead_p(doc, "Static, adaptive, and learned replacement. ", "Classical adaptive policies such as SEQ [1], EELRU [2], ARC [3], CAR [10], LIRS [11], 2Q [13], and CLOCK-Pro [14] adjust eviction priorities internally within a single unified structure. Modern static policies—W-TinyLFU [12], LHD [15], S3-FIFO [7], and SIEVE [8]—achieve strong scan resistance and low CPU overhead without multi-policy switching. Regret-based and hybrid approaches include DIP [16], ACME [30], LeCaR [4], CACHEUS [5], and Acme [19]. Recent 2025–2026 systems expand this space with 3L-Cache [6], LPR [17], S4-FIFO [28], EACLOCK [31], Clock2Q+ [32], stale-tolerant evaluations [33], LLM prefix-cache studies [34], and eBPF-extensible OS/GPU memory hooks [35], [36].")
-    add_lead_p(doc, "Drift detection and shadow evaluation. ", "CUSUM [20], Page–Hinkley [20], and ADWIN [21] originate in supervised streaming [22]; recent unsupervised detectors [37]–[42] address label scarcity in general streams, whereas page replacement exposes only the policy-dependent miss stream. SHARDS [23] and miniature simulations [24] use sampled shadow caches; we enforce C_{s} = min(⌊0.2C⌋, max(8, ⌊0.5D_{w}⌋)) so C_{s}/D_{w} < 1 holds by construction.")
-    add_lead_p(doc, "Hindsight oracles. ", "Belady's MIN [25] bounds single-page eviction, whereas our per-window Viterbi DP oracle bounds discrete policy switching over 21 implementable policies with explicit penalty c_{switch}.")
+    # ── VII. SIMULATOR AND ORACLE VALIDATION ───────────────────────────────
+    add_section_heading(doc, "VII. SIMULATOR AND ORACLE VALIDATION")
+    add_p(doc, "We implemented an automated C++ and Python validation suite (tests/validate_simulator.cpp, tests/run_tests.py): (1) Hand-worked policy sequences (C = 3): Exact hit/miss string matches for LRU (10 misses), FIFO (9 misses), and MRU (7 misses) on the 12-reference Belady sequence {1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5}, plus repeated-reference tests (C = 1, 2) for LRU, CLOCK, S3-FIFO, ARC, and SIEVE. (2) Scan resistance & monotonicity: Verified S3-FIFO and ARC incur fewer misses than LRU on hot+scan sequences, and S3-FIFO miss counts decrease monotonically across C ∈ {5, 10, 20}. (3) Viterbi DP vs. brute force: Exhaustive P^{T} enumeration (P = 4, T = 5, 1,024 schedules) matched solveDPOracle() to 10^{-12} across c_{switch} ∈ {0, 15, 35, 100}. (4) State-carrying vs. independent replay: On a 3-phase trace (3 × 2,000 refs, C = 10: hot {0..9} → cyclic scan {100..115} → hot {0..9}), independent-replay c = 0 oracle scored 52 misses (0.0087) whereas state-carrying switchTo() execution incurred 2,011 misses (0.3352), confirming that real transitions incur substantial cold/state-loss overhead above the independent-replay bound. (5) Bounds guard: Fixed a bug in src/pathA_sim.cpp where passing --np smaller than max(r_{i}) + 1 caused out-of-bounds access in unit tests. External cross-validation against libCacheSim was not performed (listed as an unresolved item). All 16 C++ validation checks and all 5 Python CLI unit tests (make test) pass.")
 
-    # ── III. PROBLEM FORMULATION AND HYPOTHESES ────────────────────────────
-    add_section_heading(doc, "III. PROBLEM FORMULATION AND HYPOTHESES")
-    add_p(doc, "Let σ = (x_{1}, …, x_{n}) be a sequence of n page references over distinct pages U with working-set size WSS = |U|. For target capacity C = ⌊α · WSS⌋ (α ∈ {0.01, 0.05, 0.10}), we discard a warm-up prefix of n_{warm} = min(100,000, ⌊0.1n⌋) references and partition the remaining stream into T = ⌊(n − n_{warm})/W⌋ non-overlapping windows of size W (n_{eval} = T · W). Given a policy pool P and per-window misses m_{t,p}, let M_{best} = min_{p} ∑_{t} m_{t,p} be the best single static policy miss count.")
-    add_p(doc, "A discrete switching schedule π = (π_{1}, …, π_{T}) incurs penalty c_{switch} ≥ 0 whenever π_{t} ≠ π_{t−1}. Net oracle gain is g(c_{switch}) = (M_{best} − min_{π} M(π; c_{switch})) / n_{eval} ≥ 0. Proposition 1 (Necessary Condition for Worthwhile Switching): for S ≥ 1 switches with mean dwell L̄ = n_{eval}/S, switch penalty c_{switch} = βC, and gross gain Δm̄, clearing threshold τ requires L̄ ≥ βC / (Δm̄ − τ), or β ≤ L̄(Δm̄ − τ)/C. Online controllers evaluate a candidate pool P_{cand} ⊆ P in sampled shadow caches satisfying C_{s}/D_{w} < 1. We test: (H1) at c_{switch} = C and W = 50,000, fewer than 10% of family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces; (H2) no online controller beats static S3-FIFO under Holm-adjusted paired Wilcoxon tests; and (H3) observable trace features predict unseen-family headroom under LOFO cross-validation.")
+    # ── VIII. RESULTS ──────────────────────────────────────────────────────
+    add_section_heading(doc, "VIII. RESULTS")
+    add_lead_p(doc, "H1: Oracle Switching Ceiling. ", "Across 264 primary pairs (1%–10% WSS, W = 50k), 0 of 90 family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces (Table II). At c_{switch} = C, mean g(C) = 0.0001 (max 0.0067); even at c_{switch} = 0, only 2/264 pairs (0.76%) clear 0.02. Importantly, this null result is not an artifact of the 68% kernel share: across the 30 independent families, family-macro mean g(C) = 0.0001 (g(0) = 0.0018); across 4 equal-weighted sources, g(C) = 0.0001 (g(0) = 0.0024); and even restricting strictly to the 21 non-stationary traces with g(0) > 0.001, mean g(C) = 0.0002 (max 0.0067) and mean g(0) = 0.0049 (max 0.0564).")
 
-    # ── IV. ORACLE AND EXPERIMENTAL DESIGN ─────────────────────────────────
-    add_section_heading(doc, "IV. ORACLE AND EXPERIMENTAL DESIGN")
-    add_lead_p(doc, "Simulator and exact DP oracle. ", "Our C++17 simulator pathA_sim executes 21 policies under identical replay and measures CPU time via CLOCK_PROCESS_CPUTIME_ID. Using Viterbi DP in O(T P^{2}) time, we compute the exact minimum-cost schedule dp[t][p] = m_{t,p} + min_{q}(dp[t−1][q] + c_{switch} · 1[p ≠ q]). Algorithm 1 summarizes the paired evaluation loop.")
-    t_alg = [
-        ["1. Warm-up: Replay n_{warm} = min(100k, ⌊0.1n⌋) refs; partition remaining n_{eval} = TW refs into T windows of size W."],
-        ["2. Oracle DP: Simulate P = 21 policies to form {m_{t,p}}; solve Viterbi DP for c_{switch} ∈ {0, 0.10C, 0.25C, 0.50C, C} to obtain g(c_{switch})."],
-        ["3. Online Controllers: Execute active policy at capacity C; on drift trigger (or every 10 epochs), rank 6-policy pool in shadow caches (C_{s}/D_{w} < 1 or 1.0C ablation) via 4-block LCB (z = 1.28) and migrate resident metadata on switch."],
+    t2_rows = [
+        ["Real-app (n=30)", "0.0002", "0.0024", "0/30", "0.0019", "0.0149"],
+        ["Instr. kernels (n=180)", "0.0000", "0.0000", "0/180", "0.0005", "0.0079"],
+        ["FIU block-I/O (n=36)", "0.0002", "0.0067", "0/36", "0.0049", "0.0564"],
+        ["PDL storage (n=18)", "0.0000", "0.0002", "0/18", "0.0025", "0.0156"],
+        ["Trace-weighted (n=264)", "0.0001", "0.0067", "0/264", "0.0014", "0.0564"],
+        ["Family-macro (n=30)", "0.0001", "0.0067", "0/90 grp", "0.0018", "0.0564"],
     ]
-    add_ieee_table(doc, "ALGORITHM 1. EXACT DP ORACLE & CONTROLLER EVALUATION",
-                   ["Evaluation Pipeline"], t_alg, col_widths=[3.25], right_align_from=2, font_pt=7.0)
-    add_lead_p(doc, "Switching controllers and hyperparameters. ", "We evaluate 17 online switching controllers over a 6-policy candidate pool (LRU, LFU-A, 2Q, MRU, S3-FIFO, ARC) against static S3-FIFO (Table II). Controllers sample references at p_{samp} = 0.20 and rank candidates in shadow caches (C_{s} ≤ 0.2C) via a lower-confidence-bound rule (z = 1.28, 40% warm-up, 4-block variance, dwell = 10, cooldown = 4, hysteresis = 30, epoch = 2,000 refs).")
+    add_ieee_table(doc, "TABLE II. H1 INDEPENDENT-REPLAY ORACLE GAIN BY SOURCE (W = 50k)",
+                   ["Scope", "g(C) mean", "g(C) max", "Clear ≥0.02", "g(0) mean", "g(0) max"],
+                   t2_rows, col_widths=[1.20, 0.42, 0.42, 0.48, 0.40, 0.33])
 
-    t_hp = [
-        ["CUSUM", "low / med / high", "δ = 0.5, h ∈ {8.0, 5.0, 3.0}"],
-        ["Page–Hinkley", "low / med / high", "δ = 0.005, λ ∈ {8.0, 5.0, 3.0}"],
-        ["ADWIN", "low / med / high", "δ ∈ {0.0005, 0.002, 0.01}"],
-        ["Periodic", "low / med / high", "interval ∈ {40, 20, 10} epochs"],
-        ["Random", "low / med / high", "prob ∈ {0.02, 0.05, 0.10} / epoch"],
-        ["OracleTrig", "oracle", "fires at DP switch boundaries"],
-        ["ContShadow", "continuous", "evaluates every 10 epochs"],
+    add_figure(doc, "fig_oracle_ceiling.pdf", "Fig. 1. Independent-replay oracle gain (W = 50k) across trace sources at c = C and c = 0.")
+
+    add_lead_p(doc, "Capacity Scaling (1%–50% WSS) & Best-Static Clarification. ", "Table III resolves any apparent discrepancy between S3-FIFO and Best Static: S3-FIFO is the best global static policy (winning 176/264 primary pairs, followed by 2Q 43, CAR 12, MGLRU-style 11, CLOCK-Pro 6, 3L-style 6, CACHEUS 5), whereas Per-Pair Best Static selects the ex-post best of 21 policies per pair. At 25% WSS (W = 50k), 2/88 pairs clear g(C) ≥ 0.02 (8/88 at c = 0); at 50% WSS, 0/88 clear at c = C (9/88 at c = 0). Across all 440 pairs (1%–50% WSS), only 2/440 (0.45%) clear 0.02 at c = C.")
+
+    t3_rows = [
+        ["1%", "0.5545", "0.5496", "0.5494", "0.5496", "0.0003", "0.0000"],
+        ["5%", "0.4750", "0.4741", "0.4732", "0.4741", "0.0010", "0.0000"],
+        ["10%", "0.4376", "0.4364", "0.4341", "0.4363", "0.0023", "0.0001"],
+        ["25%", "0.3348", "0.3294", "0.3252", "0.3288", "0.0041", "0.0006"],
+        ["50%", "0.1695", "0.1503", "0.1464", "0.1500", "0.0039", "0.0003"],
     ]
-    add_ieee_table(doc, "TABLE II. CONTROLLER HYPERPARAMETERS AND BUDGETS",
-                   ["Trigger", "Budget", "Parameters"], t_hp,
-                   col_widths=[0.85, 0.85, 1.50], right_align_from=3)
+    add_ieee_table(doc, "TABLE III. MEAN MISS RATIOS AND ORACLE GAINS ACROSS 1%–50% WSS (W = 50k, n = 88/row)",
+                   ["Cap.", "S3-FIFO", "Pair Best", "Ora(0)", "Ora(C)", "g(0)", "g(C)"],
+                   t3_rows, col_widths=[0.38, 0.50, 0.52, 0.48, 0.48, 0.45, 0.44])
 
-    # ── V. RESULTS: EXACT DP ORACLE CEILING (H1) ───────────────────────────
-    add_section_heading(doc, "V. RESULTS: EXACT DP ORACLE CEILING (H1)")
+    # ── IX. STATISTICAL ANALYSIS ───────────────────────────────────────────
+    add_section_heading(doc, "IX. STATISTICAL ANALYSIS")
+    add_lead_p(doc, "Reconciling Prior p-Value Discrepancies. ", "Earlier repository outputs contained two seemingly conflicting numbers: h2_controller_analysis.csv reported p_{Holm} = 1.000 because analyze_pathA_study.py ran a one-sided Wilcoxon test (alternative='less') testing whether controllers improved over S3-FIFO (none did), whereas generate_paper_assets.py ran a two-sided test across n = 264 correlated (trace, capacity) pairs (p < 10^{-15}). Because the 264 pairs come from only 30 independent workload families, treating n = 264 as i.i.d. inflates test power.")
+    add_lead_p(doc, "Cluster-Valid Inference. ", "Table IV reports the corrected family-level analysis (n = 30 family means per controller, two-sided Wilcoxon signed-rank test [26] with Holm correction [27], matched-pair rank-biserial correlation r_{b}, and 3,000-resample family-cluster bootstrap 95% CIs). Every single one of the 17 controllers loses significantly to static S3-FIFO (+0.0393 to +0.0433 pair mean Δ MR; p_{fam,Holm} ∈ [1.0×10^{-4}, 1.2×10^{-4}]; r_{b} ∈ [+0.91, +0.97]).")
 
-    t2_rows = []
-    for src, sname in [("real_app_pageref", "Real-app"), ("instrumented_program", "Prog."),
-                       ("fiu_public", "FIU"), ("pdl_public", "PDL")]:
-        for tag, pool in [("c=C", c_rows), ("c=0", z_rows)]:
-            vals = np.array([float(r["net_gain_vs_best"]) for r in pool if r["source"] == src])
-            t2_rows.append([f"{sname} ({tag})", len(vals), f"{vals.mean():.4f}", f"{np.quantile(vals,0.9):.4f}",
-                            f"{vals.max():.4f}", f"{int((vals>=0.02).sum())}/{len(vals)}"])
-    for label, pool in [("All W=50k (c=C)", c_rows), ("All W=50k (c=0)", z_rows)]:
-        vals = np.array([float(r["net_gain_vs_best"]) for r in pool])
-        t2_rows.append([label, len(vals), f"{vals.mean():.4f}", f"{np.quantile(vals,0.9):.4f}",
-                        f"{vals.max():.4f}", f"{int((vals>=0.02).sum())}/{len(vals)}"])
-    add_ieee_table(doc, "TABLE III. EXACT DP ORACLE NET GAIN OVER BEST STATIC POLICY",
-                   ["Source (Cost)", "n", "Mean g", "p_{90} g", "Max g", "≥ 0.02"], t2_rows,
-                   col_widths=[1.05, 0.30, 0.48, 0.45, 0.48, 0.48])
-
-    add_figure(doc, "fig_oracle_ceiling.pdf",
-               "Fig. 1. Mean and maximum net oracle gain across trace sources for c_{switch} = C and c_{switch} = 0 (W = 50,000).")
-
-    add_lead_p(doc, "Full-refill ceiling (H1 supported). ", "When paying the full-refill switch cost (c_{switch} = C), 0 of 90 family–capacity groups meet ≥ 0.02 on ≥ 2/3 of traces. Across all 264 pairs at W = 50,000, mean g(C) = 0.0001, median = 0.0000, p_{90} = 0.0000, and max = 0.0067 (python_etl_s101 at 10% WSS). Equal-source macro-averaging yields identical mean g(C) = 0.0001. At c_{switch} = 0, only 2/264 pairs (0.8%) reach 0.02 (fiu_online_test at 10% WSS: 0.0564; 5% WSS: 0.0208), noting that FIU traces (0.49M refs, median WSS 156,736) incur ≥ 32% compulsory first-touch misses.")
-    add_lead_p(doc, "Static S3-FIFO dominance & capacity breakdown (1%–50% WSS). ", "Across all 264 pairs (21-policy ranking in Supplement Table S1), S3-FIFO is best on 176 pairs (66.7%) with lowest mean miss ratio (0.4890 at 59.5 ns/ref), ahead of CAR (0.5151), ARC (0.5189), and 2Q (0.5192). Table IV disaggregates 1%, 5%, and 10% WSS. Extending the oracle to 25% and 50% WSS (88 pairs each, W = 50,000) confirms the ceiling: at c_{switch} = C, only 2/88 pairs (2.3%, max 0.0251) clear 0.02 at 25% WSS and 0/88 (max 0.0141) at 50% WSS.")
-
-    t_cap = [
-        ["1% WSS", "0.5545", "0.5496", "0.0000", "0.0003", "0.6106", "+0.0562"],
-        ["5% WSS", "0.4750", "0.4741", "0.0000", "0.0010", "0.5050", "+0.0300"],
-        ["10% WSS", "0.4376", "0.4364", "0.0001", "0.0023", "0.4751", "+0.0374"],
+    t4_rows = [
+        ["CUSUM-high / med / low", "+0.0414 to +0.0433", "≤ 1.2×10^{-4}", "≥ 0.91", "Loses"],
+        ["PH-high / med / low", "+0.0398 to +0.0412", "≤ 1.2×10^{-4}", "≥ 0.92", "Loses"],
+        ["ADWIN-high / med / low", "+0.0406 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
+        ["Periodic-10 / 20 / 40", "+0.0398 to +0.0416", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
+        ["Random-high / med / low", "+0.0393 to +0.0402", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
+        ["OracleTrig", "+0.0405", "1.0×10^{-4}", "+0.95", "Loses"],
+        ["ContShadow", "+0.0412", "1.0×10^{-4}", "+0.97", "Loses"],
     ]
-    add_ieee_table(doc, "TABLE IV. ORACLE CEILING AND CONTSHADOW DEFICIT BY CAPACITY (W = 50,000)",
-                   ["Cap.", "S3-FIFO", "Best St.", "g(C)", "g(0)", "ContSh.", "Δ"], t_cap,
-                   col_widths=[0.55, 0.45, 0.45, 0.42, 0.42, 0.45, 0.46])
+    add_ieee_table(doc, "TABLE IV. H2 ONLINE CONTROLLERS VS. STATIC S3-FIFO (n = 264 PAIRS, 30 FAMILIES)",
+                   ["Controller", "Pair Δ MR", "p_{fam,Holm}", "r_{b}", "Result"],
+                   t4_rows, col_widths=[1.15, 0.80, 0.55, 0.38, 0.37])
 
-    # ── VI. SWITCH-COST AND WINDOW SENSITIVITY ─────────────────────────────
-    add_section_heading(doc, "VI. SWITCH-COST AND WINDOW SENSITIVITY")
-    t_sw = []
-    for w in (5000, 10000, 25000, 50000):
-        for cf in ("0.00", "0.02", "0.05", "0.10", "0.25", "0.50", "1.00"):
-            sub = [r for r in fsw_low if int(r["window"]) == w and r["cost_frac"] == cf]
-            g = np.array([float(r["net_gain_vs_best"]) for r in sub])
-            sw = np.mean([float(r["oracle_switches"]) for r in sub])
-            clabel = "0" if cf == "0.00" else (f"{cf}C" if cf != "1.00" else "C")
-            t_sw.append([f"{w//1000}k", clabel, f"{g.mean():.4f}", f"{g.max():.5f}",
-                         f"{int((g>=0.005).sum())}", f"{int((g>=0.01).sum())}",
-                         f"{int((g>=0.02).sum())}", f"{sw:.2f}"])
-    add_ieee_table(doc, "TABLE V. DP ORACLE SENSITIVITY TO WINDOW W AND SWITCH COST (n = 264; Sw. = MEAN SWITCHES)",
-                   ["W", "c_{sw}", "Mean g", "Max g", "≥.005", "≥.01", "≥.02", "Sw."], t_sw,
-                   col_widths=[0.28, 0.36, 0.45, 0.50, 0.38, 0.36, 0.36, 0.36], font_pt=6.5)
+    add_figure(doc, "fig_controllers_vs_s3fifo.pdf", "Fig. 2. Miss ratio vs. CPU cost (ns/ref): static baselines vs. 17 switching controllers.")
 
-    add_figure(doc, "fig_cost_sweep.pdf",
-               "Fig. 2. Percentage of trace–capacity pairs clearing g ≥ 0.02 across the 9-point switch-cost grid and four window granularities (W ∈ {5k, 10k, 25k, 50k}).")
-    add_p(doc, "At realistic metadata-migration costs (c_{switch} ≤ 0.10C) and fine windows (W = 5,000), 13/264 pairs (4.9%, max 0.0933) clear 0.02 (12/264 at W = 10k, 0.10C). Whenever c_{switch} ≥ 0.50C, 0 of 264 pairs clear 0.02 at any window size (smooth decline governed by Proposition 1; at W = 50k, 0.25C, max g = 0.01998). Table VI shows all 14 zero-cost hits at W = 10,000 come from fiu_public (10/36) and real_app_pageref (4/30).")
+    # ── X. SENSITIVITY AND FAILURE-MODE ANALYSIS ───────────────────────────
+    add_section_heading(doc, "X. SENSITIVITY AND FAILURE-MODE ANALYSIS")
+    add_p(doc, "Sweeping c_{switch} ∈ [0, C] across 9 points and W ∈ {5k, 10k, 25k, 50k} (264 pairs at 1%–10% WSS) shows net gains declining smoothly as cost rises: at W = 5k, 20/264 (7.6%) clear 0.02 at c = 0, 13/264 (4.9%) at 0.10C, 7/264 at 0.25C, and 0/264 once c_{switch} ≥ 0.50C across all four window sizes (Fig. 3).")
 
-    t_w10_src = [
-        ["fiu_public", "36", "0.0219", "0.1331", "10"],
-        ["real_app_pageref", "30", "0.0103", "0.0665", "4"],
-        ["pdl_public", "18", "0.0016", "0.0087", "0"],
-        ["instrumented_program", "180", "0.0004", "0.0116", "0"],
-    ]
-    add_ieee_table(doc, "TABLE VI. PER-SOURCE BREAKDOWN AT W = 10,000, c_{switch} = 0",
-                   ["Source", "Pairs", "Mean g", "Max g", "≥ 0.02"], t_w10_src,
-                   col_widths=[1.25, 0.40, 0.50, 0.50, 0.45])
+    add_figure(doc, "fig_cost_sweep.pdf", "Fig. 3. Share of 264 pairs clearing ≥ 0.02 net gain across normalized switch-cost fractions.")
 
-    # ── VII. RESULTS: SWITCHING CONTROLLERS VS. S3-FIFO (H2) ───────────────
-    add_section_heading(doc, "VII. RESULTS: SWITCHING CONTROLLERS VS. S3-FIFO (H2)")
+    add_lead_p(doc, "Exploratory H3 Screening (Leak-Free). ", "Fixing global standardization leakage in the original script yields leak-free LOFO AUC = 0.895 (95% bootstrap CI [0.825, 0.956]; PR-AUC = 0.471 vs. positive rate 13/88 = 0.148) for predicting post-hoc zero-cost headroom g(0) ≥ 0.005. However, due to class imbalance, the default 0.5 threshold predicts TP = 0, FP = 1, FN = 13, TN = 74, giving 0.841 raw accuracy (below the 0.852 majority-class baseline), 0.493 balanced accuracy, and F_{1} = 0.000. Thus, trace features rank relative drift propensity but do not provide a reliable binary classifier; H3 remains strictly exploratory.")
 
-    from scipy.stats import wilcoxon
-    s3_mr = {(r["trace"], r["cap_frac"]): float(r["miss_ratio"]) for r in pol if r["policy"] == "S3-FIFO"}
-    s3_ns_mean = np.mean([float(r["ns_per_ref"]) for r in pol if r["policy"] == "S3-FIFO"])
-    ctrl_names = sorted(set(r["controller"] for r in ctrl) - {"S3-FIFO"})
-    rng_boot = np.random.default_rng(42)
-    t4_rows = [["S3-FIFO (static)", "0.0000 [---]", "---", "0.00", f"{s3_ns_mean:.1f}"]]
-    cstats = []
-    for cname in ctrl_names:
-        sub = [r for r in ctrl if r["controller"] == cname]
-        deltas = np.array([float(r["miss_ratio"]) - s3_mr[(r["trace"], r["cap_frac"])] for r in sub])
-        fam_map = {}
-        for r, d in zip(sub, deltas):
-            fam_map.setdefault(r["family"], []).append(d)
-        fg = [np.array(v) for v in fam_map.values()]
-        bmeans = [np.concatenate([fg[i] for i in rng_boot.integers(0, len(fg), len(fg))]).mean() for _ in range(3000)]
-        ci_lo, ci_hi = np.percentile(bmeans, [2.5, 97.5])
-        _, pval = wilcoxon(deltas, alternative="two-sided")
-        sw = np.mean([float(r["switches"]) for r in sub])
-        ns = np.mean([float(r["ns_per_ref"]) for r in sub])
-        cstats.append((cname, deltas.mean(), ci_lo, ci_hi, pval, sw, ns))
-    for cname, dm, lo, hi, pv, sw, ns in sorted(cstats, key=lambda x: x[1]):
-        t4_rows.append([cname, f"{dm:+.4f} [{lo:+.3f}, {hi:+.3f}]", "<10^{-15}", f"{sw:.2f}", f"{ns:.1f}"])
-    add_ieee_table(doc, "TABLE VII. SWITCHING CONTROLLERS VS. STATIC S3-FIFO (n = 264; TWO-SIDED WILCOXON & 95% CLUSTER CI)",
-                   ["Controller", "Δ MR [95% CI]", "p_{Holm}", "Sw.", "ns/ref"], t4_rows,
-                   col_widths=[0.90, 1.05, 0.48, 0.35, 0.45], font_pt=6.5)
+    add_lead_p(doc, "Controller Failure Diagnosis. ", "Why do all 17 controllers underperform static S3-FIFO even when triggers are oracle-placed (OracleTrig, Δ = +0.0405)? Direct measurement across 9,564 evaluation windows (Fig. 4) shows that sampled ContShadow-0.2C agrees with the true full-cache window winner in only 67.7% of windows (and even noise-free cold FullShadow-1.0C agrees in 67.9%). On FIU traces, ContShadow spends only 24.5% of references in S3-FIFO while mis-allocating 59.7% to 2Q/LRU/ARC. Shadow ablations (n = 264) confirm that eliminating sampling noise (FullShadow: Δ = +0.0284, 705 ns/ref), adding cost awareness (FullShadow-CostAware: Δ = +0.0286), maintaining full persistent shadows (PersistentShadow: Δ = +0.0175, 2,985 ns/ref; PersistentShadow-CostAware: Δ = +0.0191), or expanding to 21 policies (ContShadow-21: Δ = +0.0470) still fails to beat static S3-FIFO.")
 
-    add_figure(doc, "fig_controllers_vs_s3fifo.pdf",
-               "Fig. 3. Mean miss ratio vs. simulator CPU cost (ns/ref). Static S3-FIFO dominates all 17 switching controllers.")
-    add_lead_p(doc, "Every controller underperforms S3-FIFO (H2 supported). ", "Every switching controller incurs a significantly higher mean miss ratio than static S3-FIFO (Δ ∈ [+0.0393, +0.0433], all two-sided Holm-adjusted p < 10^{-15}, all 95% family-cluster CIs strictly above +0.020) and 1.56×–3.35× higher CPU overhead (92.9–199.1 vs. 59.5 ns/ref). Expanding the pool to all 21 policies (ContShadow-21) worsens performance further to +0.0470 (95% CI [+0.0249, +0.0784], two-sided p = 2.15×10^{-35}, 2.93 switches, 1,075.6 ns/ref). Even OracleTrig (+0.0405) loses, proving trigger tuning is second-order.")
+    add_figure(doc, "fig_shadow_ranking.pdf", "Fig. 4. Shadow-cache top-1 ranking accuracy across 9,564 evaluation windows.")
 
-    # ── VIII. CONTROLLER FAILURE-MODE DIAGNOSIS ────────────────────────────
-    add_section_heading(doc, "VIII. CONTROLLER FAILURE-MODE DIAGNOSIS")
-    t_diag = []
-    for cname in ("ContShadow", "CUSUM-med", "OracleTrig"):
-        sub = [r for r in cdiag if r["controller"] == cname]
-        dm = np.mean([float(r["miss_ratio"]) - float(r["s3fifo_miss_ratio"]) for r in sub])
-        sh = [np.mean([float(r[k]) for r in sub]) for k in ("s3fifo_frac","lru_frac","q2_frac","arc_frac","lfua_frac","mru_frac")]
-        t_diag.append([f"{cname} (all)", f"{dm:+.4f}"] + [f"{x:.3f}" for x in sh])
-    for src, sname in [("real_app_pageref", "Real-app"), ("fiu_public", "FIU"),
-                       ("pdl_public", "PDL"), ("instrumented_program", "Prog.")]:
-        sub = [r for r in cdiag if r["controller"] == "ContShadow" and r["source"] == src]
-        dm = np.mean([float(r["miss_ratio"]) - float(r["s3fifo_miss_ratio"]) for r in sub])
-        sh = [np.mean([float(r[k]) for r in sub]) for k in ("s3fifo_frac","lru_frac","q2_frac","arc_frac","lfua_frac","mru_frac")]
-        t_diag.append([f"ContSh. ({sname})", f"{dm:+.4f}"] + [f"{x:.3f}" for x in sh])
-    add_ieee_table(doc, "TABLE VIII. ACTIVE-POLICY TIME-SHARE AND DEFICIT VS. S3-FIFO",
-                   ["Controller / Src", "Δ MR", "S3", "LRU", "2Q", "ARC", "LFU", "MRU"], t_diag,
-                   col_widths=[0.95, 0.45, 0.30, 0.30, 0.28, 0.28, 0.28, 0.28])
-    add_figure(doc, "fig_shadow_ranking.pdf",
-               "Fig. 4. Direct shadow ranking accuracy against the true full-cache per-window best policy (4,770 evals for ContShadow-0.2C; 4,794 evals for FullShadow-1.0C).")
-    add_p(doc, "Direct causal measurement across 9,564 evaluation windows (Fig. 4) shows ContShadow-0.2C agrees with the true full-cache top-1 policy only 67.7% of the time (selecting S3-FIFO 56.2% vs. true best 65.3%), allocating 18.9% to LRU and 6.0% to MRU. FullShadow-1.0C on the cold 20k-ref window yields nearly identical top-1 agreement (67.9%), proving cold-window truncation penalizes S3-FIFO's ghost filter.")
+    add_lead_p(doc, "Migration & Syscall Microbenchmarks. ", "Direct C++ measurement of switchTo() metadata migration (S3-FIFO → ARC, n = 30 trials per C) shows 315.6 µs at C = 64 (95% CI [296.9, 334.3] µs), 322.0 µs at C = 512, 166.9 µs at C = 4,096, and 590.3 µs at C = 16,384 (0.036 µs/page). Separately, an OS page-cache pread microbenchmark (real_io_bench, p_{50} = 1.47–4.82 µs, p_{99} = 4.75–21.44 µs) reflects kernel syscall/DRAM-cache overhead rather than NVMe storage or migration cost, and shows PersistentShadow cutting throughput from 319.3 kops/s (S3-FIFO) to 168.2 kops/s on sqlite_join_agg_s101.")
 
-    add_lead_p(doc, "Noise-free (1.0C), persistent, and cost-aware shadow ablation. ", "Eliminating cold-start truncation (PersistentShadow: six continuously warmed 1.0C shadow caches) raises S3-FIFO share to 77.0% and cuts the deficit to +0.0175 (95% CI [+0.0086, +0.0269], two-sided p = 1.04×10^{-20}), yet every ablation still loses significantly to static S3-FIFO at up to 50.2× CPU cost (2,985.3 ns/ref).")
-    t_ab = [
-        ["ContSh. (0.2C)", "+0.0412 [+0.022,+0.065]", "<10^{-15}", "1.73", "199.1", ".671", ".189", ".060"],
-        ["FullSh. (1.0C)", "+0.0284 [+0.015,+0.044]", "2.9e-26", "1.12", "705.0", ".627", ".262", ".018"],
-        ["FullSh.-CA", "+0.0286 [+0.015,+0.044]", "4.2e-28", "0.77", "691.0", ".577", ".324", ".011"],
-        ["PersistSh.", "+0.0175 [+0.009,+0.027]", "1.0e-20", "1.55", "2985", ".770", ".158", ".012"],
-        ["PersSh.-CA", "+0.0191 [+0.011,+0.028]", "2.2e-24", "0.83", "2901", ".652", ".283", ".009"],
-    ]
-    add_ieee_table(doc, "TABLE IX. FULL-CAPACITY (C_{s} = C) AND PERSISTENT SHADOW ABLATION (n = 264)",
-                   ["Controller", "Δ MR [95% CI]", "p_{2-sided}", "Sw.", "ns/ref", "S3", "LRU", "MRU"], t_ab,
-                   col_widths=[0.68, 0.85, 0.38, 0.25, 0.34, 0.24, 0.24, 0.24], font_pt=6.0)
-    add_figure(doc, "fig_shadow_ablation.pdf",
-               "Fig. 5. Shadow ablation progression from sampled 0.2C (ContShadow) to full 1.0C (FullShadow) and continuously warmed 1.0C (PersistentShadow).")
-
-    add_lead_p(doc, "User-space pread syscall overhead. ", "Replaying sqlite_join_agg_s101 and fiu_online_test (10% WSS) against a 4 KB backing file with pread after POSIX_FADV_DONTNEED yields p_{50} latencies of 1.47–4.82 μs, indicating OS page-cache service rather than physical NVMe I/O. Even under fast page-cache syscalls, PersistentShadow cuts throughput by 1.90× on sqlite (168.22 vs. 319.26 kops/s) and 1.17× on fiu_online (137.51 vs. 160.77 kops/s), while ContShadow matches S3-FIFO throughput on fiu_online (161.42 vs. 160.77 kops/s) only by incurring +0.0200 higher miss ratio.")
-    t_rio = [
-        ["sqlite_join", "S3-FIFO", "0.0345", "319.26", "1.47", "4.75"],
-        ["sqlite_join", "ContShadow", "0.0425", "309.00", "1.47", "4.82"],
-        ["sqlite_join", "PersistentSh.", "0.0405", "168.22", "4.68", "7.05"],
-        ["fiu_online", "S3-FIFO", "0.7425", "160.77", "3.35", "19.07"],
-        ["fiu_online", "ContShadow", "0.7625", "161.42", "3.35", "17.67"],
-        ["fiu_online", "PersistentSh.", "0.7507", "137.51", "4.82", "21.44"],
-    ]
-    add_ieee_table(doc, "TABLE X. USER-SPACE 4 KB PREAD OVERHEAD (10% WSS; OS PAGE-CACHE SERVICED)",
-                   ["Trace", "Policy", "MR", "kops/s", "p_{50} (μs)", "p_{99} (μs)"], t_rio,
-                   col_widths=[0.65, 0.72, 0.42, 0.48, 0.48, 0.48])
-
-    # ── IX. EXPLORATORY PREDICTIVE SCREENING AND CASE STUDIES (H3) ─────────
-    add_section_heading(doc, "IX. EXPLORATORY PREDICTIVE SCREENING AND CASE STUDIES (H3)")
-    add_p(doc, "At the primary endpoint (c_{switch} = C, g ≥ 0.02), all 88 traces are negative. For exploratory screening, we fit L_{2}-regularized logistic regression on a post hoc threshold max_{cap} g(0) ≥ 0.005 (13/88 positive traces, 14.8%). Because predicting 'always negative' achieves 85.2% raw accuracy—exceeding our model's 84.1% raw accuracy (LOFO balanced accuracy = 0.493, F1 = 0.000)—the model functions purely as a continuous risk score, achieving AUC = 0.901 under LOFO and 0.890 (balanced accuracy 0.756) on public holdout (Table XI, Fig. 6).")
-
-    t5_rows = [
-        ["Primary (c=C, g ≥ 0.02)", "88", "---", "0.500", "---"],
-        ["Expl. LOFO (c=0, g ≥ 0.005)", "88", "---", "0.493", "0.901"],
-        ["Real-app holdout (tr: pub)", "10", "78", "0.500", "1.000"],
-        ["Public holdout (tr: real)", "78", "10", "0.756", "0.890"],
-    ]
-    add_ieee_table(doc, "TABLE XI. EXPLORATORY HEADROOM RISK SCORE (LOFO & CROSS-SOURCE)",
-                   ["Evaluation split", "n_{te}", "n_{tr}", "Bal. Acc.", "AUC"], t5_rows,
-                   col_widths=[1.42, 0.32, 0.32, 0.50, 0.44])
-
-    add_figure(doc, "fig_lofo_roc.pdf",
-               "Fig. 6. Exploratory LOFO ROC curve ranking zero-cost headroom ≥ 0.005 on unseen trace families (AUC = 0.901).",
-               width_in=3.1)
-
-    add_figure(doc, "fig_window_timeline.pdf",
-               "Fig. 7. Per-window miss ratio (10% WSS, W = 50,000) on fiu_online_test (left, 7 zero-cost switches, g(0) = 0.0564) vs. sqlite_join_agg_s101 (right, stationary, g(0) = 0.0020).",
-               width_in=3.3)
-    add_lead_p(doc, "Representative trace case studies. ", "Fig. 7 and Table XII contrast four traces: fiu_online_test exhibits extreme window reuse variability (window_reuse_cv = 2.5916) and g(0) = 0.0564 at 10% WSS, yet g(C) = 0.0000; git_repo_s202 yields g(0) = 0.0196 and g(C) = 0.0000; python_etl_s101 retains one DP switch at c_{switch} = C (g(C) = 0.0067); and sqlite_join_agg_s101 remains stationary (g(0) = 0.0020, g(C) = 0.0005).")
-
-    t_cases = [
-        ["fiu_online_test", "2.5916", "0.1415", "0.0564", "0.0000"],
-        ["git_repo_s202", "0.3309", "0.3096", "0.0196", "0.0000"],
-        ["python_etl_s101", "0.7205", "0.5904", "0.0087", "0.0067"],
-        ["sqlite_join_agg", "0.0012", "0.1124", "0.0020", "0.0005"],
-    ]
-    add_ieee_table(doc, "TABLE XII. REPRESENTATIVE TRACE CASE STUDIES (10% WSS, W = 50,000)",
-                   ["Trace", "win_reuse_cv", "uniq_win_cv", "g(0)", "g(C)"], t_cases,
-                   col_widths=[1.05, 0.65, 0.65, 0.42, 0.42])
-
-    # ── X. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION ─────────────────
-    add_section_heading(doc, "X. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION")
-    add_lead_p(doc, "Design implication. ", "Under a worst-case full-refill penalty, switching never clears 0.02; under realistic migration costs (≤ 0.10C) and fine windows (W = 5k), only 4.9% of pairs clear 0.02. Meanwhile, all 17 evaluated controllers and persistent 1.0C shadow ablations lose significantly to static S3-FIFO. Engineering effort is better invested in a strong scan-resistant static policy (e.g., S3-FIFO or CAR).")
-    add_lead_p(doc, "Limitations and threats to validity. ", "(1) Independent-replay oracle assumes each policy keeps its own warm cache state. (2) Real-app LD_PRELOAD omits post-map page faults; instrumented kernels (68%) average 0.30M refs, and FIU traces (0.49M refs) have ≥ 32% compulsory misses. (3) We did not run bit-for-bit cross-validation against libCacheSim. (4) Expanding to all 21 policies (ContShadow-21) worsens miss ratio (+0.0470); windows < 5k are outside scope. (5) Protocol timestamping was local in git and H3's 0.005 threshold was post hoc.")
-    add_lead_p(doc, "Conclusion. ", "An independent-replay Viterbi DP oracle across 88 traces and 1%–50% WSS shows switching clears 0.02 in 0/90 groups at c_{switch} = C, 4.9% at 0.10C (W = 5k), and 0/264 once c_{switch} ≥ 0.50C. Static S3-FIFO dominates all 17 switching controllers, persistent 1.0C ablations, and ContShadow-21 because cold-window shadow evaluation mis-ranks the top-1 policy in 32% of windows.")
-    add_lead_p(doc, "Data and code availability. ", "All simulator code, trace capture scripts, raw CSVs, supplement, and table/figure generation scripts are publicly available at https://github.com/anoneurx/drift-gating-reproducibility.")
+    # ── XI. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION ────────────────
+    add_section_heading(doc, "XI. DISCUSSION, THREATS TO VALIDITY, AND CONCLUSION")
+    add_lead_p(doc, "Design implication. ", "Discrete policy switching rarely clears a 0.02 net gain even under an optimistic independent-replay oracle, and all evaluated online controllers lose to static S3-FIFO because cold-window shadow evaluation mis-ranks policies in ~32% of windows while heterogeneous switchTo() discards ghost state. Systems builders gain more from adopting a strong scan-resistant static policy (S3-FIFO or CAR) than from adding drift-triggered switching machinery.")
+    add_lead_p(doc, "Threats to validity & limitations. ", "(1) Independent-replay model: Does not model state-carrying cold cascades; our validation trace confirms state-carrying execution incurs higher misses than c = 0 independent replay. (2) Trace corpus: 68% instrumented kernels average 0.30M refs, FIU traces have ≥ 31% compulsory misses, and LD_PRELOAD omits post-map kernel page faults. (3) External cross-validation: libCacheSim bit-for-bit cross-validation was not run. (4) Scope: Windows < 5k and live kernel implementations (MGLRU / cache_ext) are outside scope. (5) Post-hoc status: Local git timestamping is not external preregistration, and H3's 0.005 threshold was post hoc.")
+    add_lead_p(doc, "Reproducibility and Conclusion. ", "All simulator code (src/pathA_sim.cpp), validation tests (make test, make verify), raw CSVs, supplement, and table/figure scripts are publicly available at https://github.com/anoneurx/drift-gating-reproducibility. Under an independent-replay Viterbi DP oracle across 88 traces (1%–50% WSS), discrete policy switching clears a 0.02 net gain in 0/90 family–capacity groups (1%–10% WSS) at c_{switch} = C, 2/440 pairs across 1%–50% WSS at c_{switch} = C, 4.9% at 0.10C (W = 5k), and 0/264 once c_{switch} ≥ 0.50C. Static S3-FIFO dominates all 17 switching controllers (p_{fam,Holm} ≤ 1.2×10^{-4}), persistent 1.0C ablations, and ContShadow-21 because shadow ranking fails on 32% of windows and heterogeneous switches discard ghost metadata.")
 
     # ── REFERENCES ─────────────────────────────────────────────────────────
     add_section_heading(doc, "REFERENCES")
@@ -552,9 +427,9 @@ def main():
         "[1] G. Glass and P. Cao, 'Adaptive page replacement based on memory reference behavior,' in Proc. ACM SIGMETRICS, 1997, pp. 115–126.",
         "[2] Y. Smaragdakis, S. Kaplan, and P. Wilson, 'EELRU: Simple and effective adaptive page replacement,' in Proc. ACM SIGMETRICS, 1999, pp. 122–133.",
         "[3] N. Megiddo and D. S. Modha, 'ARC: A self-tuning, low overhead replacement cache,' in Proc. USENIX FAST, 2003, pp. 115–130.",
-        "[4] K. Vietri et al., 'Driving cache replacement with ML-based LeCaR,' in Proc. USENIX HotStorage, 2018.",
+        "[4] G. Vietri et al., 'Driving cache replacement with ML-based LeCaR,' in Proc. USENIX HotStorage, 2018.",
         "[5] L. V. Rodriguez et al., 'Learning cache replacement with CACHEUS,' in Proc. USENIX FAST, 2021, pp. 341–354.",
-        "[6] W. Zhou et al., '3L-Cache: Low overhead and precise learning-based eviction policy for caches,' in Proc. USENIX FAST, 2025, pp. 237–254.",
+        "[6] K. Yan et al., 'S4FIFO: Adaptive and efficient cache replacement via multi-queue,' Proc. ACM Manag. Data, 2026.",
         "[7] J. Yang et al., 'FIFO queues are all you need for cache eviction,' in Proc. ACM SOSP, 2023, pp. 130–149.",
         "[8] Y. Zhang et al., 'SIEVE is simpler than LRU: An efficient turn-key eviction algorithm for web caches,' in Proc. USENIX NSDI, 2024.",
         "[9] CMU Parallel Data Laboratory, 'Cache eviction tactics: cacheDatasets trace collection,' 2026.",

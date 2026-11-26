@@ -47,6 +47,7 @@ $(BENCH): $(BENCHCPP)
 # test  (unit tests for policy correctness and DP oracle)
 # ---------------------------------------------------------------------------
 test: build
+	$(CXX) $(CXXFLAGS) -o /tmp/validate_sim tests/validate_simulator.cpp && /tmp/validate_sim
 	$(PYTHON) tests/run_tests.py
 
 # ---------------------------------------------------------------------------
