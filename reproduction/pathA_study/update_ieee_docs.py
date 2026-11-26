@@ -355,11 +355,11 @@ def main():
     add_lead_p(doc, "H1: Oracle Switching Ceiling. ", "Across 264 primary pairs (1%–10% WSS, W = 50k), 0 of 90 family–capacity groups clear g(C) ≥ 0.02 on ≥ 2/3 of traces (Table II). At c_{switch} = C, mean g(C) = 0.0001 (max 0.0067); even at c_{switch} = 0, only 2/264 pairs (0.76%) clear 0.02. Importantly, this null result is not an artifact of the 68% kernel share: across the 30 independent families, family-macro mean g(C) = 0.0001 (g(0) = 0.0018); across 4 equal-weighted sources, g(C) = 0.0001 (g(0) = 0.0024); and even restricting strictly to the 21 non-stationary traces with g(0) > 0.001, mean g(C) = 0.0002 (max 0.0067) and mean g(0) = 0.0049 (max 0.0564).")
 
     t2_rows = [
-        ["Real-app (n=30)", "0.0002", "0.0024", "0/30", "0.0019", "0.0149"],
-        ["Instr. kernels (n=180)", "0.0000", "0.0000", "0/180", "0.0005", "0.0079"],
-        ["FIU block-I/O (n=36)", "0.0002", "0.0067", "0/36", "0.0049", "0.0564"],
-        ["PDL storage (n=18)", "0.0000", "0.0002", "0/18", "0.0025", "0.0156"],
-        ["Trace-weighted (n=264)", "0.0001", "0.0067", "0/264", "0.0014", "0.0564"],
+        ["Real-app (n=30)", "0.0004", "0.0067", "0/30", "0.0028", "0.0196"],
+        ["Instr. kernels (n=180)", "0.0000", "0.0001", "0/180", "0.0000", "0.0017"],
+        ["FIU block-I/O (n=36)", "0.0000", "0.0000", "0/36", "0.0058", "0.0564"],
+        ["PDL storage (n=18)", "0.0000", "0.0000", "0/18", "0.0008", "0.0084"],
+        ["Trace-weighted (n=264)", "0.0001", "0.0067", "0/264", "0.0012", "0.0564"],
         ["Family-macro (n=30)", "0.0001", "0.0067", "0/90 grp", "0.0018", "0.0564"],
     ]
     add_ieee_table(doc, "TABLE II. H1 INDEPENDENT-REPLAY ORACLE GAIN BY SOURCE (W = 50k)",
@@ -384,16 +384,16 @@ def main():
     # ── IX. STATISTICAL ANALYSIS ───────────────────────────────────────────
     add_section_heading(doc, "IX. STATISTICAL ANALYSIS")
     add_lead_p(doc, "Reconciling Prior p-Value Discrepancies. ", "Earlier repository outputs contained two seemingly conflicting numbers: h2_controller_analysis.csv reported p_{Holm} = 1.000 because analyze_pathA_study.py ran a one-sided Wilcoxon test (alternative='less') testing whether controllers improved over S3-FIFO (none did), whereas generate_paper_assets.py ran a two-sided test across n = 264 correlated (trace, capacity) pairs (p < 10^{-15}). Because the 264 pairs come from only 30 independent workload families, treating n = 264 as i.i.d. inflates test power.")
-    add_lead_p(doc, "Cluster-Valid Inference. ", "Table IV reports the corrected family-level analysis (n = 30 family means per controller, two-sided Wilcoxon signed-rank test [26] with Holm correction [27], matched-pair rank-biserial correlation r_{b}, and 3,000-resample family-cluster bootstrap 95% CIs). Every single one of the 17 controllers loses significantly to static S3-FIFO (+0.0393 to +0.0433 pair mean Δ MR; p_{fam,Holm} ∈ [1.0×10^{-4}, 1.2×10^{-4}]; r_{b} ∈ [+0.91, +0.97]).")
+    add_lead_p(doc, "Cluster-Valid Inference. ", "Table IV reports the corrected family-level analysis (n = 30 family means per controller, two-sided Wilcoxon signed-rank test [26] with Holm correction [27], matched-pair rank-biserial correlation r_{b}, and 3,000-resample family-cluster bootstrap 95% CIs). Every single one of the 17 controllers loses significantly to archived static S3-FIFO (+0.0393 to +0.0433 pair mean Δ MR; p_{fam,Holm} ∈ [1.0×10^{-4}, 1.2×10^{-4}]; r_{b} ∈ [+0.90, +0.97]), subject to the S3-FIFO capacity-overrun caveat in Section VII.")
 
     t4_rows = [
-        ["CUSUM-high / med / low", "+0.0414 to +0.0433", "≤ 1.2×10^{-4}", "≥ 0.91", "Loses"],
-        ["PH-high / med / low", "+0.0398 to +0.0412", "≤ 1.2×10^{-4}", "≥ 0.92", "Loses"],
-        ["ADWIN-high / med / low", "+0.0406 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
-        ["Periodic-10 / 20 / 40", "+0.0398 to +0.0416", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
-        ["Random-high / med / low", "+0.0393 to +0.0402", "≤ 1.2×10^{-4}", "≥ 0.93", "Loses"],
-        ["OracleTrig", "+0.0405", "1.0×10^{-4}", "+0.95", "Loses"],
-        ["ContShadow", "+0.0412", "1.0×10^{-4}", "+0.97", "Loses"],
+        ["CUSUM-high / med / low", "+0.0393 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.95", "Loses"],
+        ["PH-high / med / low", "+0.0410 to +0.0424", "≤ 1.2×10^{-4}", "≥ 0.92", "Loses"],
+        ["ADWIN-high / med / low", "+0.0406 to +0.0413", "≤ 1.2×10^{-4}", "≥ 0.90", "Loses"],
+        ["Periodic-10 / 20 / 40", "+0.0394 to +0.0433", "≤ 1.2×10^{-4}", "0.95", "Loses"],
+        ["Random-high / med / low", "+0.0394 to +0.0408", "≤ 1.2×10^{-4}", "≥ 0.95", "Loses"],
+        ["OracleTrig", "+0.0405", "1.2×10^{-4}", "+0.95", "Loses"],
+        ["ContShadow", "+0.0412", "1.2×10^{-4}", "+0.93", "Loses"],
     ]
     add_ieee_table(doc, "TABLE IV. H2 ONLINE CONTROLLERS VS. STATIC S3-FIFO (n = 264 PAIRS, 30 FAMILIES)",
                    ["Controller", "Pair Δ MR", "p_{fam,Holm}", "r_{b}", "Result"],
@@ -409,7 +409,7 @@ def main():
 
     add_lead_p(doc, "Exploratory H3 Screening (Leak-Free). ", "Fixing global standardization leakage in the original script yields leak-free LOFO AUC = 0.895 (95% bootstrap CI [0.825, 0.956]; PR-AUC = 0.471 vs. positive rate 13/88 = 0.148) for predicting post-hoc zero-cost headroom g(0) ≥ 0.005. However, due to class imbalance, the default 0.5 threshold predicts TP = 0, FP = 1, FN = 13, TN = 74, giving 0.841 raw accuracy (below the 0.852 majority-class baseline), 0.493 balanced accuracy, and F_{1} = 0.000. Thus, trace features rank relative drift propensity but do not provide a reliable binary classifier; H3 remains strictly exploratory.")
 
-    add_lead_p(doc, "Controller Failure Diagnosis. ", "Why do all 17 controllers underperform static S3-FIFO even when triggers are oracle-placed (OracleTrig, Δ = +0.0405)? Direct measurement across 9,564 evaluation windows (Fig. 4) shows that sampled ContShadow-0.2C agrees with the true full-cache window winner in only 67.7% of windows (and even noise-free cold FullShadow-1.0C agrees in 67.9%). On FIU traces, ContShadow spends only 24.5% of references in S3-FIFO while mis-allocating 59.7% to 2Q/LRU/ARC. Shadow ablations (n = 264) confirm that eliminating sampling noise (FullShadow: Δ = +0.0284, 705 ns/ref), adding cost awareness (FullShadow-CostAware: Δ = +0.0286), maintaining full persistent shadows (PersistentShadow: Δ = +0.0175, 2,985 ns/ref; PersistentShadow-CostAware: Δ = +0.0191), or expanding to 21 policies (ContShadow-21: Δ = +0.0470) still fails to beat static S3-FIFO.")
+    add_lead_p(doc, "Controller Failure Diagnosis. ", "Direct measurement across 9,564 evaluation windows (Fig. 4) shows that sampled ContShadow-0.2C agrees with the true full-cache window winner in only 67.7% of windows (and even noise-free cold FullShadow-1.0C agrees in 67.9%). Across all 264 pairs, ContShadow spends 67.1% of references in S3-FIFO (69.3% on FIU traces, 11.0% in LRU, 14.2% in LFU-A, 4.8% in MRU, 0.6% in 2Q, and 0.0% in ARC), yet still loses by +0.0412 overall. Shadow ablations (n = 264) confirm that eliminating sampling noise (FullShadow: Δ = +0.0284, 705 ns/ref), adding cost awareness (FullShadow-CostAware: Δ = +0.0286), maintaining full persistent shadows (PersistentShadow: Δ = +0.0175, 2,985 ns/ref; PersistentShadow-CostAware: Δ = +0.0191), or expanding to 21 policies (ContShadow-21: Δ = +0.0470) still underperforms the baseline.")
 
     add_figure(doc, "fig_shadow_ranking.pdf", "Fig. 4. Shadow-cache top-1 ranking accuracy across 9,564 evaluation windows.")
 

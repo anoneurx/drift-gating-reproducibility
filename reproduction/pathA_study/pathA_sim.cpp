@@ -1590,6 +1590,8 @@ int main(int argc, char** argv) {
         in.read((char*)refs.data(), (streamsize)(refs.size() * sizeof(u32)));
     }
     if (refs.empty()) { fprintf(stderr, "empty trace\n"); return 1; }
+    u32 maxPage = *max_element(refs.begin(), refs.end());
+    if ((u64)maxPage + 1 > (u64)NP) NP = (int)min<u64>((u64)maxPage + 1, 1ULL << 28);
 
     unordered_set<u32> distinct(refs.begin(), refs.end());
     size_t wss = distinct.size();
